@@ -1,0 +1,9 @@
+{
+  "name": "Remix: MedSmart",
+  "description": "A comprehensive multilingual healthcare platform for patients and doctors, featuring AI diagnostics, secure consultations, and electronic medical records.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ],
+  "majorCapabilities": []
+}

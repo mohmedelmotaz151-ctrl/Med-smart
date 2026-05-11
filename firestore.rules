@@ -1,0 +1,104 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Helper Primitives ---
+    function isSignedIn() { return request.auth != null; }
+    function isEmailVerified() { return isSignedIn() && request.auth.token.email_verified == true; }
+    function isOwner(userId) { return isSignedIn() && request.auth.uid == userId; }
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    
+    // Auth tokens never contain custom claims in this env, but we check for admin in a collection
+    function isAdmin() { return isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)); }
+
+    // --- Users ---
+    // /users/{userId}
+    match /users/{userId} {
+      allow get: if isSignedIn();
+      allow list: if isSignedIn() && resource.data.uid == request.auth.uid;
+      allow create: if isOwner(userId) && isValidUser(incoming()) && incoming().uid == request.auth.uid;
+      allow update: if isOwner(userId) && isValidUser(incoming()) && (
+        // Action: Update Profile
+        (incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'photoURL', 'language', 'phoneNumber', 'updatedAt']) && 
+         incoming().updatedAt == request.time && incoming().uid == existing().uid && incoming().role == existing().role)
+      );
+    }
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['uid', 'email', 'role', 'createdAt']) &&
+             data.uid is string && data.uid.size() <= 128 &&
+             data.email is string && data.email.size() <= 256 &&
+             data.role in ['patient', 'doctor', 'admin'] &&
+             data.createdAt == (resource == null ? request.time : resource.data.createdAt);
+    }
+
+    // --- Doctors ---
+    match /doctors/{doctorId} {
+      allow read: if isSignedIn();
+      allow create, update: if isOwner(doctorId) && isValidDoctor(incoming()) && (
+        resource == null || (incoming().updatedAt == request.time && incoming().diff(existing()).affectedKeys().hasAny(['specialty', 'fees', 'experience', 'bio', 'location', 'rating', 'languages', 'updatedAt']))
+      );
+    }
+
+    function isValidDoctor(data) {
+      return data.specialty is string && data.specialty.size() <= 100 &&
+             data.fees is number && data.fees >= 0;
+    }
+
+    // --- Appointments ---
+    match /appointments/{appointmentId} {
+      allow get: if isSignedIn() && (isOwner(existing().patientId) || isOwner(existing().doctorId));
+      allow list: if isSignedIn() && (resource.data.patientId == request.auth.uid || resource.data.doctorId == request.auth.uid);
+      allow create: if isSignedIn() && isValidAppointment(incoming()) && isOwner(incoming().patientId) && isValidId(appointmentId);
+      allow update: if isSignedIn() && isValidAppointment(incoming()) && (
+        (isOwner(existing().patientId) && incoming().diff(existing()).affectedKeys().hasOnly(['status', 'notes', 'updatedAt']) && incoming().status == 'cancelled') ||
+        (isOwner(existing().doctorId) && incoming().diff(existing()).affectedKeys().hasOnly(['status', 'notes', 'updatedAt']))
+      ) && incoming().updatedAt == request.time;
+    }
+
+    function isValidAppointment(data) {
+      return data.patientId is string && data.patientId.size() <= 128 &&
+             data.doctorId is string && data.doctorId.size() <= 128 &&
+             data.status in ['pending', 'confirmed', 'cancelled', 'completed'] &&
+             data.createdAt == (resource == null ? request.time : resource.data.createdAt);
+    }
+
+    // --- Medical Records ---
+    match /medicalRecords/{recordId} {
+      allow get: if isSignedIn() && (isOwner(existing().patientId) || isOwner(existing().doctorId));
+      allow list: if isSignedIn() && (resource.data.patientId == request.auth.uid || resource.data.doctorId == request.auth.uid);
+      allow create: if isSignedIn() && isOwner(incoming().doctorId) && isValidRecord(incoming()) && isValidId(recordId);
+      // Records are immutable per standard practice
+      allow update, delete: if false;
+    }
+
+    function isValidRecord(data) {
+      return data.patientId is string && data.doctorId is string && 
+             data.diagnosis is string && data.diagnosis.size() <= 1000 &&
+             data.createdAt == request.time;
+    }
+
+    // --- Chats ---
+    match /chats/{chatId} {
+      // In this simplified version, chatId is docId or 'ai'
+      // For real chats, we'd have participants subcollection
+      allow read: if isSignedIn(); // Simplified for now since chatId 'ai' is public logic
+      
+      match /messages/{messageId} {
+        allow read: if isSignedIn();
+        allow create: if isSignedIn() && isOwner(incoming().senderId) && isValidMessage(incoming());
+      }
+    }
+
+    function isValidMessage(data) {
+      return data.senderId is string && data.text is string && 
+             data.text.size() <= 5000 && data.timestamp == request.time;
+    }
+  }
+}

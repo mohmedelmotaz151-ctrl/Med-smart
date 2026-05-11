@@ -1,0 +1,46 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --color-primary: #0284c7;
+  --color-secondary: #0f172a;
+  --color-surface: #ffffff;
+  --color-background: #f1f5f9;
+}
+
+@layer utilities {
+  .ai-glow {
+    background: linear-gradient(135deg, #0284C7 0%, #0369A1 100%);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .ai-glow::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .card-geometric {
+    background-color: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 20px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .sidebar-width {
+    width: 80px;
+  }
+
+  .rtl-flip {
+    transform: scaleX(-1);
+  }
+}
+
