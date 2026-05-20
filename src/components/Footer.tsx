@@ -1,66 +1,78 @@
 import React from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
-import { Mail, Phone, MapPin, Facebook, Twitter, Instagram } from 'lucide-react';
+import { Mail, Phone, MapPin, ShieldCheck, FileCheck2, Award } from 'lucide-react';
 
 const Footer: React.FC = () => {
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   
   return (
-    <footer className="bg-slate-900 text-slate-300 py-12">
+    <footer className="bg-slate-900 text-slate-300 py-12 border-t border-slate-800">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
           <div className="space-y-4">
-            <h3 className="text-xl font-bold text-white">{t('app.name')}</h3>
-            <p className="text-sm leading-relaxed">
-              Providing digital healthcare solutions for a better life. Connect with the best doctors around the world.
+            <h3 className="text-xl font-black text-white">{t('app.name')}</h3>
+            <p className="text-xs leading-relaxed text-slate-400">
+              {language === 'en'
+                ? 'Pioneering heavy electro-mechanical installations, certified Fire Suppression loops, and premier industrial HVAC engineering across Riyadh and GCC.'
+                : 'الشركة الرائدة في تصميم وإنجاز الأعمال الكهروميكانيكية المتكاملة، شبكات ومضخات مكافحة الحرائق وتكييف الهواء للمجمعات والمصانع بالمملكة العربيّة السعوديّة.'}
             </p>
-            <div className="flex gap-4">
-              <Facebook size={20} className="hover:text-blue-500 cursor-pointer transition-colors" />
-              <Twitter size={20} className="hover:text-blue-400 cursor-pointer transition-colors" />
-              <Instagram size={20} className="hover:text-pink-500 cursor-pointer transition-colors" />
-            </div>
           </div>
           
           <div>
-            <h4 className="text-white font-bold mb-4">Quick Links</h4>
-            <ul className="space-y-2 text-sm">
-              <li><a href="#" className="hover:text-white transition-colors">Find a Doctor</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Book Appointment</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Health Tips</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Emergency Services</a></li>
+            <h4 className="text-white font-bold mb-4 text-xs uppercase tracking-wider">
+              {language === 'en' ? 'Our Core Work' : 'أقسامنا الهندسية'}
+            </h4>
+            <ul className="space-y-2 text-xs">
+              <li>{language === 'en' ? 'Fire Fighting Systems' : 'أنظمة مكافحة الحريق'}</li>
+              <li>{language === 'en' ? 'Early Alarm Systems' : 'أنظمة الإنذار والتوجيه الفوري'}</li>
+              <li>{language === 'en' ? 'HVAC & Air Chilling' : 'أنظمة التكييف والتهوية'}</li>
+              <li>{language === 'en' ? 'Industrial Generators' : 'المولدات الكهربائية الثقيلة'}</li>
             </ul>
           </div>
           
           <div>
-            <h4 className="text-white font-bold mb-4">Legal</h4>
-            <ul className="space-y-2 text-sm">
-              <li><a href="#" className="hover:text-white transition-colors">Privacy Policy</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Terms of Service</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Cookies Policy</a></li>
+            <h4 className="text-white font-bold mb-4 text-xs uppercase tracking-wider">
+              {language === 'en' ? 'Corporate Certificates' : 'الشهادات والاعتمادات'}
+            </h4>
+            <ul className="space-y-2 text-xs text-slate-400">
+              <li className="flex items-center gap-2">
+                <ShieldCheck size={14} className="text-red-500" />
+                <span>{language === 'en' ? 'Saudi Civil Defense Approved' : 'معتمد من الدفاع المدني السعودي'}</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <FileCheck2 size={14} className="text-blue-500" />
+                <span>{language === 'en' ? 'SBC Building Code Compliant' : 'مطابق لكود البناء السعودي'}</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <Award size={14} className="text-emerald-500" />
+                <span>{language === 'en' ? 'ZATCA Registered Profile' : 'مسجل لدى هيئة الزكاة والضريبة'}</span>
+              </li>
             </ul>
           </div>
           
           <div>
-            <h4 className="text-white font-bold mb-4">Contact Info</h4>
-            <ul className="space-y-3 text-sm">
+            <h4 className="text-white font-bold mb-4 text-xs uppercase tracking-wider">
+              {language === 'en' ? 'Corporate Contact' : 'بيانات المقر الموحد'}
+            </h4>
+            <ul className="space-y-3 text-xs">
               <li className="flex items-center gap-3">
-                <MapPin size={18} className="text-blue-500" />
-                <span>123 Medical Center St, Cairo, Egypt</span>
+                <MapPin size={16} className="text-red-500" />
+                <span>Riyadh, Kingdom of Saudi Arabia</span>
               </li>
               <li className="flex items-center gap-3">
-                <Phone size={18} className="text-blue-500" />
-                <span>+20 123 456 7890</span>
+                <Phone size={16} className="text-red-500" />
+                <span>+966 500 000 000</span>
               </li>
               <li className="flex items-center gap-3">
-                <Mail size={18} className="text-blue-500" />
-                <span>support@medsmart.ai</span>
+                <Mail size={16} className="text-red-500" />
+                <span>info@gcc-mep.co</span>
               </li>
             </ul>
           </div>
         </div>
         
-        <div className="border-t border-slate-800 mt-12 pt-8 text-center text-xs">
-          <p>© {new Date().getFullYear()} MedSmart AI Healthcare. All rights reserved.</p>
+        <div className="border-t border-slate-800 mt-12 pt-8 text-center text-xs text-slate-500">
+          <p>© {new Date().getFullYear()} GCC COMPANY. {language === 'en' ? 'All rights reserved.' : 'جميع الحقوق محفوظة لشركة جي سي سي للمقاولات.'}</p>
         </div>
       </div>
     </footer>

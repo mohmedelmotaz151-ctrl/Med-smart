@@ -117,6 +117,12 @@ const Admin: React.FC = () => {
   const [complianceFee, setComplianceFee] = useState<number>(0);
   const [discountPercent, setDiscountPercent] = useState<number>(0);
   const [comments, setComments] = useState<string>('');
+  
+  // Custom tracking metadata states
+  const [engineerName, setEngineerName] = useState<string>('');
+  const [inspectionDate, setInspectionDate] = useState<string>('');
+  const [attachedPdfUrl, setAttachedPdfUrl] = useState<string>('');
+  const [customStatusNotes, setCustomStatusNotes] = useState<string>('');
 
   // Simulated notification triggers
   const [notificationMsg, setNotificationMsg] = useState<{ text: string; type: 'whatsapp' | 'email' | 'toast' } | null>(null);
@@ -429,6 +435,11 @@ const Admin: React.FC = () => {
       setDiscountPercent(0);
       setComments('');
     }
+    // Set custom tracking inputs
+    setEngineerName((inq as any).engineerName || '');
+    setInspectionDate((inq as any).inspectionDate || '');
+    setAttachedPdfUrl((inq as any).attachedPdfUrl || '');
+    setCustomStatusNotes((inq as any).customStatusNotes || '');
   };
 
   // Live Auto-calculated total amount
@@ -454,7 +465,11 @@ const Admin: React.FC = () => {
     const updatedInquiry = {
       ...selectedInquiry,
       status,
-      priceDetails: pricePayload
+      priceDetails: pricePayload,
+      engineerName,
+      inspectionDate,
+      attachedPdfUrl,
+      customStatusNotes
     };
 
     // Trigger instant mock notifications
@@ -466,7 +481,11 @@ const Admin: React.FC = () => {
         const docRef = doc(db, 'inquiries', selectedInquiry.id);
         await updateDoc(docRef, {
           status,
-          priceDetails: pricePayload
+          priceDetails: pricePayload,
+          engineerName,
+          inspectionDate,
+          attachedPdfUrl,
+          customStatusNotes
         });
       }
 
@@ -930,6 +949,76 @@ const Admin: React.FC = () => {
                           placeholder={language === 'en' ? 'Conforms strictly with NFPA standards, pressure safety logs clear.' : 'أحمال وتدفق المياه مطابقة للأكواد، وتم اعتماد سماكة مواسير الإطفاء.'}
                           className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs focus:outline-none focus:border-red-500 font-bold font-sans text-slate-800"
                         />
+                      </div>
+                    </div>
+
+                    {/* Progress tracking details form inputs */}
+                    <div className="space-y-4 pt-5 border-t border-slate-150 text-right">
+                      <div className="space-y-1">
+                        <h4 className="text-xs font-black text-slate-950 uppercase tracking-wider block">
+                          {language === 'en' ? 'Track Progress SLA & Engineer Parameters' : 'بيانات مهندس المعاينة وتفاصيل التتبع للعميل'}
+                        </h4>
+                        <p className="text-[10.5px] text-slate-450 font-bold block">
+                          {language === 'en' ? 'Manage assignee details, proposal attachments, and custom milestone text for customer view.' : 'املأ هذه الخانات الإضافية لتظهر فوراً للعميل في صفحة تتبع الطلبات لتوفير تجربة بروفيشنال.'}
+                        </p>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {/* Engineer Name Input */}
+                        <div className="space-y-1.5 flex flex-col gap-1 text-right">
+                          <label className="text-[10px] font-black text-slate-600 uppercase block">
+                            {language === 'en' ? 'Designated Project Engineer' : 'المهندس المسؤول عن المشروع'}
+                          </label>
+                          <input
+                            type="text"
+                            value={engineerName}
+                            onChange={(e) => setEngineerName(e.target.value)}
+                            placeholder={language === 'en' ? 'e.g. Eng. Khalid Al-Qahtani' : 'مثال: م. خالد القحطاني'}
+                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs focus:outline-none focus:border-red-500 font-bold text-right"
+                          />
+                        </div>
+
+                        {/* Proposal PDF Attachment URL */}
+                        <div className="space-y-1.5 flex flex-col gap-1 text-right">
+                          <label className="text-[10px] font-black text-slate-600 uppercase block">
+                            {language === 'en' ? 'Official Quotation PDF Link' : 'رابط عرض السعر المعتمد PDF'}
+                          </label>
+                          <input
+                            type="text"
+                            value={attachedPdfUrl}
+                            onChange={(e) => setAttachedPdfUrl(e.target.value)}
+                            placeholder={language === 'en' ? 'e.g. https://gcc-company.com/proposals/draft.pdf' : 'مثال: https://gcc-company.com/uploads/gcc-draft-proposal.pdf'}
+                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs focus:outline-none focus:border-red-500 font-bold font-mono text-slate-800 text-left"
+                          />
+                        </div>
+
+                        {/* Inspection schedule date */}
+                        <div className="space-y-1.5 flex flex-col gap-1 text-right">
+                          <label className="text-[10px] font-black text-slate-600 uppercase block">
+                            {language === 'en' ? 'Site Inspection Date & Time' : 'توقيت الزيارة والمعاينة الميدانية'}
+                          </label>
+                          <input
+                            type="text"
+                            value={inspectionDate}
+                            onChange={(e) => setInspectionDate(e.target.value)}
+                            placeholder={language === 'en' ? 'e.g. Thursday, 2:30 PM' : 'مثال: الخميس القادم الساعة ٢:٣٠ ظهراً'}
+                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs focus:outline-none focus:border-red-500 font-bold text-right"
+                          />
+                        </div>
+
+                        {/* Custom status notes */}
+                        <div className="space-y-1.5 flex flex-col gap-1 text-right">
+                          <label className="text-[10px] font-black text-slate-600 uppercase block">
+                            {language === 'en' ? 'Custom SLA Progression Message' : 'مذكرة إجراء المعاينة المحدثة مخصصة'}
+                          </label>
+                          <input
+                            type="text"
+                            value={customStatusNotes}
+                            onChange={(e) => setCustomStatusNotes(e.target.value)}
+                            placeholder={language === 'en' ? 'e.g. Sizing reports submitted to Civil Defense...' : 'مثال: تم طرح الحسابات الهيدروليكية ومطابقتها مع المهندس الاستشاري...'}
+                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs focus:outline-none focus:border-red-500 font-bold text-right"
+                          />
+                        </div>
                       </div>
                     </div>
 

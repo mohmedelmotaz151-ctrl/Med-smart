@@ -17,12 +17,13 @@ const Contact = lazy(() => import('./pages/Contact'));
 const Profile = lazy(() => import('./pages/Profile'));
 const Track = lazy(() => import('./pages/Track'));
 const Admin = lazy(() => import('./pages/Admin'));
+const MepManagement = lazy(() => import('./pages/MepManagement'));
 
 const ProtectedRoute = ({ children, role }: { children: React.ReactNode; role?: string }) => {
   const { user, profile, loading } = useAuth();
   
   if (loading) return <LoadingScreen />;
-  if (!user) return <Navigate to="/login" />;
+  if (!user) return <Navigate to="/" />;
   if (role && profile?.role !== role) return <Navigate to="/" />;
   
   return <>{children}</>;
@@ -50,7 +51,25 @@ function AppContent() {
                 <Route path="/sizer" element={<AISizer />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/track" element={<Track />} />
-                <Route path="/admin" element={<Admin />} />
+                <Route 
+                  path="/admin" 
+                  element={
+                    <ProtectedRoute role="admin">
+                      <Admin />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/gcc-dashboard" 
+                  element={
+                    <ProtectedRoute role="admin">
+                      <Admin />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route path="/mep-management" element={<MepManagement />} />
+                <Route path="/secure-admin" element={<MepManagement />} />
+                <Route path="/system-control" element={<MepManagement />} />
                 <Route 
                   path="/profile" 
                   element={

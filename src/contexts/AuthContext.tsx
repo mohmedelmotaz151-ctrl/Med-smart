@@ -55,7 +55,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           handleFirestoreError(error, OperationType.GET, `users/${user.uid}`);
         }
       } else {
-        setProfile(null);
+        const localUserJson = localStorage.getItem('gcc_demo_user');
+        const localProfileJson = localStorage.getItem('gcc_demo_profile');
+        if (localUserJson && localProfileJson) {
+          setUser(JSON.parse(localUserJson));
+          setProfile(JSON.parse(localProfileJson));
+        } else {
+          setProfile(null);
+        }
       }
       setLoading(false);
     });

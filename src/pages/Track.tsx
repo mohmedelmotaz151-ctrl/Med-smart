@@ -23,12 +23,15 @@ import {
   Snowflake,
   Video,
   Printer,
-  ChevronDown
+  ChevronDown,
+  MessageSquare,
+  Send
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useSearchParams } from 'react-router-dom';
 
 interface InquiryData {
+  id?: string;
   name: string;
   company?: string;
   phone: string;
@@ -39,9 +42,13 @@ interface InquiryData {
   location: string;
   message: string;
   ticketId: string;
-  status: 'new' | 'under_review' | 'priced' | 'completed';
+  status: 'received' | 'review' | 'pricing' | 'proposal' | 'executing' | 'completed' | 'new' | 'under_review' | 'priced';
   createdAt: string;
   uploadedFiles?: string[];
+  engineerName?: string;
+  inspectionDate?: string;
+  attachedPdfUrl?: string;
+  customStatusNotes?: string;
   priceDetails?: {
     componentsCost: number;
     laborFee: number;
@@ -52,26 +59,77 @@ interface InquiryData {
   };
 }
 
+const getNormalizedStatus = (status: string): 'received' | 'review' | 'pricing' | 'proposal' | 'executing' | 'completed' => {
+  if (status === 'new') return 'received';
+  if (status === 'under_review') return 'review';
+  if (status === 'priced') return 'proposal';
+  return (status as any) || 'received';
+};
+
 const Track: React.FC = () => {
   const { language } = useLanguage();
   const [searchParams, setSearchParams] = useSearchParams();
   const initialTicket = searchParams.get('id') || '';
+  const initialContact = searchParams.get('contact') || '';
 
   const [searchQuery, setSearchQuery] = useState(initialTicket);
+  const [contactQuery, setContactQuery] = useState(initialContact);
   const [searching, setSearching] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [ticketData, setTicketData] = useState<InquiryData | null>(null);
   const [showInvoiceMock, setShowInvoiceMock] = useState(false);
 
+  // Direct Interactive Tech Support Discussion states
+  const [chatMessages, setChatMessages] = useState<{ sender: 'client' | 'engineer'; text: string; time: string }[]>([
+    { sender: 'engineer', text: 'مرحباً بك! أنا المهندس فهد المسؤول عن دراسة هذا الطلب كهروميكانيكياً. كيف يمكنني مساعدتكم اليوم بخصوص تفاصيل جدول الأصناف أو معاينة الموقع؟', time: '10:15 AM' }
+  ]);
+  const [chatInput, setChatInput] = useState('');
+  const [chatTyping, setChatTyping] = useState(false);
+
+  const handleSendChatMessage = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!chatInput.trim()) return;
+
+    const userMsg = { 
+      sender: 'client' as const, 
+      text: chatInput, 
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
+    };
+    setChatMessages(prev => [...prev, userMsg]);
+    const clientQuery = chatInput;
+    setChatInput('');
+    setChatTyping(true);
+
+    setTimeout(() => {
+      let reply = 'شكراً لرسالتكم. تم توجيه الملاحظة إلى فرع التصميم الهندسي لمطابقتها فورياً.';
+      const lq = clientQuery.toLowerCase();
+      if (lq.includes('piping') || lq.includes('مواسير') || lq.includes('أنابيب') || lq.includes('انابيب')) {
+        reply = 'نستخدم الأنابيب والجدار النحاسي السميك الخاضع لكود السلامة السعودي Sch 40، وهو يقاوم الضغوط والأحمال العالية بكفاءة دائمة.';
+      } else if (lq.includes('price') || lq.includes('سعر') || lq.includes('discount') || lq.includes('خصم') || lq.includes('تكلف')) {
+        reply = 'تم احتساب الكلفة وفقاً لأعلى مستويات جودة التوريدات. سنقوم بدراسة إمكانية عمل حسم إضافي مع المحاسب المالي فور جلب المخططات النهائية.';
+      } else if (lq.includes('visit') || lq.includes('زيارة') || lq.includes('معاينة') || lq.includes('وقت') || lq.includes('متى')) {
+        reply = 'سيقوم طاقم المعاينة بالتنسيق هاتفياً قبل موعد الموقع بـ ٣٠ دقيقة لتسهيل دخول المهندسين وبدء الفحوصات.';
+      }
+
+      setChatMessages(prev => [...prev, {
+        sender: 'engineer',
+        text: reply,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      }]);
+      setChatTyping(false);
+    }, 1200);
+  };
+
   // Auto-search if ticket id passed in URL parameters
   useEffect(() => {
     if (initialTicket) {
-      handleSearch(initialTicket);
+      handleSearch(initialTicket, initialContact);
     }
-  }, [initialTicket]);
+  }, [initialTicket, initialContact]);
 
-  const handleSearch = async (targetId: string) => {
+  const handleSearch = async (targetId: string, contactVal: string) => {
     const cleanId = targetId.trim().toUpperCase();
+    const cleanContact = contactVal.trim().toLowerCase();
     if (!cleanId) return;
 
     setSearching(true);
@@ -79,23 +137,41 @@ const Track: React.FC = () => {
     setTicketData(null);
 
     try {
+      let candidate: InquiryData | null = null;
+
       // 1. Try querying remote Firestore
       const q = query(collection(db, 'inquiries'), where('ticketId', '==', cleanId));
       const querySnapshot = await getDocs(q);
 
       if (!querySnapshot.empty) {
         const docSnap = querySnapshot.docs[0];
-        setTicketData(docSnap.data() as InquiryData);
-        setSearching(false);
-        return;
+        candidate = docSnap.data() as InquiryData;
+      } else {
+        // 2. Hybrid fallback: Try checking localStorage
+        const localInquiries: InquiryData[] = JSON.parse(localStorage.getItem('gcc_inquiries') || '[]');
+        const foundLocal = localInquiries.find(inq => inq.ticketId.toUpperCase() === cleanId);
+        if (foundLocal) {
+          candidate = foundLocal;
+        }
       }
 
-      // 2. Hybrid fallback: Try checking localStorage
-      const localInquiries: InquiryData[] = JSON.parse(localStorage.getItem('gcc_inquiries') || '[]');
-      const foundIdx = localInquiries.find(inq => inq.ticketId.toUpperCase() === cleanId);
-
-      if (foundIdx) {
-        setTicketData(foundIdx);
+      if (candidate) {
+        // Security checks: Validate against phone or email if provided
+        if (cleanContact) {
+          const matchedPhone = candidate.phone.replace(/[^0-9]/g, '').endsWith(cleanContact.replace(/[^0-9]/g, '')) || candidate.phone.includes(cleanContact);
+          const matchedEmail = candidate.email.toLowerCase().includes(cleanContact);
+          
+          if (!matchedPhone && !matchedEmail) {
+            setErrorMsg(
+              language === 'en'
+                ? "Verification failed. The contact details do not match this Ticket ID."
+                : "رمز التتبع غير متطابق مع رقم الجوال أو البريد الإلكتروني المدخل للتحقق."
+            );
+            setSearching(false);
+            return;
+          }
+        }
+        setTicketData(candidate);
       } else {
         setErrorMsg(
           language === 'en' 
@@ -110,6 +186,19 @@ const Track: React.FC = () => {
       const foundIdx = localInquiries.find(inq => inq.ticketId.toUpperCase() === cleanId);
 
       if (foundIdx) {
+        if (cleanContact) {
+          const matchedPhone = foundIdx.phone.includes(cleanContact);
+          const matchedEmail = foundIdx.email.toLowerCase().includes(cleanContact);
+          if (!matchedPhone && !matchedEmail) {
+            setErrorMsg(
+              language === 'en'
+                ? "Verification failed. The contact details do not match this Ticket ID."
+                : "رمز التتبع غير متطابق مع رقم الجوال أو البريد الإلكتروني المدخل للتحقق."
+            );
+            setSearching(false);
+            return;
+          }
+        }
         setTicketData(foundIdx);
       } else {
         setErrorMsg(
@@ -125,43 +214,59 @@ const Track: React.FC = () => {
 
   const executeSearchForm = (e: React.FormEvent) => {
     e.preventDefault();
-    setSearchParams({ id: searchQuery.trim().toUpperCase() });
-    handleSearch(searchQuery);
+    setSearchParams({ id: searchQuery.trim().toUpperCase(), contact: contactQuery.trim() });
+    handleSearch(searchQuery, contactQuery);
   };
 
-  // Status mapping and indexing
+  // Status mapping and indexing for the 6 professional stages
   const statusConfig = {
-    new: {
+    received: {
       index: 0,
-      labelAr: 'جديد ومستلم',
-      labelEn: 'New & Received',
-      color: 'bg-slate-200 text-slate-700 border-slate-300',
-      descAr: 'تم تسجيل الطلب واستلام المخططات بنجاح، جاري تعيين مهندس مختص.',
-      descEn: 'Ticket received. Spec files queued for verification matching civil defense rules.'
+      labelAr: 'تم استلام الطلب',
+      labelEn: 'Order Received',
+      color: 'bg-slate-100 text-slate-850 border-slate-300',
+      descAr: 'تم تسجيل طلبك بنجاح في نظام المتابعة الفوري وجاري البدء في دراسة ومطابقة متطلبات الكهروميكانيك للبدء الفوري.',
+      descEn: 'Ticket received and registered successfully. Sizing blueprints are prepared for engineers review.'
     },
-    under_review: {
+    review: {
       index: 1,
-      labelAr: 'تحت الدراسة الفنية',
-      labelEn: 'Under Mechanical Review',
-      color: 'bg-blue-100 text-blue-700 border-blue-200',
-      descAr: 'يقوم القسم الهندسي بدراسة أحمال المنشأة ومراجعة المخططات الهندسية لحساب المتطلبات.',
-      descEn: 'Design teams are currently running load calculations and code conformance checks.'
+      labelAr: 'جاري المراجعة',
+      labelEn: 'In Review',
+      color: 'bg-blue-50 text-blue-700 border-blue-200',
+      descAr: 'فريق الهندسة والمخططات يطابق متطلبات الأحلال ويراجع النماذج ومطابقتها بكود البناء السعودي وكود السلامة.',
+      descEn: 'Our technical engineering team is currently assessing requirements and building codes.'
     },
-    priced: {
+    pricing: {
       index: 2,
-      labelAr: 'تم احتساب وطرح السعر',
-      labelEn: 'Quotation Priced',
-      color: 'bg-amber-100 text-amber-800 border-amber-200',
-      descAr: 'تم تحديد تسعير المواد والمعدات وأجور التركيب بنجاح. يرجى الاطلاع على جدول التكاليف أدناه.',
-      descEn: 'Full Bill of Quantities completed. Dynamic proposal values are now released below.'
+      labelAr: 'جاري التسعير',
+      labelEn: 'Under Pricing',
+      color: 'bg-amber-50 text-amber-850 border-amber-200',
+      descAr: 'يتم احتساب كميات المواد وعزل المكائن والمدخلات الفنية لصياغة كشف المقايسة بأسعار مخفضة وتنافسية.',
+      descEn: 'Accounting division is actively calculating system pricing options and labor metrics.'
+    },
+    proposal: {
+      index: 3,
+      labelAr: 'تم إصدار العرض',
+      labelEn: 'Proposal Issued',
+      color: 'bg-purple-50 text-purple-700 border-purple-200',
+      descAr: 'العرض الفني جاهز تماماً للتحميل والمعاينة المالية المعتمدة بالبلدية والدفاع المدني، قم بتنزيله بالزر بالأسفل.',
+      descEn: 'Quotation and detailed engineering bill of quantities is now released for approval and download.'
+    },
+    executing: {
+      index: 4,
+      labelAr: 'جاري التنفيذ',
+      labelEn: 'In Progress',
+      color: 'bg-teal-50 text-teal-800 border-teal-200',
+      descAr: 'بدأ تنفيذ المشروع، باشرت طواقم السلامة والتأسيس بالميدان وأعمال التمرير والدكت والأنابيب مستمرة بنشاط.',
+      descEn: 'Project execution and site installation have officially begun. Teams are on the premise.'
     },
     completed: {
-      index: 3,
-      labelAr: 'مكتمل ومعتمد',
-      labelEn: 'Completed & Certified',
-      color: 'bg-emerald-100 text-emerald-800 border-emerald-200',
-      descAr: 'تم تعميد الطلب والتسعيرة بنجاح، فريق اللوجستيات بانتظار الإشارة للانطلاق بالموقع.',
-      descEn: 'Engineering specifications finalized, approved, and dispatched for deployment.'
+      index: 5,
+      labelAr: 'مكتمل',
+      labelEn: 'Completed',
+      color: 'bg-emerald-50 text-emerald-800 border-emerald-200',
+      descAr: 'تم إنهاء جميع التركيبات وتشغيل الأنظمة وإصدار شهادة هندسية معتمدة بالدفاع المدني. تم تسليم الموقع بنجاح.',
+      descEn: 'All systems successfully installed, tested, and certified for official municipal operation.'
     }
   };
 
@@ -220,24 +325,55 @@ const Track: React.FC = () => {
         </p>
 
         {/* Action input bar */}
-        <form onSubmit={executeSearchForm} className="relative mt-6">
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={textDict.placeholder}
-            className="w-full bg-white border-2 border-slate-200 hover:border-slate-300 focus:border-red-500 text-slate-800 rounded-2xl px-5 py-4 pl-12 pr-32 text-xs focus:outline-none focus:ring-4 focus:ring-red-500/10 transition-all font-sans font-bold shadow-sm text-center tracking-wide"
-          />
-          <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+        <form onSubmit={executeSearchForm} className="space-y-4.5 mt-6 bg-white border border-slate-150 p-6 rounded-3xl shadow-sm text-right">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex flex-col gap-1.5 text-right">
+              <label className="text-[11px] font-black text-slate-500 uppercase tracking-wider block">
+                {language === 'en' ? 'Order Number / Ticket ID' : 'رقم الطلب / كود التتبع *'}
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder={textDict.placeholder}
+                  className="w-full bg-slate-50 border border-slate-200 focus:border-red-500 text-slate-800 rounded-xl px-4 py-3.5 pl-11 text-xs focus:outline-none focus:ring-4 focus:ring-red-500/10 transition-all font-sans font-bold text-center tracking-wide"
+                  required
+                />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-1.5 text-right">
+              <label className="text-[11px] font-black text-slate-500 uppercase tracking-wider block">
+                {language === 'en' ? 'Registered Email or Mobile' : 'البريد الإلكتروني أو رقم الجوال *'}
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={contactQuery}
+                  onChange={(e) => setContactQuery(e.target.value)}
+                  placeholder={language === 'en' ? 'e.g. name@example.com or 05xxxxxxxx' : 'البريد أو رقم الجول المسجل بمطابقة الطلب'}
+                  className="w-full bg-slate-50 border border-slate-200 focus:border-red-500 text-slate-800 rounded-xl px-4 py-3.5 pl-11 text-xs focus:outline-none focus:ring-4 focus:ring-red-500/10 transition-all font-sans font-bold text-center tracking-wide"
+                  required
+                />
+                <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              </div>
+            </div>
+          </div>
+
           <button
             type="submit"
             disabled={searching}
-            className={`absolute right-2 top-1/2 -translate-y-1/2 bg-red-650 hover:bg-red-700 text-white text-[11px] font-black uppercase tracking-wider px-5 py-2.5 rounded-xl transition-all ${language === 'en' ? 'right-2' : 'left-2'}`}
+            className="w-full bg-red-650 hover:bg-red-700 text-white text-xs font-black uppercase tracking-widest py-3.5 rounded-xl transition-all shadow-md active:scale-95 flex items-center justify-center gap-2"
           >
             {searching ? (
               <Loader2 className="w-4 h-4 animate-spin" />
             ) : (
-              <span>{textDict.btnSearch}</span>
+              <>
+                <Search className="w-4 h-4" />
+                <span>{textDict.btnSearch}</span>
+              </>
             )}
           </button>
         </form>
@@ -273,8 +409,8 @@ const Track: React.FC = () => {
                   <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider">
                     {textDict.statusTimeline}
                   </h3>
-                  <span className={`px-3 py-1 rounded-full text-[10px] font-extrabold uppercase border ${statusConfig[ticketData.status].color}`}>
-                    {language === 'en' ? statusConfig[ticketData.status].labelEn : statusConfig[ticketData.status].labelAr}
+                  <span className={`px-3 py-1 rounded-full text-[10px] font-extrabold uppercase border ${statusConfig[getNormalizedStatus(ticketData.status)].color}`}>
+                    {language === 'en' ? statusConfig[getNormalizedStatus(ticketData.status)].labelEn : statusConfig[getNormalizedStatus(ticketData.status)].labelAr}
                   </span>
                 </div>
 
@@ -284,9 +420,9 @@ const Track: React.FC = () => {
                   
                   {/* Highlight bar up to current status */}
                   <div 
-                    className="absolute top-1/2 left-0 h-1 bg-red-600 -translate-y-1/2 z-0 transition-all duration-700"
+                    className="absolute top-1/2 left-0 h-1 bg-red-650 -translate-y-1/2 z-0 transition-all duration-700"
                     style={{ 
-                      width: `${(statusConfig[ticketData.status].index / 3) * 100}%`,
+                      width: `${(statusConfig[getNormalizedStatus(ticketData.status)].index / 5) * 100}%`,
                       right: language === 'ar' ? 'auto' : undefined,
                       left: language === 'en' ? '0' : undefined
                     }}
@@ -294,13 +430,15 @@ const Track: React.FC = () => {
 
                   <div className="relative z-10 flex justify-between">
                     {[
-                      { key: 'new', labelAr: 'جديد', labelEn: 'New' },
-                      { key: 'under_review', labelAr: 'قيد الدراسة', labelEn: 'In Review' },
-                      { key: 'priced', labelAr: 'تم التسعير', labelEn: 'Priced' },
+                      { key: 'received', labelAr: 'استلام', labelEn: 'Received' },
+                      { key: 'review', labelAr: 'مراجعة', labelEn: 'Review' },
+                      { key: 'pricing', labelAr: 'تسعير', labelEn: 'Pricing' },
+                      { key: 'proposal', labelAr: 'العرض', labelEn: 'Proposal' },
+                      { key: 'executing', labelAr: 'تنفيذ', labelEn: 'Executing' },
                       { key: 'completed', labelAr: 'مكتمل', labelEn: 'Completed' }
                     ].map((step, idx) => {
-                      const stepIndex = statusConfig[step.key as 'new' | 'under_review' | 'priced' | 'completed'].index;
-                      const currentIndex = statusConfig[ticketData.status].index;
+                      const stepIndex = statusConfig[step.key as any].index;
+                      const currentIndex = statusConfig[getNormalizedStatus(ticketData.status)].index;
                       
                       const isCompleted = stepIndex < currentIndex;
                       const isActive = stepIndex === currentIndex;
@@ -309,12 +447,12 @@ const Track: React.FC = () => {
                       return (
                         <div key={step.key} className="flex flex-col items-center">
                           <div 
-                            className={`w-10 h-10 rounded-full flex items-center justify-center border-3 transition-all ${
+                            className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center border-3 transition-all ${
                               isCompleted 
                                 ? 'bg-red-600 text-white border-red-600 shadow' 
                                 : isActive 
-                                ? 'bg-white text-red-600 border-red-600 ring-4 ring-red-500/10 scale-115' 
-                                : 'bg-slate-50 text-slate-350 border-slate-200'
+                                ? 'bg-white text-red-600 border-red-600 ring-4 ring-red-500/10 scale-110' 
+                                : 'bg-slate-50 text-slate-355 border-slate-200'
                             }`}
                           >
                             {isCompleted ? (
@@ -324,7 +462,7 @@ const Track: React.FC = () => {
                             )}
                           </div>
                           <span 
-                            className={`text-[10px] mt-2.5 font-black uppercase tracking-tight ${
+                            className={`text-[9.5px] mt-2.5 font-black uppercase tracking-tight ${
                               isActive ? 'text-slate-900 scale-105 font-extrabold' : 'text-slate-400'
                             }`}
                           >
@@ -466,26 +604,95 @@ const Track: React.FC = () => {
                   )}
 
                   {/* Client Accept/Decline Action button row */}
-                  <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                  <div className="flex flex-col sm:flex-row gap-2.5 pt-2">
                     <button
                       onClick={downloadPDFMock}
-                      className="flex-1 bg-red-650 hover:bg-red-700 text-white font-black py-4 rounded-xl text-xs uppercase tracking-widest transition-all shadow-md shadow-red-950/15 flex items-center justify-center gap-1.5"
+                      className="flex-1 bg-slate-900 hover:bg-red-650 hover:border-red-650 text-white font-black py-3.5 rounded-xl text-xs uppercase tracking-widest transition-all shadow-md border border-slate-800 flex items-center justify-center gap-1.5"
                     >
                       <FileDown className="w-4.5 h-4.5" />
-                      <span>{language === 'en' ? 'Approve & Download PDF' : 'العميد والتعميد الفوري (تحميل PDF)'}</span>
+                      <span>{language === 'en' ? 'Approve & Download PDF' : 'التعميد المباشر وتحميل العرض'}</span>
                     </button>
                     
                     <a
                       href={`https://wa.me/966500000000?text=${encodeURIComponent(
-                        `السلام عليكم، بخصوص عرض السعر المالي لطلب كود (${ticketData.ticketId})، أود مناقشة تفاصيل الحسابات والأصناف المذكورة ميكانيكياً.`
+                        `السلام عليكم، بخصوص عرض السعر المالي لطلب كود (${ticketData.ticketId})، أود استكمال التنسيق حول المشروع والجدول الزمني.`
                       )}`}
                       target="_blank"
-                      rel="referrer"
-                      className="bg-emerald-600 hover:bg-emerald-700 text-white font-black px-6 py-4 rounded-xl text-xs flex items-center justify-center gap-2 transition-all shadow-md shadow-emerald-900/10"
+                      rel="noreferrer"
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white font-black px-4 py-3.5 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all shadow-md"
                     >
-                      <Phone className="w-4.5 h-4.5" />
-                      <span>{language === 'en' ? 'WhatsApp Coordinator' : 'تنسيق المواد عبر واتساب'}</span>
+                      <Phone className="w-4 h-4" />
+                      <span>{language === 'en' ? 'WhatsApp Support' : 'تنسيق واتساب'}</span>
                     </a>
+
+                    <a
+                      href="tel:+966500000000"
+                      className="bg-blue-600 hover:bg-blue-700 text-white font-black px-4 py-3.5 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all shadow-md"
+                    >
+                      <Clock className="w-4 h-4" />
+                      <span>{language === 'en' ? 'Call Office' : 'اتصال هاتفي'}</span>
+                    </a>
+                  </div>
+
+                  {/* Interactive Tech Chat Discussion Board */}
+                  <div className="bg-slate-50 border border-slate-150 rounded-2xl p-4.5 space-y-3.5 mt-4">
+                    <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
+                      <div className="flex items-center gap-2">
+                        <MessageSquare className="w-4.5 h-4.5 text-red-600" />
+                        <span className="text-xs font-black text-slate-800">
+                          {language === 'en' ? 'Live Engineering Discussion' : 'النقاش والاستفسار الفني المباشر'}
+                        </span>
+                      </div>
+                      <span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-600">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+                        {language === 'en' ? 'Consultation Active' : 'مستشار فني متصل'}
+                      </span>
+                    </div>
+
+                    {/* Message Log */}
+                    <div className="space-y-3 max-h-56 overflow-y-auto p-1 text-[11px] leading-relaxed flex flex-col">
+                      {chatMessages.map((msg, i) => (
+                        <div 
+                          key={i} 
+                          className={`flex flex-col max-w-[85%] rounded-2xl px-3.5 py-2.5 ${
+                            msg.sender === 'engineer' 
+                              ? 'bg-slate-200/70 text-slate-800 self-start mr-auto rounded-tl-none text-right' 
+                              : 'bg-red-650 text-white self-end ml-auto rounded-tr-none text-right'
+                          }`}
+                        >
+                          <span className="font-extrabold text-[9.5px] opacity-75 mb-0.5">
+                            {msg.sender === 'engineer' ? (language === 'en' ? 'Eng. Fahad (Design Lead)' : 'مهندس فهد (كود السلامة)') : (language === 'en' ? 'You' : 'أنت')}
+                          </span>
+                          <p className="font-sans leading-relaxed whitespace-pre-line">{msg.text}</p>
+                          <span className="text-[8px] opacity-60 mt-1 self-end block leading-none">{msg.time}</span>
+                        </div>
+                      ))}
+
+                      {chatTyping && (
+                        <div className="bg-slate-200/50 text-slate-500 border border-slate-200/30 rounded-2xl px-3.5 py-2.5 self-start mr-auto flex items-center gap-1.5 max-w-[50%]">
+                          <Loader2 className="w-3 h-3 animate-spin text-red-600 animate-infinite" />
+                          <span className="font-bold text-[10px]">{language === 'en' ? 'Engineer is typing...' : 'يعمل المهندس على الرد...'}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Message Form input */}
+                    <form onSubmit={handleSendChatMessage} className="flex gap-2">
+                      <input
+                        type="text"
+                        value={chatInput}
+                        onChange={(e) => setChatInput(e.target.value)}
+                        placeholder={language === 'en' ? 'Ask about pipes, costs, inspection...' : 'اسأل بخصوص: الصيانة، المواسير، تكلفة معينة...'}
+                        className="flex-1 bg-white border border-slate-200 focus:border-red-500 text-slate-800 rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:ring-4 focus:ring-red-500/5 transition-all outline-none"
+                      />
+                      <button
+                        type="submit"
+                        disabled={chatTyping || !chatInput.trim()}
+                        className="bg-red-650 hover:bg-red-700 text-white p-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center shrink-0 disabled:opacity-45"
+                      >
+                        <Send className="w-4 h-4 rotate-180" />
+                      </button>
+                    </form>
                   </div>
                 </motion.div>
               )}
@@ -559,6 +766,21 @@ const Track: React.FC = () => {
                   <div>
                     <span className="text-[10px] text-slate-400 block">{language === 'en' ? 'Site / City' : 'مدينة الموقع'}</span>
                     <span className="font-dark font-extrabold text-slate-200 block mt-0.5">{ticketData.location || 'Riyadh'}</span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 pt-3 border-t border-slate-800/80">
+                    <div>
+                      <span className="text-[10px] text-slate-400 block">{language === 'en' ? 'Assigned Engineer' : 'المهندس المسؤول'}</span>
+                      <span className="font-black text-rose-300 block mt-0.5 leading-snug">
+                        {ticketData.engineerName || (language === 'en' ? 'Eng. Fahad Al-Nafiei' : 'المهندس فهد النفيعي')}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-slate-400 block">{language === 'en' ? 'Inspection Date' : 'موعد معاينة الموقع'}</span>
+                      <span className="font-mono font-bold text-slate-200 block mt-0.5">
+                        {ticketData.inspectionDate || (language === 'en' ? '2026-05-24' : '2026-05-24')}
+                      </span>
+                    </div>
                   </div>
 
                   {ticketData.uploadedFiles && ticketData.uploadedFiles.length > 0 && (

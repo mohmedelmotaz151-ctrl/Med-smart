@@ -5,7 +5,6 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { auth } from '../lib/firebase';
 import { signOut } from 'firebase/auth';
 import { 
-  Stethoscope, 
   Calendar, 
   ClipboardList, 
   MessageSquare, 
@@ -23,8 +22,16 @@ const Navbar: React.FC = () => {
   const navigate = useNavigate();
 
   const handleLogout = async () => {
-    await signOut(auth);
+    localStorage.removeItem('gcc_demo_user');
+    localStorage.removeItem('gcc_demo_profile');
+    try {
+      await signOut(auth);
+    } catch (e) {
+      console.warn("Firebase signout failed", e);
+    }
+    // Force direct reload if needed or just navigate to flush state
     navigate('/login');
+    window.location.reload();
   };
 
   const toggleLanguage = () => {
@@ -65,40 +72,34 @@ const Navbar: React.FC = () => {
 
         <div className="h-8 w-px bg-slate-200 mx-1 hidden sm:block"></div>
 
-        {user ? (
+        {user && profile?.role === 'admin' ? (
           <div className="flex items-center gap-3">
-            <Link to="/profile" className="flex items-center gap-3 group">
+            <Link to="/gcc-dashboard" className="flex items-center gap-3 group">
               <div className="text-right hidden sm:block leading-tight">
-                <p className="text-sm font-bold text-slate-800 group-hover:text-sky-600 transition-colors">
-                  {profile?.displayName || user.displayName || 'User'}
+                <p className="text-sm font-bold text-slate-800 group-hover:text-red-600 transition-colors">
+                  {profile?.displayName || user.displayName || 'Admin'}
                 </p>
-                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">
-                  {profile?.role || 'Patient'}
+                <p className="text-[10px] text-red-500 font-black uppercase tracking-tighter">
+                  {language === 'en' ? 'System Administrator' : 'مدير النظام المعتمد'}
                 </p>
               </div>
               {user.photoURL ? (
-                <img src={user.photoURL} alt="Profile" className="w-10 h-10 rounded-full border-2 border-white shadow-sm" />
+                <img src={user.photoURL} alt="Profile" className="w-10 h-10 rounded-full border-2 border-red-500 shadow-sm" />
               ) : (
-                <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 font-bold border-2 border-white shadow-sm uppercase">
-                  {user.email?.charAt(0)}
+                <div className="w-10 h-10 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-red-500 font-bold shadow-sm uppercase">
+                  {user.email?.charAt(0) || 'A'}
                 </div>
               )}
             </Link>
             <button 
               onClick={handleLogout}
-              className="p-2 text-slate-300 hover:text-red-500 rounded-lg transition-colors"
+              className="p-2 text-slate-300 hover:text-red-500 rounded-lg transition-colors cursor-pointer"
+              title={language === 'en' ? 'Logout Admin Session' : 'تسجيل الخروج'}
             >
               <LogOut size={20} />
             </button>
           </div>
-        ) : (
-          <Link 
-            to="/login"
-            className="bg-sky-600 text-white px-6 py-2.5 rounded-xl font-bold hover:bg-sky-700 transition-colors shadow-lg shadow-sky-100 text-sm"
-          >
-            {t('auth.login')}
-          </Link>
-        )}
+        ) : null}
       </div>
     </nav>
   );

@@ -281,7 +281,7 @@ const Home: React.FC = () => {
         </div>
       </div>
 
-      {/* Banner prompt to try our Sizer AI */}
+      {/* Banner prompt to try our Sizer */}
       <motion.div 
         whileHover={{ scale: 1.01 }}
         className="bg-gradient-to-r from-red-600 to-blue-700 rounded-3xl p-8 text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl relative overflow-hidden"
@@ -289,15 +289,15 @@ const Home: React.FC = () => {
         <div className="absolute inset-0 bg-black/10 mix-blend-overlay" />
         <div className="relative z-10 space-y-2 max-w-xl">
           <div className="bg-red-500 text-white font-extrabold text-[9px] uppercase tracking-wider px-2.5 py-1 rounded-md inline-block">
-            {language === 'en' ? 'SMART TOOL' : 'أداة هندسية ذكية'}
+            {language === 'en' ? 'ESTIMATION TOOL' : 'أداة التخطيط والتسعير'}
           </div>
           <h3 className="text-xl md:text-2xl font-black tracking-tight">
-            {language === 'en' ? 'Try GCC Smart Alarm & Control Configurator' : 'حدد نظام الإنذار والتحكم التفاعلي بالذكاء الاصطناعي'}
+            {language === 'en' ? 'Try GCC Interactive Alarm & Control Sizer' : 'حدد نظام الإنذار والتحكم التفاعلي المباشر'}
           </h3>
           <p className="text-xs text-white/80 leading-relaxed font-sans">
             {language === 'en' 
               ? 'Easily spec fire alarms, motion intrusion, access gates, biometric panels, and custom central automation conformant to SBC in seconds.' 
-              : 'حدد وصمم منظومة إنذار الحريق والسرقة والمنزل الذكي وبوابات العبور والتحكم بالوصول مطابقة للاشتراطات الكودية.'}
+              : 'حدد وصمم منظومة إنذار الحريق والسرقة وأنظمة الأتمتة المتقدمة وبوابات العبور والتحكم بالوصول مطابقة للاشتراطات الكودية.'}
           </p>
         </div>
         <button 

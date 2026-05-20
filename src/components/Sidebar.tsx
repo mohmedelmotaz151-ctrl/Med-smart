@@ -1,37 +1,79 @@
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   Home, 
   User, 
   Wrench, 
   Building2, 
-  BrainCircuit, 
+  Calculator, 
   Mail,
   Settings,
   ClipboardList
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useAuth } from '../contexts/AuthContext';
 
 const Sidebar: React.FC = () => {
   const { language, t } = useLanguage();
+  const { profile } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
 
-  const navItems = [
+  // Hidden 5x tap counter for the Logo
+  const [logoClicks, setLogoClicks] = useState(0);
+
+  // Hidden Keypress Hook (Ctrl + Shift + A) to open secret gate
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'a') {
+        e.preventDefault();
+        navigate('/mep-management');
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [navigate]);
+
+  const handleLogoTap = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setLogoClicks(prev => {
+      const next = prev + 1;
+      if (next >= 5) {
+        navigate('/mep-management');
+        return 0;
+      }
+      return next;
+    });
+  };
+
+  const baseItems = [
     { icon: <Home size={22} />, path: '/', label: language === 'en' ? 'Home' : 'الرئيسية' },
     { icon: <Wrench size={22} />, path: '/services', label: language === 'en' ? 'Services' : 'الخدمات' },
     { icon: <Building2 size={22} />, path: '/projects', label: language === 'en' ? 'Projects' : 'المشاريع' },
-    { icon: <BrainCircuit size={22} />, path: '/sizer', label: t('nav.sizer') },
+    { icon: <Calculator size={22} />, path: '/sizer', label: t('nav.sizer') },
     { icon: <Mail size={22} />, path: '/contact', label: language === 'en' ? 'Contact' : 'اتصل بنا' },
     { icon: <ClipboardList size={22} />, path: '/track', label: language === 'en' ? 'Track Quote' : 'تتبع السعر' },
-    { icon: <Settings size={22} />, path: '/admin', label: language === 'en' ? 'Admin Panel' : 'لوحة الإدمن' },
-    { icon: <User size={22} />, path: '/profile', label: t('nav.profile') },
   ];
+
+  // Only display the admin panel link if the logged in user has role === 'admin'
+  const navItems = profile?.role === 'admin' 
+    ? [...baseItems, { icon: <Settings size={22} />, path: '/gcc-dashboard', label: language === 'en' ? 'Admin Panel' : 'لوحة الإدمن' }]
+    : baseItems;
 
   return (
     <aside className="sidebar-width bg-slate-900 text-white border-r border-slate-800 flex flex-col items-center py-6 gap-8 z-50 shrink-0">
-      <Link to="/" className="w-12 h-12 bg-red-600 rounded-xl flex items-center justify-center text-white font-extrabold text-lg shadow-lg shadow-red-900/30 transition-transform active:scale-95">
-        GCC
-      </Link>
+      <button 
+        onClick={handleLogoTap} 
+        className="w-12 h-12 bg-red-650 hover:bg-red-700 rounded-xl flex items-center justify-center text-white font-extrabold text-lg shadow-lg shadow-red-950/40 transition-transform active:scale-95 cursor-pointer relative group"
+        title={language === 'en' ? 'GCC MEP Digital Portal (5 taps for secret Admin Gate)' : 'البوابة الرقمية لشركة الخليج (انقر ٥ مرات لفتح المنفذ السري)'}
+      >
+        <span>GCC</span>
+        {logoClicks > 0 && (
+          <span className="absolute -bottom-1 -right-1 bg-blue-600 text-white rounded-full text-[8px] w-4 h-4 flex items-center justify-center font-black animate-bounce">
+            {logoClicks}
+          </span>
+        )}
+      </button>
       
       <nav className="flex flex-col gap-5">
         {navItems.map((item) => {

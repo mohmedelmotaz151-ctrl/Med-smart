@@ -3,7 +3,7 @@ import { GoogleGenAI } from "@google/genai";
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 export async function getMedicalAdvice(symptoms: string) {
-  const prompt = `You are a professional medical assistant AI part of the "MedSmart" app.
+  const prompt = `You are a professional engineering assistant AI part of the "GCC Sizer" app.
   The user is reporting the following symptoms: "${symptoms}".
   Provide a professional, helpful, and concise response. 
   

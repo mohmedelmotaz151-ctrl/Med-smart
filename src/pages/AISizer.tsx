@@ -3,7 +3,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { db } from '../lib/firebase';
 import { collection, addDoc } from 'firebase/firestore';
 import { 
-  BrainCircuit, 
+  Calculator, 
   Send, 
   Flame, 
   Zap, 
@@ -394,7 +394,7 @@ const AISizer: React.FC = () => {
       projectType: buildingTypesLocalized[buildingTypeAlarm]?.en || 'General Construction',
       projectArea: selectedCategory === 'hvac' ? hvacArea.toString() : (selectedCategory === 'fire_fighting' ? suppArea.toString() : 'N/A'),
       location: clientCity,
-      message: `[طلب مخصص تم تكوينه وحسابه ذاتياً بموقع GCC الذكي] التفاصيل الإضافية: ${detailedSpecs}`,
+      message: `[طلب مخصص تم تكوينه وحسابه ذاتياً بموقع GCC لتقدير وتخطيط المشروعات] التفاصيل الإضافية: ${detailedSpecs}`,
       ticketId: ticketStr,
       status: 'new',
       createdAt: new Date().toISOString(),
@@ -444,16 +444,16 @@ const AISizer: React.FC = () => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-200 pb-5">
         <div>
           <div className="inline-flex items-center gap-1.5 bg-red-50 text-red-650 px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase border border-red-150">
-            <BrainCircuit className="w-3.5 h-3.5" />
-            <span>{language === 'en' ? 'GCC INTERACTIVE CONFIGURATORS' : 'دليل وأنظمة تسعير شركة GCC الذكية'}</span>
+            <Calculator className="w-3.5 h-3.5" />
+            <span>{language === 'en' ? 'GCC INTERACTIVE CONFIGURATORS' : 'دليل وأنظمة تقدير وتخطيط أسعار شركة GCC'}</span>
           </div>
           <h1 className="text-3xl font-black text-slate-900 tracking-tight mt-1.5 leading-none">
-            {language === 'en' ? 'Smart Engineering Sizer & Configurator' : 'الحاسبة الذكية وتخطيط الأنظمة'}
+            {language === 'en' ? 'Engineering Equipment Sizer & Pricing' : 'حاسبة تقدير التكاليف وتخطيط الأنظمة'}
           </h1>
           <p className="text-slate-500 text-xs mt-1.5 font-bold">
             {language === 'en' 
               ? 'Select an electro-mechanical category of choice, spec physical inputs conformant to Saudi Codes, and receive automated design reports.' 
-              : 'صمم وحدد سعة تكييف مبناك، شبكة الإطفاء، المولدات الاحتياطية أو الإنذار الذكي بموجب الأكواد واحصل على مقايسة فورية.'}
+              : 'صمم وحدد سعة تكييف مبناك، شبكة الإطفاء، المولدات الاحتياطية أو الإنذار بموجب الأكواد واحصل على مقايسة فورية.'}
           </p>
         </div>
 
@@ -477,8 +477,8 @@ const AISizer: React.FC = () => {
             </h2>
             <p className="text-xs text-slate-500 max-w-xl mx-auto font-semibold">
               {language === 'en' 
-                ? 'Welcome to the smart sizer center. Select any of the primary GCC divisions below to start configuring required devices, capacity, and materials.'
-                : 'أهلاً بك في حاسبة شركة GCC المعتمدة. يرجى اختيار أحد الأقسام وتحديد سعة تبريدك، مضخات الإطفاء، كاتم المولدات أو كواشف الأمن للحساب الفوري.'}
+                ? 'Welcome to the sizing and pricing center. Select any of the primary GCC divisions below to start configuring required devices, capacity, and materials.'
+                : 'أهلاً بك في حاسبة التقييم والتقدير لشركة GCC المعتمدة. يرجى اختيار أحد الأقسام وتحديد سعة تبريدك، مضخات الإطفاء، كاتم المولدات أو كواشف الأمن للحساب الفوري.'}
             </p>
           </div>
 
@@ -498,7 +498,7 @@ const AISizer: React.FC = () => {
                     {language === 'en' ? 'Alarm & Access Systems' : 'الإنذار والتحكم بالوصول'}
                   </h3>
                   <p className="text-[11px] text-slate-400 font-bold leading-normal mt-1">
-                    {language === 'en' ? 'Configure fire alarms, biometrics, security gates and smart automatic releases.' : 'حدد كواشف فتح الأبواب، بوابات مواقف السيارات الدوارة، وأجهزة تحقق البصمة والمنزل الذكي.'}
+                    {language === 'en' ? 'Configure fire alarms, biometrics, security gates and automatic releases.' : 'حدد كواشف فتح الأبواب، بوابات مواقف السيارات الدوارة، وأجهزة تحقق البصمة والتحكم الفوري بالوصول.'}
                   </p>
                 </div>
               </div>
