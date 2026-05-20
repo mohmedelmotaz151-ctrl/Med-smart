@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
+import GccLogo from './GccLogo';
 
 const Sidebar: React.FC = () => {
   const { language, t } = useLanguage();
@@ -64,10 +65,10 @@ const Sidebar: React.FC = () => {
     <aside className="sidebar-width bg-slate-900 text-white border-r border-slate-800 flex flex-col items-center py-6 gap-8 z-50 shrink-0">
       <button 
         onClick={handleLogoTap} 
-        className="w-12 h-12 bg-red-650 hover:bg-red-700 rounded-xl flex items-center justify-center text-white font-extrabold text-lg shadow-lg shadow-red-950/40 transition-transform active:scale-95 cursor-pointer relative group"
+        className="w-12 h-12 transition-transform active:scale-95 duration-200 cursor-pointer relative group flex items-center justify-center"
         title={language === 'en' ? 'GCC MEP Digital Portal' : 'البوابة الرقمية لشركة الخليج'}
       >
-        <span>GCC</span>
+        <GccLogo className="w-11 h-11" />
       </button>
       
       <nav className="flex flex-col gap-5">
