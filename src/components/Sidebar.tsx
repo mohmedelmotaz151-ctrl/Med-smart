@@ -68,11 +68,6 @@ const Sidebar: React.FC = () => {
         title={language === 'en' ? 'GCC MEP Digital Portal (5 taps for secret Admin Gate)' : 'البوابة الرقمية لشركة الخليج (انقر ٥ مرات لفتح المنفذ السري)'}
       >
         <span>GCC</span>
-        {logoClicks > 0 && (
-          <span className="absolute -bottom-1 -right-1 bg-blue-600 text-white rounded-full text-[8px] w-4 h-4 flex items-center justify-center font-black animate-bounce">
-            {logoClicks}
-          </span>
-        )}
       </button>
       
       <nav className="flex flex-col gap-5">
