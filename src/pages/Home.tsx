@@ -65,7 +65,6 @@ const Home: React.FC = () => {
 
   const highlights = [
     { label: t('home.stats.experience'), value: language === 'en' ? '2+' : 'عامان', icon: <ShieldCheck className="w-5 h-5 text-emerald-500" /> },
-    { label: t('home.stats.projects'), value: '450+', icon: <Building className="w-5 h-5 text-blue-500" /> },
     { label: t('home.stats.engineers'), value: language === 'en' ? '20+' : '+20', icon: <Users className="w-5 h-5 text-purple-500" /> },
     { label: t('home.stats.safety'), value: '100%', icon: <Flame className="w-5 h-5 text-red-500" /> },
   ];
@@ -128,7 +127,7 @@ const Home: React.FC = () => {
       </motion.div>
 
       {/* Stats Counter Section */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-6">
         {highlights.map((stat, i) => (
           <motion.div
             key={i}

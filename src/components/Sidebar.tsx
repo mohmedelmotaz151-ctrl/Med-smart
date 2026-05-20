@@ -65,7 +65,7 @@ const Sidebar: React.FC = () => {
       <button 
         onClick={handleLogoTap} 
         className="w-12 h-12 bg-red-650 hover:bg-red-700 rounded-xl flex items-center justify-center text-white font-extrabold text-lg shadow-lg shadow-red-950/40 transition-transform active:scale-95 cursor-pointer relative group"
-        title={language === 'en' ? 'GCC MEP Digital Portal (5 taps for secret Admin Gate)' : 'البوابة الرقمية لشركة الخليج (انقر ٥ مرات لفتح المنفذ السري)'}
+        title={language === 'en' ? 'GCC MEP Digital Portal' : 'البوابة الرقمية لشركة الخليج'}
       >
         <span>GCC</span>
       </button>
