@@ -9,12 +9,14 @@ import LoadingScreen from './components/LoadingScreen';
 // Lazy load pages
 const Home = lazy(() => import('./pages/Home'));
 const Login = lazy(() => import('./pages/Login'));
-const Appointments = lazy(() => import('./pages/Appointments'));
-const Records = lazy(() => import('./pages/Records'));
-const Chat = lazy(() => import('./pages/Chat'));
-const Booking = lazy(() => import('./pages/Booking'));
-const DoctorSearch = lazy(() => import('./pages/DoctorSearch'));
+const About = lazy(() => import('./pages/About'));
+const Services = lazy(() => import('./pages/Services'));
+const Projects = lazy(() => import('./pages/Projects'));
+const AISizer = lazy(() => import('./pages/AISizer'));
+const Contact = lazy(() => import('./pages/Contact'));
 const Profile = lazy(() => import('./pages/Profile'));
+const Track = lazy(() => import('./pages/Track'));
+const Admin = lazy(() => import('./pages/Admin'));
 
 const ProtectedRoute = ({ children, role }: { children: React.ReactNode; role?: string }) => {
   const { user, profile, loading } = useAuth();
@@ -37,53 +39,27 @@ function AppContent() {
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <Navbar />
         <main className="flex-1 overflow-y-auto p-6 md:p-8">
-          <div className="max-w-7xl mx-auto w-full">
+          <div className="max-w-7xl mx-auto w-full font-sans">
             <Suspense fallback={<LoadingScreen />}>
               <Routes>
                 <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/search" element={<DoctorSearch />} />
-            <Route 
-              path="/appointments" 
-              element={
-                <ProtectedRoute>
-                  <Appointments />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/appointments/book" 
-              element={
-                <ProtectedRoute>
-                  <Booking />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/records" 
-              element={
-                <ProtectedRoute>
-                  <Records />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/chat/:chatId" 
-              element={
-                <ProtectedRoute>
-                  <Chat />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/profile" 
-              element={
-                <ProtectedRoute>
-                  <Profile />
-                </ProtectedRoute>
-              } 
-            />
-          </Routes>
+                <Route path="/about" element={<About />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/services" element={<Services />} />
+                <Route path="/projects" element={<Projects />} />
+                <Route path="/sizer" element={<AISizer />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/track" element={<Track />} />
+                <Route path="/admin" element={<Admin />} />
+                <Route 
+                  path="/profile" 
+                  element={
+                    <ProtectedRoute>
+                      <Profile />
+                    </ProtectedRoute>
+                  } 
+                />
+              </Routes>
             </Suspense>
           </div>
         </main>

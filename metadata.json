@@ -1,9 +1,11 @@
 {
-  "name": "Remix: MedSmart",
-  "description": "A comprehensive multilingual healthcare platform for patients and doctors, featuring AI diagnostics, secure consultations, and electronic medical records.",
+  "name": "GCC Company",
+  "description": "Professional engineering, electro-mechanical, safety, cooling, and backup power solutions platform for GCC region contracts.",
   "requestFramePermissions": [
     "camera",
     "microphone"
   ],
-  "majorCapabilities": []
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
 }

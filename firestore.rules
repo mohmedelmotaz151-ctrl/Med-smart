@@ -100,5 +100,10 @@ service cloud.firestore {
       return data.senderId is string && data.text is string && 
              data.text.size() <= 5000 && data.timestamp == request.time;
     }
+
+    // --- Inquiries / Quote Requests ---
+    match /inquiries/{inquiryId} {
+      allow read, write: if true;
+    }
   }
 }

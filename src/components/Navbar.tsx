@@ -33,38 +33,34 @@ const Navbar: React.FC = () => {
 
   return (
     <nav className="h-[72px] bg-white border-b border-slate-200 flex items-center justify-between px-6 shrink-0 z-40">
-      <div className="flex items-center gap-4 bg-slate-100 rounded-full px-4 py-2 w-full max-w-md border border-slate-200/50">
-        <Search className="text-slate-400" size={18} />
-        <input 
-          type="text" 
-          placeholder={t('home.search_placeholder')}
-          className="bg-transparent border-none focus:outline-none text-sm w-full placeholder:text-slate-400 font-medium"
-        />
+      <div className="flex flex-col">
+        <span className="text-lg font-black tracking-wider text-slate-900">{t('app.name')}</span>
+        <span className="text-[10px] text-slate-500 font-bold uppercase tracking-tight hidden sm:block leading-none mt-0.5">{t('app.tagline')}</span>
       </div>
 
       <div className="flex items-center gap-6">
         <div className="flex items-center gap-2 font-bold text-xs uppercase tracking-widest cursor-pointer">
           <button 
             onClick={() => setLanguage('en')}
-            className={`${language === 'en' ? 'text-sky-600 underline underline-offset-4' : 'text-slate-400'}`}
+            className={`${language === 'en' ? 'text-blue-600 underline underline-offset-4 font-extrabold' : 'text-slate-400'}`}
           >
             English
           </button>
           <span className="text-slate-300">|</span>
           <button 
             onClick={() => setLanguage('ar')}
-            className={`font-sans ${language === 'ar' ? 'text-sky-600 underline underline-offset-4' : 'text-slate-400'}`}
+            className={`font-sans ${language === 'ar' ? 'text-blue-600 underline underline-offset-4 font-extrabold' : 'text-slate-400'}`}
           >
             العربية
           </button>
         </div>
 
         <button 
-          onClick={() => navigate('/chat/ai')}
-          className="bg-red-500 hover:bg-red-600 text-white rounded-xl px-5 py-2.5 font-bold text-sm flex items-center gap-2 shadow-lg shadow-red-100 transition-all active:scale-95"
+          onClick={() => navigate('/sizer')}
+          className="bg-red-600 hover:bg-red-700 text-white rounded-xl px-5 py-2.5 font-bold text-xs flex items-center gap-2 shadow-lg shadow-red-200 transition-all active:scale-95"
         >
-          <PlusCircle size={18} />
-          <span>{language === 'en' ? 'Emergency' : 'طوارئ'}</span>
+          <PlusCircle size={16} />
+          <span>{language === 'en' ? 'AI Consultation' : 'استشارة هندسية ذكية'}</span>
         </button>
 
         <div className="h-8 w-px bg-slate-200 mx-1 hidden sm:block"></div>
