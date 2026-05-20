@@ -7,13 +7,14 @@ const LoadingScreen: React.FC = () => {
     <div className="fixed inset-0 bg-white flex flex-col items-center justify-center z-[100]">
       <motion.div
         animate={{ 
-          scale: [1, 1.15, 1],
-          rotate: [0, 5, -5, 0]
+          scale: [1, 1.12, 1],
+          rotate: [0, 4, -4, 0]
         }}
-        transition={{ duration: 1.5, repeat: Infinity }}
-        className="bg-red-650 p-4 rounded-2xl shadow-xl shadow-red-200"
+        transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+        className="relative bg-red-650 w-24 h-24 rounded-2xl shadow-xl shadow-red-200 flex flex-col items-center justify-center"
       >
-        <Shield size={48} className="text-white" />
+        <Shield size={64} className="text-white/10 absolute" />
+        <span className="text-white font-black text-2xl tracking-tight z-10 pointer-events-none">GCC</span>
       </motion.div>
       <motion.div
         initial={{ opacity: 0 }}
