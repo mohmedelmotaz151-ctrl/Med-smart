@@ -28,7 +28,7 @@ const Sidebar: React.FC = () => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'a') {
         e.preventDefault();
-        navigate('/mep-management');
+        navigate('/login');
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -40,7 +40,7 @@ const Sidebar: React.FC = () => {
     setLogoClicks(prev => {
       const next = prev + 1;
       if (next >= 5) {
-        navigate('/mep-management');
+        navigate('/login');
         return 0;
       }
       return next;

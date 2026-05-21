@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -15,6 +15,7 @@ import {
   Search
 } from 'lucide-react';
 import { motion } from 'motion/react';
+import GccLogo from './GccLogo';
 
 const Navbar: React.FC = () => {
   const { user, profile } = useAuth();
@@ -40,9 +41,15 @@ const Navbar: React.FC = () => {
 
   return (
     <nav className="h-[72px] bg-white border-b border-slate-200 flex items-center justify-between px-6 shrink-0 z-40">
-      <div className="flex flex-col">
-        <span className="text-lg font-black tracking-wider text-slate-900">{t('app.name')}</span>
-        <span className="text-[10px] text-slate-500 font-bold uppercase tracking-tight hidden sm:block leading-none mt-0.5">{t('app.tagline')}</span>
+      <div 
+        onClick={() => navigate('/')}
+        className="flex items-center gap-3 cursor-pointer select-none active:scale-95 transition-all duration-200"
+        title={language === 'en' ? 'GCC Company' : 'شركة جي سي سي للمقاولات'}
+      >
+        <div className="flex flex-col">
+          <span className="text-md sm:text-lg font-black tracking-wider text-slate-900 leading-none">{t('app.name')}</span>
+          <span className="text-[10px] text-slate-500 font-bold uppercase tracking-tight hidden sm:block leading-none mt-1">{t('app.tagline')}</span>
+        </div>
       </div>
 
       <div className="flex items-center gap-6">
@@ -119,15 +126,7 @@ const Navbar: React.FC = () => {
               <LogOut size={20} />
             </button>
           </div>
-        ) : (
-          <Link
-            to="/login"
-            className="text-xs font-black text-slate-500 hover:text-slate-900 flex items-center gap-1.5 border border-slate-200 hover:bg-slate-50 rounded-xl px-4 py-2 hover:shadow-sm transition-all active:scale-95"
-          >
-            <UserIcon size={14} className="text-slate-405" />
-            <span>{language === 'en' ? 'Client/Staff Login' : 'تسجيل الدخول'}</span>
-          </Link>
-        )}
+        ) : null}
       </div>
     </nav>
   );
