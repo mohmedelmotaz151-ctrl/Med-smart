@@ -99,8 +99,8 @@ const Admin: React.FC = () => {
   const [mediaDescriptionEn, setMediaDescriptionEn] = useState('');
   const [mediaDescriptionAr, setMediaDescriptionAr] = useState('');
   const [mediaType, setMediaType] = useState<'project' | 'service'>('project');
-  const [mediaClientEn, setMediaClientEn] = useState('GCC Company');
-  const [mediaClientAr, setMediaClientAr] = useState('شركة الخليج للعمليات');
+  const [mediaClientEn, setMediaClientEn] = useState('GCC Saudi Arabia');
+  const [mediaClientAr, setMediaClientAr] = useState('شركة جي سي سي للمقاولات العامة');
   const [mediaLocationEn, setMediaLocationEn] = useState('Riyadh, KSA');
   const [mediaLocationAr, setMediaLocationAr] = useState('الرياض، المملكة العربية السعودية');
   const [mediaYear, setMediaYear] = useState(new Date().getFullYear().toString());
@@ -233,8 +233,8 @@ const Admin: React.FC = () => {
     setMediaDescriptionEn('');
     setMediaDescriptionAr('');
     setMediaType('project');
-    setMediaClientEn('GCC Company');
-    setMediaClientAr('شركة الخليج للعمليات');
+    setMediaClientEn('GCC Saudi Arabia');
+    setMediaClientAr('شركة جي سي سي للمقاولات العامة');
     setMediaLocationEn('Riyadh, KSA');
     setMediaLocationAr('الرياض، المملكة العربية السعودية');
     setMediaYear(new Date().getFullYear().toString());
@@ -349,8 +349,8 @@ const Admin: React.FC = () => {
     setMediaDescriptionEn(media.descriptionEn);
     setMediaDescriptionAr(media.descriptionAr);
     setMediaType(media.type);
-    setMediaClientEn(media.clientEn || 'GCC Company');
-    setMediaClientAr(media.clientAr || 'شركة الخليج للعمليات');
+    setMediaClientEn(media.clientEn || 'GCC Saudi Arabia');
+    setMediaClientAr(media.clientAr || 'شركة جي سي سي للمقاولات العامة');
     setMediaLocationEn(media.locationEn || 'Riyadh, KSA');
     setMediaLocationAr(media.locationAr || 'الرياض، المملكة العربية السعودية');
     setMediaYear(media.year || new Date().getFullYear().toString());

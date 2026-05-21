@@ -1263,7 +1263,7 @@ const AISizer: React.FC = () => {
                       <label className="text-[10.5px] font-black text-slate-600 block">{language === 'en' ? 'Company Name / Entity' : 'اسم الشركة / المنشأة (مستحب)'}</label>
                       <input 
                         type="text" value={clientCompany} onChange={(e) => setClientCompany(e.target.value)}
-                        placeholder={language === 'en' ? 'e.g. GCC Industrial Co.' : 'مثال: شركة الخليج للتطوير'}
+                        placeholder={language === 'en' ? 'e.g. GCC Saudi Contracting Co.' : 'مثال: شركة المقاولات السعودية'}
                         className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:border-red-500 font-bold"
                       />
                     </div>

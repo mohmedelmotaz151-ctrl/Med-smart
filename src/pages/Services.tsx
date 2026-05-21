@@ -192,8 +192,8 @@ const Services: React.FC = () => {
         </h1>
         <p className="text-slate-600 text-sm leading-relaxed font-sans">
           {language === 'en'
-            ? 'We offer bespoke mechanical, safety, and electrical installations. Our certified divisions design, fabricate, install, and service complexes under strict adherence to Saudi GCC Building Codes.'
-            : 'نقدم حلولاً متكاملة لتصميم وتركيب وتشغيل الأنظمة الهندسية ومكافحة المخاطر. تعمل فرقنا التقنية الموزعة على تلبية مواصفات كود البناء الخليجي وكود السلامة العالمي بدقة ميكانيكية استثنائية.'}
+            ? 'We offer bespoke mechanical, safety, and electrical installations. Our certified divisions design, fabricate, install, and service complexes under strict adherence to Saudi Building Codes (SBC).'
+            : 'نقدم حلولاً متكاملة لتصميم وتركيب وتشغيل الأنظمة الهندسية ومكافحة المخاطر. تعمل فرقنا التقنية الموزعة على تلبية مواصفات كود البناء السعودي وكود السلامة العالمي بدقة ميكانيكية استثنائية.'}
         </p>
       </div>
 

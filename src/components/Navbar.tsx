@@ -72,34 +72,62 @@ const Navbar: React.FC = () => {
 
         <div className="h-8 w-px bg-slate-200 mx-1 hidden sm:block"></div>
 
-        {user && profile?.role === 'admin' ? (
+        {user ? (
           <div className="flex items-center gap-3">
-            <Link to="/gcc-dashboard" className="flex items-center gap-3 group">
-              <div className="text-right hidden sm:block leading-tight">
-                <p className="text-sm font-bold text-slate-800 group-hover:text-red-600 transition-colors">
-                  {profile?.displayName || user.displayName || 'Admin'}
-                </p>
-                <p className="text-[10px] text-red-500 font-black uppercase tracking-tighter">
-                  {language === 'en' ? 'System Administrator' : 'مدير النظام المعتمد'}
-                </p>
-              </div>
-              {user.photoURL ? (
-                <img src={user.photoURL} alt="Profile" className="w-10 h-10 rounded-full border-2 border-red-500 shadow-sm" />
-              ) : (
-                <div className="w-10 h-10 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-red-500 font-bold shadow-sm uppercase">
-                  {user.email?.charAt(0) || 'A'}
+            {profile?.role === 'admin' ? (
+              <Link to="/gcc-dashboard" className="flex items-center gap-3 group">
+                <div className="text-right hidden sm:block leading-tight">
+                  <p className="text-sm font-bold text-slate-800 group-hover:text-red-600 transition-colors">
+                    {profile?.displayName || user.displayName || 'Admin'}
+                  </p>
+                  <p className="text-[10px] text-red-500 font-black uppercase tracking-tighter">
+                    {language === 'en' ? 'System Administrator' : 'مدير النظام المعتمد'}
+                  </p>
                 </div>
-              )}
-            </Link>
+                {user.photoURL ? (
+                  <img src={user.photoURL} alt="Profile" className="w-10 h-10 rounded-full border-2 border-red-500 shadow-sm" />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-red-500 font-bold shadow-sm uppercase">
+                    {user.email?.charAt(0) || 'A'}
+                  </div>
+                )}
+              </Link>
+            ) : (
+              <Link to="/profile" className="flex items-center gap-3 group">
+                <div className="text-right hidden sm:block leading-tight">
+                  <p className="text-sm font-bold text-slate-800 group-hover:text-blue-650 transition-colors">
+                    {profile?.displayName || user.displayName || 'Client'}
+                  </p>
+                  <p className="text-[10px] text-blue-500 font-semibold uppercase tracking-tighter">
+                    {language === 'en' ? 'Client' : 'عميل'}
+                  </p>
+                </div>
+                {user.photoURL ? (
+                  <img src={user.photoURL} alt="Profile" className="w-10 h-10 rounded-full border-2 border-blue-500 shadow-sm" />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-blue-500 font-bold shadow-sm uppercase">
+                    {user.email?.charAt(0) || 'C'}
+                  </div>
+                )}
+              </Link>
+            )}
             <button 
               onClick={handleLogout}
-              className="p-2 text-slate-300 hover:text-red-500 rounded-lg transition-colors cursor-pointer"
-              title={language === 'en' ? 'Logout Admin Session' : 'تسجيل الخروج'}
+              className="p-2 text-slate-400 hover:text-red-500 rounded-lg transition-colors cursor-pointer"
+              title={language === 'en' ? 'Logout Session' : 'تسجيل الخروج'}
             >
               <LogOut size={20} />
             </button>
           </div>
-        ) : null}
+        ) : (
+          <Link
+            to="/login"
+            className="text-xs font-black text-slate-500 hover:text-slate-900 flex items-center gap-1.5 border border-slate-200 hover:bg-slate-50 rounded-xl px-4 py-2 hover:shadow-sm transition-all active:scale-95"
+          >
+            <UserIcon size={14} className="text-slate-405" />
+            <span>{language === 'en' ? 'Client/Staff Login' : 'تسجيل الدخول'}</span>
+          </Link>
+        )}
       </div>
     </nav>
   );

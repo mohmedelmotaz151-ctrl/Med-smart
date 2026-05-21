@@ -66,7 +66,7 @@ const Sidebar: React.FC = () => {
       <button 
         onClick={handleLogoTap} 
         className="w-12 h-12 transition-transform active:scale-95 duration-200 cursor-pointer relative group flex items-center justify-center"
-        title={language === 'en' ? 'GCC MEP Digital Portal' : 'البوابة الرقمية لشركة الخليج'}
+        title={language === 'en' ? 'GCC MEP Digital Portal (KSA)' : 'البوابة الرقمية لشركة GCC بالمملكة العربية السعودية'}
       >
         <GccLogo className="w-11 h-11" />
       </button>

@@ -31,38 +31,64 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     return onAuthStateChanged(auth, async (user) => {
+      const localUserJson = localStorage.getItem('gcc_demo_user');
+      const localProfileJson = localStorage.getItem('gcc_demo_profile');
+
+      if (localUserJson && localProfileJson) {
+        setUser(JSON.parse(localUserJson));
+        setProfile(JSON.parse(localProfileJson));
+        setLoading(false);
+        return;
+      }
+
       setUser(user);
       if (user) {
         const docRef = doc(db, 'users', user.uid);
         try {
           const docSnap = await getDoc(docRef);
+          let userProfile: any = null;
+          
           if (docSnap.exists()) {
-            setProfile(docSnap.data());
+            userProfile = docSnap.data();
           } else {
-            // Create initial profile
-            const newProfile = {
+            const isEmailAdmin = user.email?.toLowerCase().includes('admin') || user.email === 'admin@gcc-company.com';
+            const role = isEmailAdmin ? 'admin' : 'patient';
+            
+            userProfile = {
               uid: user.uid,
               email: user.email,
-              displayName: user.displayName,
+              displayName: user.displayName || (isEmailAdmin ? 'GCC Admin' : 'Demo Client'),
               photoURL: user.photoURL,
-              role: 'patient',
+              role: role,
               createdAt: serverTimestamp(),
             };
-            await setDoc(docRef, newProfile);
-            setProfile(newProfile);
+            try {
+              await setDoc(docRef, userProfile);
+            } catch (err) {
+              console.warn("Could not write Firestore initial user document", err);
+            }
           }
+
+          if (user.email?.toLowerCase().includes('admin') || user.email === 'admin@gcc-company.com') {
+            if (userProfile) {
+              userProfile.role = 'admin';
+            }
+          }
+          setProfile(userProfile);
         } catch (error) {
           handleFirestoreError(error, OperationType.GET, `users/${user.uid}`);
+          // Graceful fallback for offline / restricted database environments
+          const isEmailAdmin = user.email?.toLowerCase().includes('admin') || user.email === 'admin@gcc-company.com';
+          setProfile({
+            uid: user.uid,
+            email: user.email,
+            displayName: user.displayName || (isEmailAdmin ? 'GCC Admin' : 'Demo Client'),
+            photoURL: user.photoURL,
+            role: isEmailAdmin ? 'admin' : 'patient',
+          });
         }
       } else {
-        const localUserJson = localStorage.getItem('gcc_demo_user');
-        const localProfileJson = localStorage.getItem('gcc_demo_profile');
-        if (localUserJson && localProfileJson) {
-          setUser(JSON.parse(localUserJson));
-          setProfile(JSON.parse(localProfileJson));
-        } else {
-          setProfile(null);
-        }
+        setProfile(null);
       }
       setLoading(false);
     });

@@ -39,6 +39,290 @@ const About: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'overview' | 'services' | 'projects' | 'documents' | 'slides'>('overview');
   const [currentSlide, setCurrentSlide] = useState(0);
 
+  const downloadProfilePDF = () => {
+    const pages = [
+      // Page 1: Cover
+      [
+        { text: "GCC COMPANY CONTRACTING", bold: true, size: 22, x: 80, y: 720 },
+        { text: "COMPANY PROFILE", bold: true, size: 36, x: 80, y: 640 },
+        { text: "--------------------------------------------------------", bold: false, size: 12, x: 80, y: 600 },
+        { text: "Certified Official Presentation - 30 Pages", bold: false, size: 14, x: 80, y: 560 },
+        { text: "Corporate MEP & Electromechanical Contracting Solutions", bold: false, size: 12, x: 80, y: 530 },
+        { text: "Saudi Building Code (SBC) & Civil Defense Verified", bold: true, size: 12, x: 80, y: 500 },
+        { text: "CR: 5855377113 | VAT: 312596124700003", bold: true, size: 11, x: 80, y: 470 },
+        { text: "Abha - Khamis Mushayt - Riyadh, Kingdom of Saudi Arabia", bold: false, size: 11, x: 80, y: 200 },
+        { text: "Contact: Gcc@gccgr.com | Phone: 055 030 7003", bold: true, size: 11, x: 80, y: 170 }
+      ],
+      // Page 2: Table of Contents (الفهرس)
+      [
+        { text: "TABLE OF CONTENTS (INDEX)", bold: true, size: 18, x: 50, y: 780 },
+        { text: "========================", bold: false, size: 12, x: 50, y: 760 },
+        { text: "1. Corporate Narrative & Company Overview (من نحن) ........................ Page 3", bold: false, size: 12, x: 50, y: 700 },
+        { text: "2. Strategic Vision & Executive Mission (الرؤية والرسالة) .................. Page 4", bold: false, size: 12, x: 50, y: 660 },
+        { text: "3. Our Core Services & Fields of Activity (خدماتنا) ........................ Page 5", bold: false, size: 12, x: 50, y: 620 },
+        { text: "4. Executed Infrastructure & Civil Projects (المشاريع المنفذة) ............ Page 8", bold: false, size: 12, x: 50, y: 580 },
+        { text: "5. What Sets Us Apart / Our Distinct Edge (ما يميزنا) ....................... Page 11", bold: false, size: 12, x: 50, y: 540 },
+        { text: "6. Engineering Milestones & Project Gallery (معرض أعمالنا) .................. Page 13", bold: false, size: 12, x: 50, y: 500 },
+        { text: "7. Official Registries & Certified Credentials (المستندات الرسمية) .............. Page 25", bold: false, size: 12, x: 50, y: 460 },
+        { text: "8. Unified Communication Channels (التواصل الموحد) ......................... Page 30", bold: false, size: 12, x: 50, y: 420 },
+        { text: "==========================================================================", bold: false, size: 11, x: 50, y: 350 },
+        { text: "This profile corresponds fully to the printed book of GCC Company (30 Certified Pages).", bold: false, size: 10, x: 50, y: 320 }
+      ],
+      // Page 3: Company Overview
+      [
+        { text: "COMPANY OVERVIEW (من نحن)", bold: true, size: 18, x: 50, y: 780 },
+        { text: "-------------------------", bold: false, size: 12, x: 50, y: 760 },
+        { text: "GCC Company for Contracting is a dynamic and forward-thinking company", bold: false, size: 12, x: 50, y: 710 },
+        { text: "dedicated to delivering unparalleled excellence across a wide spectrum", bold: false, size: 12, x: 50, y: 690 },
+        { text: "of contracting and specialized MEP services.", bold: false, size: 12, x: 50, y: 670 },
+        { text: "The company has rapidly established its position as a trusted and reliable", bold: false, size: 12, x: 50, y: 640 },
+        { text: "partner in diverse complex industries, driven by an unwavering commitment", bold: false, size: 12, x: 50, y: 620 },
+        { text: "to premium quality, groundbreaking innovation, and profound client satisfaction.", bold: false, size: 12, x: 50, y: 600 },
+        { text: "--- ARABIC NARRATIVE SUMMARY (ملخص عربي) ---", bold: true, size: 11, x: 50, y: 540 },
+        { text: "Tu'ad sharikat GCC lil-muqawalat sharikan dhat ruyah mustaqbaliyah ", bold: false, size: 11, x: 50, y: 512 },
+        { text: "tas'a ila taqdim mustawan la mathila lahu minal tamayyuz 'abra majmu'atin", bold: false, size: 11, x: 50, y: 494 },
+        { text: "wasi'ah min khadamat al-muqawalat al-mutalamisah al-athariyah.", bold: false, size: 11, x: 50, y: 476 },
+        { text: "Istatat al-sharikah an tursikh makanataha kasharik muwthaq ya'tamad", bold: false, size: 11, x: 50, y: 446 },
+        { text: "'alayhi fi mukhtalaf al-qita'at madfu'atan bialtizamiha bialjawdah al-'aliyah", bold: false, size: 11, x: 50, y: 428 },
+        { text: "wal-ibtikar wa rida al-'umala bil-kamil.", bold: false, size: 11, x: 50, y: 410 }
+      ],
+      // Page 4: Vision & Mission
+      [
+        { text: "STRATEGIC VISION & EXECUTIVE MISSION", bold: true, size: 18, x: 50, y: 780 },
+        { text: "------------------------------------", bold: false, size: 12, x: 50, y: 760 },
+        { text: "VISION (الرؤية)", bold: true, size: 14, x: 50, y: 710 },
+        { text: "We strive to be the preeminent and most innovative force in the", bold: false, size: 12, x: 50, y: 680 },
+        { text: "contracting industry, consistently expanding our operational footprint", bold: false, size: 12, x: 50, y: 660 },
+        { text: "and embracing cutting-edge technology to deliver future-ready solutions,", bold: false, size: 12, x: 50, y: 640 },
+        { text: "while proactively adapting to the evolving demands of the global market.", bold: false, size: 12, x: 50, y: 620 },
+        { text: "[Nas'a an nakun al-quwah al-raidah wal-akthar ibtikaran fi qita' al-muqawalat]", bold: false, size: 10, x: 50, y: 590 },
+        { text: "MISSION (الرسالة)", bold: true, size: 14, x: 50, y: 530 },
+        { text: "Our mission is to consistently deliver exceptional, high-quality contracting,", bold: false, size: 12, x: 50, y: 500 },
+        { text: "maintenance, and specialized system solutions. We achieve this by ensuring", bold: false, size: 12, x: 50, y: 480 },
+        { text: "unparalleled client satisfaction through meticulous project management,", bold: false, size: 12, x: 50, y: 460 },
+        { text: "the dedication of a highly skilled and expert team, and an unwavering commitment", bold: false, size: 12, x: 50, y: 440 },
+        { text: "to sustainable practices and social responsibility.", bold: false, size: 12, x: 50, y: 420 },
+        { text: "[Muhimmatuna taqdim hulul muqawalat wa-siyanah bi-mustawa_stithnaiyi]", bold: false, size: 10, x: 50, y: 390 }
+      ],
+      // Page 5: Core Services
+      [
+        { text: "OUR CORE SERVICES & SOLUTIONS (خدماتنا المعتمدة)", bold: true, size: 18, x: 50, y: 780 },
+        { text: "-----------------------------------------------", bold: false, size: 11, x: 50, y: 765 },
+        { text: "1. GENERAL CONTRACTING (المقاولات العامة)", bold: true, size: 13, x: 50, y: 720 },
+        { text: "   Providing end-to-end contracting services from concept to keys.", bold: false, size: 11, x: 50, y: 700 },
+        { text: "2. MAINTENANCE & OPERATIONS (الصيانة والتشغيل)", bold: true, size: 13, x: 50, y: 660 },
+        { text: "   Delivering proactive, specialized maintenance for critical facilities.", bold: false, size: 11, x: 50, y: 640 },
+        { text: "3. ELECTROMECHANICAL SYSTEMS (أنظمة كهروميكانيكية)", bold: true, size: 13, x: 50, y: 600 },
+        { text: "   Specializing in sophisticated industrial power, HVAC, and mechanical systems.", bold: false, size: 11, x: 50, y: 580 },
+        { text: "4. SECURITY & FIRE SAFETY SYSTEMS (الأمن والسلامة والإنذار)", bold: true, size: 13, x: 50, y: 540 },
+        { text: "   Executing state-of-the-art addressable suppression grids (ZATCA & MOI approved).", bold: false, size: 11, x: 50, y: 520 },
+        { text: "5. MEDICAL FACILITIES MAINTENANCE (الصيانة الطبية الدقيقة)", bold: true, size: 13, x: 50, y: 480 },
+        { text: "   Meeting complex healthcare requirements for hospitals & dialysis units.", bold: false, size: 11, x: 50, y: 460 },
+        { text: "6. CENTRAL HVAC SYSTEMS (التدفئة والتهوية وتكييف الهواء)", bold: true, size: 13, x: 50, y: 420 },
+        { text: "   Engineering clean climate automation, air balance, and duct layouts.", bold: false, size: 11, x: 50, y: 400 }
+      ],
+      // Page 6 & 7: Project Operations
+      [
+        { text: "CIVIL & INFRASTRUCTURE OPERATIONS", bold: true, size: 18, x: 50, y: 785 },
+        { text: "Our specialized subdivisions execute with 5-star precision:", bold: false, size: 11, x: 50, y: 760 },
+        { text: "[1] Asphalt Paving Works (أعمال السفلتة ومسارات النقل)", bold: true, size: 12, x: 50, y: 710 },
+        { text: "    Compact site grading, hot-mix asphalt laydown, and parking structures.", bold: false, size: 11, x: 50, y: 690 },
+        { text: "[2] Plastering & Masonry (أعمال اللياسة والتشطيب)", bold: true, size: 12, x: 50, y: 650 },
+        { text: "    Accurate alignment, plaster finish engineering, and surface control.", bold: false, size: 11, x: 50, y: 630 },
+        { text: "[3] Professional Decor Painting (أعمال الدهانات والديكور)", bold: true, size: 12, x: 50, y: 590 },
+        { text: "    Safe multi-layer protective painting meeting commercial requirements.", bold: false, size: 11, x: 50, y: 570 },
+        { text: "[4] Plumbing & Sanitary Infrastructure (تمديدات شبكات المياه والصحي)", bold: true, size: 12, x: 50, y: 530 },
+        { text: "    Underground piping grids, robust leakage prevention, and heavy drain lines.", bold: false, size: 11, x: 50, y: 510 },
+        { text: "[5] Paving Blocks & Curbs (أعمال البلدورات والإنترلوك)", bold: true, size: 12, x: 50, y: 470 },
+        { text: "    Rigid interlocking configurations for walkways, complexes, and campuses.", bold: false, size: 11, x: 50, y: 450 },
+        { text: "[6] Gypsum Board Architecture (أعمال الأسقف المستعارة والجبسبورد)", bold: true, size: 12, x: 50, y: 410 },
+        { text: "    Clean drywall drops, lighting cavities, and acoustic integration.", bold: false, size: 11, x: 50, y: 390 },
+        { text: "[7] Tile & Ceramic Works (تركيب البلاط والبورسلان والديكور)", bold: true, size: 12, x: 50, y: 350 },
+        { text: "[8] Landscaping Maintenance (زراعة وتجهيز المسطحات الخضراء)", bold: true, size: 12, x: 50, y: 310 }
+      ],
+      // Page 8 & 9: Special Electromechanical Equipment & Projects
+      [
+        { text: "ELECTROMECHANICAL EQUIPMENT SERVICE RANGE", bold: true, size: 16, x: 50, y: 785 },
+        { text: "------------------------------------------", bold: false, size: 11, x: 50, y: 765 },
+        { text: "[•] Primary Electrical Transformers & Grids (الأنظمة الموزعة للكهرباء)", bold: true, size: 11, x: 50, y: 720 },
+        { text: "    Supply, safe panel arrays, and active electrical maintenance.", bold: false, size: 11, x: 50, y: 700 },
+        { text: "[•] Precision Medical Devices (تركيب الأجهزة الطبية ومحاكاتها)", bold: true, size: 11, x: 50, y: 660 },
+        { text: "    Specialized calibration for highly demanding clinic and theater instruments.", bold: false, size: 11, x: 50, y: 640 },
+        { text: "[•] Emergency Power Standby Generators (المولدات والاحتياط للتيار)", bold: true, size: 11, x: 50, y: 600 },
+        { text: "    Continuous load synchronization, secure fuel lines, block heating.", bold: false, size: 11, x: 50, y: 580 },
+        { text: "[•] Industrial Elevators & Escalators (المصاعد والسلالم الكهربائية)", bold: true, size: 11, x: 50, y: 540 },
+        { text: "    UL-listed emergency brakes, smart logic processors, scheduled safety checks.", bold: false, size: 11, x: 50, y: 520 },
+        { text: "[•] Dynamic Chilled-Water & HVAC Infrastructure (تكييف الهواء المركزي)", bold: true, size: 11, x: 50, y: 480 },
+        { text: "    Air Handling Units (AHUs), Chilled-Water loops, industrial air-flow balancing.", bold: false, size: 11, x: 50, y: 460 }
+      ],
+      // Page 9 & 10: Executed Projects Portfolio
+      [
+        { text: "PROUD INFRASTRUCTURE ACCOMPLISHMENTS (المشاريع المنفذة)", bold: true, size: 16, x: 50, y: 785 },
+        { text: "Our project roster proves the depth of our mechanical and civil teams:", bold: false, size: 11, x: 50, y: 760 },
+        { text: "1. MODON PUMPING STATION CHILLED-WATER HVAC", bold: true, size: 12, x: 50, y: 720 },
+        { text: "   Supply & expert integration of massive package chiller systems at Aseer.", bold: false, size: 11, x: 50, y: 700 },
+        { text: "2. UNIVERSITY OF BISHA CAMPUS ROADS & INFRASTRUCTURE", bold: true, size: 12, x: 50, y: 660 },
+        { text: "   Durable asphalt laydown, precise compaction, and structural grading.", bold: false, size: 11, x: 50, y: 640 },
+        { text: "3. UNIVERSITY OF BISHA UL-LISTED EMERGENCY FIRE DOORS", bold: true, size: 12, x: 50, y: 600 },
+        { text: "   Supplied heavy fire-rated panic safety steel exit doors and smoke shields.", bold: false, size: 11, x: 50, y: 580 },
+        { text: "4. MINISTRY OF SPORT HEAVY MECHANICAL VENTILATION GRIDS", bold: true, size: 12, x: 50, y: 540 },
+        { text: "   CO2 automated sensor loops, ventilation networks, exhaust sizing.", bold: false, size: 11, x: 50, y: 520 },
+        { text: "5. MINISTRY OF HEALTH - TANUMAH HOSPITAL DIALYSIS SUITE", bold: true, size: 12, x: 50, y: 480 },
+        { text: "   Fully-engineered fire alarm & addressable wet suppression grids.", bold: false, size: 11, x: 50, y: 460 },
+        { text: "6. JED4 AMAZON FULFILLMENT CENTER AIR DUCT RIGGING", bold: true, size: 12, x: 50, y: 420 },
+        { text: "   Massive central HVAC ducts rigged strictly meeting corporate layout guidelines.", bold: false, size: 11, x: 50, y: 400 }
+      ],
+      // Page 10 continued: Portfolio and Letters
+      [
+        { text: "PROUD INFRASTRUCTURE ACCOMPLISHMENTS (CONTINUED)", bold: true, size: 16, x: 50, y: 785 },
+        { text: "7. MAERSK LOGISTIC TRANSIT PARK DUCTS & AUTOMATION", bold: true, size: 12, x: 50, y: 720 },
+        { text: "   Climate envelope automation in extreme coastal summer conditions.", bold: false, size: 11, x: 50, y: 700 },
+        { text: "8. RECONSTRUCTION / RELOCATION OF NAJRAN RED CRESCENT HQ", bold: true, size: 12, x: 50, y: 660 },
+        { text: "   Deconstruction, transport, re-erection, and full systems commissioning.", bold: false, size: 11, x: 50, y: 640 },
+        { text: "9. PEST & WEED INTERVENTION FOR UNIVERSITY OF BISHA", bold: true, size: 12, x: 50, y: 600 },
+        { text: "   Chemical soil treatment, eco-friendly weed removal, structural barriers.", bold: false, size: 11, x: 50, y: 580 },
+        { text: "------------------------------------------------------------------------", bold: false, size: 11, x: 50, y: 530 },
+        { text: "DISTINCTIVE EDGE & VALUES (ما يميزنا وقيم المجموعة):", bold: true, size: 13, x: 50, y: 500 },
+        { text: "• Uncompromising Quality Standards (معايير جودة عالية بدون أي مساومة)", bold: false, size: 11, x: 50, y: 470 },
+        { text: "• 5-Star Competent Logistics Sizing (تجهيز لوجستي خمس نجوم للمقاولات)", bold: false, size: 11, x: 50, y: 450 },
+        { text: "• Direct Emergency SLA Dispatch Routing (مسؤولو صيانة الطوارئ في الخدمة)", bold: false, size: 11, x: 50, y: 430 },
+        { text: "• Transparent Commercial Records & Absolute Regulatory Alignment", bold: false, size: 11, x: 50, y: 410 }
+      ],
+      // Page 25-29: Regulatory Credentials
+      [
+        { text: "OFFICIAL REGULATORY COMPLIANCE DATA", bold: true, size: 18, x: 50, y: 785 },
+        { text: "Our corporate entities are fully licensed and registered on all portals:", bold: false, size: 11, x: 50, y: 760 },
+        { text: "● COMMERCIAL REGISTER (السجل التجاري الرئيسي)", bold: true, size: 12, x: 50, y: 710 },
+        { text: "  Number: 5855377113 (وزارة التجارة)", bold: true, size: 11, x: 50, y: 690 },
+        { text: "  Verified under active commercial rules in Saudi Arabia.", bold: false, size: 11, x: 50, y: 670 },
+        { text: "● ZATCA APPOINTED VAT TAXPAYER (هيئة الزكاة والضريبة والجمارك)", bold: true, size: 12, x: 50, y: 620 },
+        { text: "  VAT Number: 312596124700003", bold: true, size: 11, x: 50, y: 600 },
+        { text: "  Form ID: VAT-111-KSA. Registered on 2024-11-01.", bold: false, size: 11, x: 50, y: 580 },
+        { text: "● UNIFIED COMPANY IDENTIFIER (الرقم الموحد المعتمد)", bold: true, size: 12, x: 50, y: 530 },
+        { text: "  Number: 7042113659 (وزارة الداخلية والمنشآت)", bold: true, size: 11, x: 50, y: 510 },
+        { text: "● MINISTRY OF INTERIOR CIVIL DEFENSE (سلامة)", bold: true, size: 12, x: 50, y: 460 },
+        { text: "  Unified CD License Number: 100001126", bold: true, size: 11, x: 50, y: 440 },
+        { text: "  Region: Aseer - Khamis Mushayt. Expiry: 2028-05-18", bold: false, size: 11, x: 50, y: 420 },
+        { text: "● SAUDI CONTRACTORS AUTHORITY (عضوية مقاول الهيئة السعودية)", bold: true, size: 12, x: 50, y: 370 },
+        { text: "  Membership Number: 1288128811 | Portal: muqawil.org", bold: true, size: 11, x: 50, y: 350 },
+        { text: "● NATIONAL ADDRESS (العنوان الوطني الموحد للشركة)", bold: true, size: 12, x: 50, y: 300 },
+        { text: "  Building 7780, King Fahad Road, Khamis Mushayt, Zone Code: 62451", bold: false, size: 11, x: 50, y: 280 }
+      ],
+      // Page 30: Contacts
+      [
+        { text: "CONTACTS & UNIFIED CHANNELS (قنوات التواصل)", bold: true, size: 20, x: 80, y: 720 },
+        { text: "==============================================", bold: false, size: 12, x: 80, y: 690 },
+        { text: "GCC COMPANY CONTRACTING - SAUDI ARABIA", bold: true, size: 13, x: 80, y: 640 },
+        { text: "For direct technical proposals, bidding details, emergency support", bold: false, size: 12, x: 80, y: 610 },
+        { text: "and service SLA routing, contact our headquarters team:", bold: false, size: 12, x: 80, y: 590 },
+        { text: "● PRIMARY EMAIL INBOX:", bold: true, size: 12, x: 80, y: 530 },
+        { text: "  Gcc@gccgr.com", bold: true, size: 14, x: 100, y: 505 },
+        { text: "● TECHNICAL HOTLINE & COORDINATION:", bold: true, size: 12, x: 80, y: 450 },
+        { text: "  +966 55 030 7003", bold: true, size: 14, x: 100, y: 425 },
+        { text: "● EXECUTIVE HEADQUARTERS ADDRESS:", bold: true, size: 12, x: 80, y: 370 },
+        { text: "  King Fahad Road, Al-Adawi Commercial Center, Khamis Mushayt", bold: false, size: 12, x: 100, y: 345 },
+        { text: "  طريق الملك فهد، مركز العدوي التجاري، خميس مشيط", bold: false, size: 11, x: 100, y: 325 },
+        { text: "==============================================", bold: false, size: 12, x: 80, y: 200 },
+        { text: "PROMPTLY BUILT TO HIGHEST INDUSTRY STANDARDS", bold: true, size: 10, x: 80, y: 170 }
+      ]
+    ];
+
+    // Helper to dynamically build a clean, multi-page PDF compliant with PDF-1.4 spec
+    let pdfStr = "%PDF-1.4\n%âãÏÓ\n";
+    let objects: string[] = [];
+    let objOffsets: number[] = [];
+
+    // Pre-declare catalog and pages parent ids
+    const catalogId = 1;
+    const pagesId = 2;
+
+    // Put them manually as the first 4 objects so ID mapping is stable
+    objects.push("1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj");
+    // Pages object will be filled in with page pointers
+    let pagesPlaceholderIdx = objects.push("") - 1; // index in objects array
+
+    // Put Font Objects
+    objects.push("3 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj");
+    objects.push("4 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>\nendobj");
+
+    // Build each page contents stream & page object
+    const createdPageIds: number[] = [];
+
+    for (let pIdx = 0; pIdx < pages.length; pIdx++) {
+      const pageElements = pages[pIdx];
+      // Generate standard PDF content stream for text drawing operations
+      let streamTxt = "BT\n";
+      pageElements.forEach(el => {
+        // Simple manual scaling & position inside standard A4 paper (595 x 842 points)
+        const escapedTxt = el.text
+          .replace(/\\/g, '\\\\')
+          .replace(/\(/g, '\\(')
+          .replace(/\)/g, '\\)');
+        streamTxt += `/F${el.bold ? 2 : 1} ${el.size || 11} Tf\n`;
+        streamTxt += `${el.x || 50} ${el.y || 700} Td\n`;
+        streamTxt += `(${escapedTxt}) Tj\n`;
+        // Move backward for next items
+        streamTxt += `-${el.x || 50} -${el.y || 700} Td\n`;
+      });
+      streamTxt += "ET\n";
+
+      // stream object
+      const streamId = objects.length + 1;
+      objects.push(`${streamId} 0 obj\n<< /Length ${streamTxt.length} >>\nstream\n${streamTxt}endstream\nendobj`);
+
+      // Page object referencing resources and the parent and content stream
+      const pageId = objects.length + 1;
+      objects.push(`${pageId} 0 obj\n<< /Type /Page /Parent 2 0 R /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents ${streamId} 0 R >>\nendobj`);
+      createdPageIds.push(pageId);
+    }
+
+    // Now complete the Pages catalog pointer in Obj 2
+    const kidsStr = createdPageIds.map(id => `${id} 0 R`).join(' ');
+    objects[pagesPlaceholderIdx] = `2 0 obj\n<< /Type /Pages /Kids [${kidsStr}] /Count ${createdPageIds.length} >>\nendobj`;
+
+    // Now write out all offsets and PDF content binary text
+    let totalOffset = 0;
+    const bodyParts: string[] = [];
+
+    // Header length
+    totalOffset = pdfStr.length;
+
+    for (let i = 0; i < objects.length; i++) {
+      objOffsets.push(totalOffset);
+      const strZ = objects[i] + "\n";
+      bodyParts.push(strZ);
+      totalOffset += strZ.length;
+    }
+
+    const startXref = totalOffset;
+
+    // Build xref table
+    let xrefTxt = `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`;
+    for (let i = 0; i < objects.length; i++) {
+      const offsetStr = String(objOffsets[i]).padStart(10, '0');
+      xrefTxt += `${offsetStr} 00000 n \n`;
+    }
+
+    const trailerTxt = `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${startXref}\n%%EOF`;
+
+    const fullPdfText = pdfStr + bodyParts.join("") + xrefTxt + trailerTxt;
+
+    const arr = new Uint8Array(fullPdfText.length);
+    for (let i = 0; i < fullPdfText.length; i++) {
+      arr[i] = fullPdfText.charCodeAt(i);
+    }
+    
+    const blob = new Blob([arr], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = language === 'en' ? 'GCC_Company_Profile_MEP.pdf' : 'بروفايل_شركة_جي_سي_سي_للمقاولات.pdf';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   // Table of Contents list based on actual screenshots
   const tocItems = [
     { page: 1, titleAr: 'الغلاف الرئيسي', titleEn: 'Cover Page', color: 'bg-red-650' },
@@ -136,19 +420,24 @@ const About: React.FC = () => {
       titleAr: 'الغلاف الفني لملف الشركة',
       titleEn: 'Corporate Profile Cover Card',
       content: (
-        <div className="bg-slate-900 text-white rounded-2xl p-8 flex flex-col justify-between h-96 relative overflow-hidden border border-slate-800 text-center items-center justify-center space-y-4">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-red-650/10 rounded-full blur-3xl -mr-16 -mt-16" />
-          <div className="absolute bottom-0 left-0 w-80 h-80 bg-blue-600/10 rounded-full blur-3xl -ml-24 -mb-24" />
+        <div 
+          onClick={downloadProfilePDF}
+          className="bg-slate-900 text-white rounded-2xl p-8 flex flex-col justify-between h-96 relative overflow-hidden border border-slate-800 text-center items-center justify-center space-y-4 cursor-pointer group hover:border-red-650/50 transition-all active:scale-[0.99]"
+          title={language === 'en' ? 'Click to Download Full PDF Document' : 'اضغط لتحميل ملف البروفايل PDF الكامل'}
+        >
+          <div className="absolute top-0 right-0 w-64 h-64 bg-red-650/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none group-hover:bg-red-650/15 transition-all" />
+          <div className="absolute bottom-0 left-0 w-80 h-80 bg-blue-600/10 rounded-full blur-3xl -ml-24 -mb-24 pointer-events-none" />
           
-          <div className="z-10 bg-red-650 text-white font-black text-[10px] tracking-widest px-3 py-1 rounded-full uppercase border border-red-500/30">
-            {language === 'en' ? 'OFFICIAL PRESENTATION' : 'الوثيقة التقديمية الرسمية'}
+          <div className="z-10 bg-red-650 text-white font-black text-[10px] tracking-widest px-3 py-1 rounded-full uppercase border border-red-500/30 flex items-center gap-1">
+            <Download className="w-3 h-3 text-white animate-bounce" />
+            {language === 'en' ? 'CLICK TO DOWNLOAD FULL PDF' : 'اضغط للتحميل المباشر للبروفايل'}
           </div>
 
-          <div className="space-y-3 z-10 max-w-md mx-auto">
+          <div className="space-y-3 z-10 max-w-md mx-auto pointer-events-none">
             <h1 className="text-3xl sm:text-4xl font-black tracking-tight leading-tight text-white uppercase font-sans">
               COMPANY PROFILE
             </h1>
-            <div className="w-16 h-1 bg-red-600 mx-auto rounded-full" />
+            <div className="w-16 h-1 bg-red-600 mx-auto rounded-full group-hover:w-24 transition-all duration-300" />
             <p className="text-sm font-extrabold text-slate-300">
               {language === 'en' ? 'GCC Company for Contracting' : 'شركة جي سي سي للمقاولات العامة'}
             </p>
@@ -157,7 +446,7 @@ const About: React.FC = () => {
             </p>
           </div>
 
-          <div className="z-10 text-[10px] text-slate-500 font-mono">
+          <div className="z-10 text-[10px] text-slate-500 font-mono pointer-events-none">
             {language === 'en' ? 'REGISTERED OFFICE: KHAMIS MUSHAYT / ABHA' : 'مقر التسجيل المعتمد: خميس مشيط / أبها'}
           </div>
         </div>
@@ -301,6 +590,160 @@ const About: React.FC = () => {
           </div>
         </div>
       )
+    },
+    {
+      id: 6,
+      titleAr: 'شهادة الاعتماد الدولي الآيزو ISO 9001:2015',
+      titleEn: 'ISO 9001:2015 Quality Registration',
+      content: (
+        <div className="bg-slate-900 text-white rounded-2xl p-6 sm:p-8 h-96 flex flex-col justify-between border border-slate-800 overflow-y-auto relative text-justify">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl pointer-events-none" />
+          <div className="flex justify-between items-start gap-4">
+            <div>
+              <span className="text-[9px] font-black text-amber-500 block uppercase tracking-wider leading-none">REGISTRATION RECORD • ISO 9001:2015</span>
+              <h3 className="text-base font-black text-white mt-1">{language === 'en' ? 'Quality Management System Certificate' : 'شهادة نظام إدارة الجودة العالمية'}</h3>
+            </div>
+            <Award className="w-8 h-8 text-amber-500 shrink-0" />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 my-auto text-[10px] font-sans">
+            <div className="bg-slate-800/80 p-3.5 border border-slate-700/50 rounded-xl space-y-1">
+              <span className="font-extrabold text-slate-400 block text-[9px] uppercase">Certificate Number / رقم الشهادة</span>
+              <span className="font-mono font-black text-amber-500 block text-sm select-all">181224019645</span>
+              <span className="text-slate-350 block leading-normal text-[9.5px]">
+                {language === 'en' 
+                  ? 'Verifiably matching general contracting capabilities (IAF Code: 28) for GCC Contracting.' 
+                  : 'معتمدة ومطابقة لمجال المقاولات العامة والتجهيز الهندسي لشركة جي سي سي.'}
+              </span>
+            </div>
+
+            <div className="bg-slate-800/80 p-3.5 border border-slate-700/50 rounded-xl space-y-1">
+              <span className="font-extrabold text-slate-400 block text-[9px] uppercase">Accredited Body / الجهة الموثقة</span>
+              <span className="font-black text-slate-200 block text-[10.5px]">ARS Assessment (UAF & IAF)</span>
+              <span className="text-slate-350 block leading-normal text-[9.5px]">
+                {language === 'en' 
+                  ? 'Initial: 18-Dec-2024. Expiry Date: 17-Dec-2027.' 
+                  : 'صياغة الإصدار: ١٨ ديسمبر ٢٠٢٤. تاريخ الانتهاء: ١٧ ديسمبر ٢٠٢٧.'}
+              </span>
+            </div>
+          </div>
+
+          <div className="bg-slate-850 p-2.5 rounded-xl text-[9.5px] text-slate-400 font-semibold border border-slate-800/60 leading-tight">
+            <span className="text-amber-500 font-black mr-1 uppercase font-mono">VERIFICATION:</span>
+            {language === 'en'
+              ? 'Visit arscert.com or iafcertsearch.org to verifiably verify with Certificate No. 181224019645.'
+              : 'يمكنكم تتبع مطابقة وموثوقية الرمز الإلكتروني للشهادة عبر قاعدة بيانات iafcertsearch.org.'}
+          </div>
+        </div>
+      )
+    },
+    {
+      id: 7,
+      titleAr: 'ترخيص الدفاع المدني لمزاولة النشاط (سلامة)',
+      titleEn: 'Civil Defense Activity License (Salamah)',
+      content: (
+        <div className="bg-slate-900 text-white rounded-2xl p-6 sm:p-8 h-96 flex flex-col justify-between border border-emerald-900/60 overflow-y-auto relative text-justify">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />
+          <div className="flex justify-between items-start gap-4">
+            <div>
+              <span className="text-[9px] font-black text-emerald-400 block uppercase tracking-wider leading-none">MINISTRY OF INTERIOR • CIVIL DEFENSE</span>
+              <h3 className="text-base font-black text-white mt-1">{language === 'en' ? 'Civil Defense Commercial Activity License (Salamah)' : 'ترخيص الدفاع المدني لمزاولة النشاط التجاري (سلامة)'}</h3>
+            </div>
+            <Flame className="w-8 h-8 text-emerald-400 shrink-0 animate-pulse" />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 my-auto text-[10.5px] font-sans">
+            <div className="bg-slate-850/90 p-3 border border-slate-800 rounded-xl space-y-1">
+              <span className="font-extrabold text-slate-400 block text-[9px] uppercase">License particulars / تفاصيل الترخيص</span>
+              <div className="flex justify-between items-center text-[10px]">
+                <span className="text-slate-350">{language === 'en' ? 'License Number:' : 'رقم الترخيص الموحد:'}</span>
+                <span className="font-mono font-black text-emerald-400 select-all">100001126</span>
+              </div>
+              <div className="flex justify-between items-center text-[10px]">
+                <span className="text-slate-350">{language === 'en' ? 'Ministry of Interior ID:' : 'رقم وزارة الداخلية:'}</span>
+                <span className="font-mono text-slate-200 font-bold select-all">7042113659</span>
+              </div>
+              <div className="flex justify-between items-center text-[10px]">
+                <span className="text-slate-350">{language === 'en' ? 'Commercial Name:' : 'الاسم التجاري للهيئة:'}</span>
+                <span className="text-slate-200 font-extrabold truncate max-w-[120px]">{language === 'en' ? 'GCC Contracting' : 'شركة جي سي سي للمقاولات'}</span>
+              </div>
+            </div>
+
+            <div className="bg-slate-850/90 p-3 border border-slate-800 rounded-xl space-y-1">
+              <span className="font-extrabold text-slate-400 block text-[9px] uppercase">VALIDITY & REGION / المدد والمنطقة</span>
+              <div className="flex justify-between items-center text-[10px]">
+                <span className="text-slate-350">{language === 'en' ? 'Issue Date:' : 'تاريخ الإصدار المعتمد:'}</span>
+                <span className="font-mono text-slate-250 font-bold">2026-05-18</span>
+              </div>
+              <div className="flex justify-between items-center text-[10px]">
+                <span className="text-slate-350">{language === 'en' ? 'Expiry Date:' : 'تاريخ الانتهاء المجدد:'}</span>
+                <span className="font-mono font-black text-rose-450">2028-05-18</span>
+              </div>
+              <div className="flex justify-between items-center text-[10px]">
+                <span className="text-slate-350">{language === 'en' ? 'Region / Location:' : 'المنطقة والمدينة والبلدية:'}</span>
+                <span className="text-emerald-400 font-black">{language === 'en' ? 'Asir, Khamis Mushayt' : 'عسير - خميس مشيط'}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-slate-850 p-2.5 rounded-xl text-[9px] text-slate-450 font-semibold border border-slate-800/60 leading-normal">
+            <span className="text-emerald-400 font-black mr-1 uppercase font-mono">OFFICIAL STATUS:</span>
+            {language === 'en'
+              ? 'This document is digitally signed by Civil Defense (Asir) and does not require hand-written signatures per Cabinet Decision No. 8.'
+              : 'هذه الوثيقة موقعة إلكترونياً ومصادق عليها رقمياً من مديرية الدفاع المدني بمنطقة عسير ولا تحتاج إلى توقيع يدوي وفقاً لقرار مجلس الوزراء رقم ٨.'}
+          </div>
+        </div>
+      )
+    },
+    {
+      id: 8,
+      titleAr: 'شهادة عضوية الهيئة السعودية للمقاولين (SCA)',
+      titleEn: 'Saudi Contractors Authority (SCA) Membership Certificate',
+      content: (
+        <div className="bg-white text-slate-800 rounded-2xl p-6 sm:p-8 h-96 flex flex-col justify-between border border-slate-200 overflow-y-auto relative text-justify">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-teal-500/5 rounded-full blur-2xl pointer-events-none" />
+          <div className="flex justify-between items-start gap-4">
+            <div>
+              <span className="text-[9px] font-black text-teal-650 block uppercase tracking-wider leading-none">SAUDI CONTRACTORS AUTHORITY • SCA</span>
+              <h3 className="text-base font-black text-slate-900 mt-1">{language === 'en' ? 'Contracting Membership Certificate' : 'شهادة عضوية تصنيف مقاول معتمد'}</h3>
+            </div>
+            <FileCheck2 className="w-8 h-8 text-teal-600 shrink-0" />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 my-auto text-[10.5px] font-sans">
+            <div className="bg-slate-50 p-3 border border-slate-150 rounded-xl space-y-1">
+              <span className="font-extrabold text-slate-400 block text-[9px] uppercase">MEMBERSHIP DATA / معلومات العضوية</span>
+              <div className="flex justify-between items-center text-[10px]">
+                <span className="text-slate-500">{language === 'en' ? 'Membership Number:' : 'رقم العضوية المسجل:'}</span>
+                <span className="font-mono font-black text-teal-700 select-all">1288128811</span>
+              </div>
+              <div className="flex justify-between items-center text-[10px]">
+                <span className="text-slate-500">{language === 'en' ? 'Registered Contractor:' : 'اسم المنشأة المرخصة:'}</span>
+                <span className="font-extrabold text-slate-800 truncate max-w-[120px]">{language === 'en' ? 'GCC Contracting' : 'شركة جي سي سي للمقاولات'}</span>
+              </div>
+            </div>
+
+            <div className="bg-slate-50 p-3 border border-slate-150 rounded-xl space-y-1">
+              <span className="font-extrabold text-slate-400 block text-[9px] uppercase">VALID PERIOD / دورة العضوية</span>
+              <div className="flex justify-between items-center text-[10px]">
+                <span className="text-slate-500">{language === 'en' ? 'Issue Date:' : 'تاريخ الإصدار المعتمد:'}</span>
+                <span className="font-mono text-slate-700 font-bold">2025-12-18</span>
+              </div>
+              <div className="flex justify-between items-center text-[10px]">
+                <span className="text-slate-500">{language === 'en' ? 'Expiry Date:' : 'تاريخ نهاية العضوية:'}</span>
+                <span className="font-mono font-black text-red-600">2026-12-18</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-teal-50/70 p-2.5 rounded-xl text-[9.5px] text-teal-850 font-semibold border border-teal-100 leading-normal">
+            <span className="text-teal-700 font-black mr-1 uppercase font-mono">VERIFICATION DIRECTIVE:</span>
+            {language === 'en'
+              ? 'Visit official portal of Saudi Contractors Authority at muqawil.org using Membership ID 1288128811 to verifiably confirm credentials.'
+              : 'يرجى مراجعة الموقع الرسمي للهيئة الهندسية السعودية للمقاولين muqawil.org بالرقم التعريفي المميز ١٢٨٨١٢٨٨١١ لمطابقة الشهادة.'}
+          </div>
+        </div>
+      )
     }
   ];
 
@@ -434,25 +877,31 @@ const About: React.FC = () => {
               </div>
 
               {/* Right decorative visual box resembling cover */}
-              <div className="lg:col-span-5 bg-slate-900 text-white rounded-2xl p-6 sm:p-8 flex flex-col justify-between h-80 relative overflow-hidden border border-slate-850">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-red-650/15 rounded-full blur-2xl" />
+              <div 
+                onClick={downloadProfilePDF}
+                className="lg:col-span-5 bg-slate-900 text-white rounded-2xl p-6 sm:p-8 flex flex-col justify-between h-80 relative overflow-hidden border border-slate-850 cursor-pointer group hover:border-red-600/50 transition-all active:scale-[0.99]"
+                title={language === 'en' ? 'Download Corporate Profile PDF' : 'تحميل الملف التعريفي والبروفايل للشركة PDF'}
+              >
+                <div className="absolute top-0 right-0 w-32 h-32 bg-red-650/15 rounded-full blur-2xl pointer-events-none group-hover:bg-red-650/25 transition-all" />
                 
-                <span className="bg-slate-800 text-slate-350 border border-slate-700 text-[8.5px] px-2 py-0.5 rounded uppercase self-start leading-none font-mono">
-                  GCC COVER PG.1
+                <span className="bg-slate-800 text-slate-350 border border-slate-700 text-[8.5px] px-2 py-0.5 rounded uppercase self-start leading-none font-mono flex items-center gap-1">
+                  <Download className="w-2.5 h-2.5 text-red-500 animate-pulse" />
+                  {language === 'en' ? 'GCC COVER • CLICK TO DOWNLOAD' : 'غلاف جي سي سي • اضغط للتحميل'}
                 </span>
 
-                <div className="space-y-2">
+                <div className="space-y-2 pointer-events-none">
                   <h3 className="text-xl font-black tracking-tight uppercase leading-tight font-sans text-white">
                     COMPANY PROFILE
                   </h3>
-                  <div className="w-10 h-1 bg-red-600 rounded" />
+                  <div className="w-10 h-1 bg-red-600 rounded group-hover:w-16 transition-all duration-300" />
                   <p className="text-[10.5px] text-slate-350 leading-relaxed font-semibold">
                     {language === 'en' ? 'Official book of execution, civil capabilities, and regulatory approvals.' : 'بروفايل معتمد بمكاتب الدفاع المدني للمقايسات والمقاولات.'}
                   </p>
                 </div>
 
-                <div className="text-[9px] text-slate-400 font-mono tracking-tighter">
-                  ESTABLISHED REGISTERED TRADEMARK
+                <div className="text-[9px] text-slate-400 font-mono tracking-tighter flex justify-between items-center w-full pointer-events-none">
+                  <span>ESTABLISHED REGISTERED TRADEMARK</span>
+                  <span className="text-red-550 font-black text-[10px] animate-pulse">PDF 📥</span>
                 </div>
               </div>
             </div>
@@ -729,7 +1178,7 @@ const About: React.FC = () => {
             </div>
 
             {/* Document display cards mimicking page 25 & 26 */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start font-sans">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-start font-sans">
               
               {/* VAT Registration simulated */}
               <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 space-y-5 shadow-sm">
@@ -769,6 +1218,147 @@ const About: React.FC = () => {
 
                 <div className="bg-emerald-50 text-emerald-800 border border-emerald-100/60 p-3 rounded-xl text-[10px] leading-relaxed font-semibold">
                   {language === 'en' ? '✓ Registered with Zakat, Tax and Customs Authority for 15% VAT standard calculations.' : '✓ خاضعة ومعتمدة رسمياً بدفاتر هيئة الزكاة والضريبة والجمارك لضمان صحة المعاملات المالية الموحدة.'}
+                </div>
+              </div>
+
+              {/* ISO 9001:2015 Registration Card */}
+              <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 space-y-5 shadow-sm relative overflow-hidden flex flex-col justify-between">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/5 rounded-full blur-xl pointer-events-none" />
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+                    <span className="text-[9px] font-black text-amber-600 block uppercase tracking-widest flex items-center gap-1.5">
+                      <Award className="w-3.5 h-3.5 text-amber-500 animate-pulse" />
+                      <span>ISO 9001:2015 REGISTERED</span>
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-mono">IAF CODE: 28</span>
+                  </div>
+
+                  <div className="space-y-4 text-xs">
+                    <div className="text-center bg-slate-50/50 p-4 rounded-2xl border border-slate-100 relative overflow-hidden">
+                      <span className="text-[9px] text-slate-400 block font-bold">CERTIFICATE NUMBER / رقم شهادة الآيزو</span>
+                      <span className="text-xl font-mono font-black text-amber-600 mt-1 block tracking-wider select-all">181224019645</span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 pb-2 border-b border-slate-50">
+                      <div>
+                        <span className="text-slate-400 block font-bold">{language === 'en' ? 'Certified Quality System' : 'نظام الجودة ومجال النشاط'}</span>
+                        <span className="font-extrabold text-slate-800 block mt-0.5">{language === 'en' ? 'GENERAL CONTRACTING' : 'أعمال المقاولات العامة'}</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-400 block font-bold">{language === 'en' ? 'Audit Standard' : 'مواصفة الفحص والتدقيق'}</span>
+                        <span className="font-mono text-red-650 font-black block mt-0.5">ISO 9001:2015</span>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <span className="text-slate-400 block font-bold">{language === 'en' ? 'Registration Period' : 'صلاحية ومدة الاعتماد'}</span>
+                        <span className="font-extrabold text-slate-850 block mt-0.5">2024/12/18 - 2027/12/17</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-400 block font-bold">{language === 'en' ? 'Accrediting Forum' : 'المنظمة وجهة الترخيص'}</span>
+                        <span className="text-slate-850 block mt-0.5 font-bold truncate select-all">UAF & IAF (ARS Assessment)</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-amber-50 text-amber-900 border border-amber-100/60 p-3 rounded-xl text-[10px] leading-relaxed font-semibold mt-4">
+                  {language === 'en' ? '✓ Quality Management System verified via standard registries arscert.com and iafcertsearch.org.' : '✓ مسجلة ومعتمدة رسمياً بموجب معايير تدقيق وتوثيق الجودة الإدارية للمقاولات كود ٢٨.'}
+                </div>
+              </div>
+
+              {/* Civil Defense (Salamah) Activity License Card */}
+              <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 space-y-5 shadow-sm relative overflow-hidden flex flex-col justify-between">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-full blur-xl pointer-events-none" />
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+                    <span className="text-[9px] font-black text-emerald-600 block uppercase tracking-widest flex items-center gap-1.5">
+                      <Flame className="w-3.5 h-3.5 text-emerald-500 animate-pulse" />
+                      <span>CIVIL DEFENSE LICENSED (سلامة)</span>
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-mono">MOI: 7042113659</span>
+                  </div>
+
+                  <div className="space-y-4 text-xs">
+                    <div className="text-center bg-slate-50/50 p-4 rounded-2xl border border-slate-100 relative overflow-hidden">
+                      <span className="text-[9px] text-slate-400 block font-bold">ACTIVITY LICENSE NUMBER / رقم ترخيص مزاولة النشاط</span>
+                      <span className="text-xl font-mono font-black text-emerald-600 mt-1 block tracking-wider select-all">100001126</span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 pb-2 border-b border-slate-50">
+                      <div>
+                        <span className="text-slate-400 block font-bold">{language === 'en' ? 'Licensee Name' : 'اسم المنشأة المرخصة'}</span>
+                        <span className="font-extrabold text-slate-800 block mt-0.5">{language === 'en' ? 'GCC Saudi Contracting' : 'شركة جي سي سي للمقاولات'}</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-400 block font-bold">{language === 'en' ? 'Region & City' : 'المنطقة والمدينة المعتمدة'}</span>
+                        <span className="font-extrabold text-slate-800 block mt-0.5">{language === 'en' ? 'Asir, Khamis Mushayt' : 'منطقة عسير - خميس مشيط'}</span>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <span className="text-slate-400 block font-bold">{language === 'en' ? 'Validity Period' : 'تاريخ الصلاحية والنهاية'}</span>
+                        <span className="font-extrabold text-slate-850 block mt-0.5">2026/05/18 - 2028/05/18</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-400 block font-bold">{language === 'en' ? 'Issuing Authority' : 'الجهة المصدرة للترخيص'}</span>
+                        <span className="text-slate-850 block mt-0.5 font-bold truncate">{language === 'en' ? 'KCD Civil Defense' : 'مديرية الدفاع المدني بعسير'}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-emerald-50 text-emerald-950 border border-emerald-100/60 p-3 rounded-xl text-[10px] leading-relaxed font-semibold mt-4">
+                  {language === 'en' ? '✓ Digitally verified Salamah safety compliance record. Excempt from handwritten signature.' : '✓ مرخصة رقمياً بالكامل وصادرة بموجب قرار مجلس الوزراء رقم ٨ للتعاملات الإلكترونية.'}
+                </div>
+              </div>
+
+              {/* Saudi Contractors Authority (SCA) Membership Card */}
+              <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 space-y-5 shadow-sm relative overflow-hidden flex flex-col justify-between">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-teal-500/5 rounded-full blur-xl pointer-events-none" />
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+                    <span className="text-[9px] font-black text-teal-600 block uppercase tracking-widest flex items-center gap-1.5">
+                      <FileCheck2 className="w-3.5 h-3.5 text-teal-500" />
+                      <span>SCA CONTRACTOR MEMBER</span>
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-mono">SCA: 1288128811</span>
+                  </div>
+
+                  <div className="space-y-4 text-xs">
+                    <div className="text-center bg-slate-50/50 p-4 rounded-2xl border border-slate-100 relative overflow-hidden">
+                      <span className="text-[9px] text-slate-400 block font-bold">MEMBERSHIP NUMBER / رقم عضوية الهيئة السعودية</span>
+                      <span className="text-xl font-mono font-black text-teal-600 mt-1 block tracking-wider select-all">1288128811</span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 pb-2 border-b border-slate-50">
+                      <div>
+                        <span className="text-slate-400 block font-bold">{language === 'en' ? 'Registrant Entity' : 'المنشأة الهندسية المسجلة'}</span>
+                        <span className="font-extrabold text-slate-800 block mt-0.5">{language === 'en' ? 'GCC Contracting' : 'شركة جي سي سي للمقاولات'}</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-400 block font-bold">{language === 'en' ? 'Validation Link' : 'رابط المطابقة الفورية'}</span>
+                        <span className="font-mono text-teal-600 font-black block mt-0.5 select-all">muqawil.org</span>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <span className="text-slate-400 block font-bold">{language === 'en' ? 'Registration Date' : 'تاريخ إصدار العضوية'}</span>
+                        <span className="font-extrabold text-slate-850 block mt-0.5">2025/12/18</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-400 block font-bold">{language === 'en' ? 'End of Membership' : 'تاريخ نهاية العضوية'}</span>
+                        <span className="font-mono text-slate-850 font-bold block mt-0.5">2026/12/18</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-teal-50 text-teal-950 border border-teal-100/60 p-3 rounded-xl text-[10px] leading-relaxed font-semibold mt-4">
+                  {language === 'en' ? '✓ Registered with Saudi Contractors Authority (SCA) to construct electro-mechanical networks.' : '✓ مقيد في سجلات عضوية الهيئة السعودية للمقاولين ومصنف للمقاولات العامة.'}
                 </div>
               </div>
 
@@ -873,8 +1463,13 @@ const About: React.FC = () => {
               <span className="text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest">
                 {language === 'en' ? `SLIDE DECK: ${currentSlide + 1} OF ${slides.length}` : `المقعد المساعد: شريحة ${currentSlide + 1} من أصل ${slides.length}`}
               </span>
-              <span className="text-[9px] bg-red-50 text-red-600 px-2 py-0.5 rounded font-black border border-red-100">
-                {language === 'en' ? 'HIGH INTENSITY VIEW' : 'عرض الشرائح التفاعلي للمستند المرفق'}
+              <span 
+                onClick={downloadProfilePDF}
+                className="text-[9px] bg-red-50 text-red-600 px-2.5 py-1 rounded-xl font-black border border-red-100 hover:bg-red-100 hover:border-red-200 cursor-pointer flex items-center gap-1.5 transition-all active:scale-95 shadow-2xs select-none"
+                title={language === 'en' ? 'Download Full PDF Profile Document' : 'تحميل مستند الملف التعريفي كاملاً بصيغة PDF'}
+              >
+                <Download className="w-3 h-3 text-red-600 animate-bounce" />
+                {language === 'en' ? 'DOWNLOAD PDF' : 'تحميل ملف البروفايل PDF'}
               </span>
             </div>
 
@@ -935,8 +1530,8 @@ const About: React.FC = () => {
           </div>
 
           <a
-            href="mailto:Gcc@gccgr.com animate-pulse"
-            className="text-xs font-mono font-black text-red-500 flex items-center gap-1 hover:text-red-400"
+            href="mailto:Gcc@gccgr.com"
+            className="text-xs font-mono font-black text-red-500 flex items-center gap-1 hover:text-red-400 animate-pulse"
           >
             <Mail className="w-4 h-4" />
             <span>Gcc@gccgr.com</span>

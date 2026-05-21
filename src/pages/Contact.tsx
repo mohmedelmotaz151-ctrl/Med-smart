@@ -216,7 +216,7 @@ const Contact: React.FC = () => {
       `بمساحة ${formData.projectArea} م٢ في حي/مدينة ${formData.location || 'غير محدد'}. ` +
       `أرجو التواصل معي لتأكيد المواصفات وتقديم عرض السعر الفني.`
     );
-    window.open(`https://wa.me/966500000000?text=${textStr}`, '_blank');
+    window.open(`https://wa.me/966550307003?text=${textStr}`, '_blank');
   };
 
   return (
@@ -704,8 +704,8 @@ const Contact: React.FC = () => {
               <div className="flex gap-3 items-start text-xs leading-relaxed font-sans">
                 <Phone className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
                 <div>
-                  <span className="block font-black text-slate-200">{language === 'en' ? 'MEP Contracts Center' : 'مكتب مراجعة العقود الفنية'}</span>
-                  <span className="block text-[11px] text-slate-400 [direction:ltr]" dir="ltr">+966 11 405 9000</span>
+                  <span className="block font-black text-slate-200">{language === 'en' ? 'MEP Contracts Center & Emergency' : 'مكتب الدعم الموحد والطوارئ'}</span>
+                  <span className="block text-[11px] text-slate-400 [direction:ltr]" dir="ltr">+966 55 030 7003</span>
                 </div>
               </div>
 
@@ -713,7 +713,7 @@ const Contact: React.FC = () => {
                 <Mail className="w-4 h-4 text-amber-400 shrink-0" />
                 <div>
                   <span className="block font-black text-slate-200">{language === 'en' ? 'Estimation Desk' : 'البريد الفني لطلبات التسعير'}</span>
-                  <span className="block text-[11px] text-slate-400">contracts@gcc-company.com</span>
+                  <span className="block text-[11px] text-slate-400">Gcc@gccgr.com</span>
                 </div>
               </div>
 

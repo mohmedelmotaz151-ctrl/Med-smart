@@ -13,7 +13,7 @@ const Footer: React.FC = () => {
             <h3 className="text-xl font-black text-white">{t('app.name')}</h3>
             <p className="text-xs leading-relaxed text-slate-400">
               {language === 'en'
-                ? 'Pioneering heavy electro-mechanical installations, certified Fire Suppression loops, and premier industrial HVAC engineering across Riyadh and GCC.'
+                ? 'Pioneering heavy electro-mechanical installations, certified Fire Suppression loops, and premier industrial HVAC engineering across Riyadh and the Kingdom of Saudi Arabia.'
                 : 'الشركة الرائدة في تصميم وإنجاز الأعمال الكهروميكانيكية المتكاملة، شبكات ومضخات مكافحة الحرائق وتكييف الهواء للمجمعات والمصانع بالمملكة العربيّة السعوديّة.'}
             </p>
           </div>
@@ -61,11 +61,11 @@ const Footer: React.FC = () => {
               </li>
               <li className="flex items-center gap-3">
                 <Phone size={16} className="text-red-500" />
-                <span>+966 500 000 000</span>
+                <span>+966 55 030 7003</span>
               </li>
               <li className="flex items-center gap-3">
                 <Mail size={16} className="text-red-500" />
-                <span>info@gcc-mep.co</span>
+                <span>Gcc@gccgr.com</span>
               </li>
             </ul>
           </div>

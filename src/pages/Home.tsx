@@ -71,57 +71,78 @@ const Home: React.FC = () => {
 
   const handleWhatsAppQuickConnect = () => {
     const textStr = encodeURIComponent("Hello GCC Company, I would like to request an engineering service / quotation inquiry.");
-    window.open(`https://wa.me/966500000000?text=${textStr}`, '_blank');
+    window.open(`https://wa.me/966550307003?text=${textStr}`, '_blank');
   };
 
   return (
     <div className="space-y-12">
-      {/* Dynamic Animated Hero Section */}
+      {/* Dynamic Animated Hero Section with powerful 2-column layout */}
       <motion.div 
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="relative overflow-hidden bg-slate-900 rounded-3xl p-8 md:p-12 text-white shadow-2xl border border-slate-800"
+        className="relative overflow-hidden bg-slate-950 rounded-3xl text-white shadow-2xl border border-slate-900"
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-red-600/10 via-blue-600/10 to-transparent pointer-events-none" />
-        <div className="absolute top-0 right-0 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-80 h-80 bg-red-600/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-r from-red-650/15 via-blue-600/15 to-transparent pointer-events-none" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-red-600/10 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="relative z-10 max-w-3xl">
-          <div className="inline-flex items-center gap-2 bg-slate-800 text-slate-300 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider mb-6 border border-slate-700">
-            <Cpu className="w-4 h-4 text-red-500 animate-pulse" />
-            <span>{language === 'en' ? 'Civil Defense & ASHRAE Certified' : 'اعتمادات الدفاع المدني وعالمية'}</span>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center p-8 md:p-12">
+          {/* Hero Left Content Column */}
+          <div className="relative z-10 lg:col-span-7 space-y-6">
+            <div className="inline-flex items-center gap-2 bg-slate-900 text-slate-300 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border border-slate-800">
+              <Cpu className="w-4 h-4 text-red-500 animate-pulse" />
+              <span>{language === 'en' ? 'Civil Defense & ASHRAE Authorized MEP' : 'اعتمادات الدفاع المدني وكود البناء السعودي'}</span>
+            </div>
+
+            <h1 className="text-3xl md:text-5xl font-black tracking-tight leading-tight">
+              {t('home.hero_title')}
+            </h1>
+            <p className="text-sm md:text-base text-slate-300 leading-relaxed font-sans max-w-2xl">
+              {t('home.hero_subtitle')}
+            </p>
+
+            <div className="flex flex-wrap gap-4 pt-2">
+              <button 
+                onClick={() => navigate('/contact')}
+                className="bg-red-650 hover:bg-red-700 text-white px-6 py-3.5 rounded-xl text-xs font-bold shadow-lg shadow-red-950/40 transition-all active:scale-95 flex items-center gap-2 uppercase tracking-wider cursor-pointer"
+              >
+                <FileSpreadsheet className="w-4 h-4" />
+                <span>{t('home.request_quote')}</span>
+              </button>
+              <button 
+                onClick={() => navigate('/services')}
+                className="bg-white hover:bg-slate-100 text-slate-950 border border-white px-6 py-3.5 rounded-xl text-xs font-extrabold transition-all flex items-center gap-2 tracking-wider cursor-pointer shadow-lg shadow-slate-950/25"
+              >
+                <span className="text-slate-950 font-black">{t('home.explore_services')}</span>
+                <ArrowUpRight className="w-4 h-4 text-red-650" />
+              </button>
+              <button 
+                onClick={handleWhatsAppQuickConnect}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3.5 rounded-xl text-xs font-bold shadow-lg shadow-emerald-950/20 transition-all active:scale-95 flex items-center gap-2 tracking-wider cursor-pointer"
+              >
+                <PhoneCall className="w-4 h-4" />
+                <span>{t('home.emergency_call')}</span>
+              </button>
+            </div>
           </div>
 
-          <h1 className="text-3xl md:text-5xl font-black tracking-tight leading-tight mb-4">
-            {t('home.hero_title')}
-          </h1>
-          <p className="text-sm md:text-base text-slate-300 leading-relaxed mb-8">
-            {t('home.hero_subtitle')}
-          </p>
-
-          <div className="flex flex-wrap gap-4">
-            <button 
-              onClick={() => navigate('/contact')}
-              className="bg-red-600 hover:bg-red-700 text-white px-6 py-3.5 rounded-xl text-xs font-bold shadow-lg shadow-red-900/30 transition-all active:scale-95 flex items-center gap-2 uppercase tracking-wider"
-            >
-              <FileSpreadsheet className="w-4 h-4" />
-              <span>{t('home.request_quote')}</span>
-            </button>
-            <button 
-              onClick={() => navigate('/services')}
-              className="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white px-6 py-3.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 tracking-wider"
-            >
-              <span>{t('home.explore_services')}</span>
-              <ArrowUpRight className="w-4 h-4 text-blue-400" />
-            </button>
-            <button 
-              onClick={handleWhatsAppQuickConnect}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3.5 rounded-xl text-xs font-bold shadow-lg shadow-emerald-950/20 transition-all active:scale-95 flex items-center gap-2 tracking-wider"
-            >
-              <PhoneCall className="w-4 h-4" />
-              <span>{t('home.emergency_call')}</span>
-            </button>
+          {/* Hero Right Visual Column - Powerful Construction Site/Crane Image */}
+          <div className="lg:col-span-5 relative h-64 lg:h-[340px] w-full rounded-2xl overflow-hidden shadow-2xl border border-slate-800">
+            <img 
+              src="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=800&fit=crop" 
+              alt="GCC Heavy Construction Site" 
+              className="w-full h-full object-cover brightness-95 contrast-105"
+              referrerPolicy="no-referrer"
+            />
+            {/* Dark glassy overlay */}
+            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/90 via-slate-950/25 to-transparent p-4 flex justify-between items-end">
+              <div>
+                <span className="text-[9px] font-mono uppercase tracking-widest text-slate-300 block">{language === 'en' ? 'Active Projects' : 'مواقع العمل النشطة'}</span>
+                <span className="text-xs font-bold text-white">{language === 'en' ? 'Riyadh Financial Hub Foundations' : 'أساسات مجمع الرياض المالي الرقمي'}</span>
+              </div>
+              <span className="bg-red-650 text-white text-[9px] font-bold px-2 py-0.5 rounded uppercase">SBC Verified</span>
+            </div>
           </div>
         </div>
       </motion.div>
@@ -147,7 +168,7 @@ const Home: React.FC = () => {
         ))}
       </div>
 
-      {/* Overview brief layout */}
+      {/* Overview brief layout with real on-site engineers image */}
       <div className="bg-white rounded-3xl p-8 border border-slate-200 flex flex-col md:flex-row gap-8 items-center">
         <div className="flex-1 space-y-4">
           <div className="inline-block bg-red-50 text-red-650 font-extrabold text-xs uppercase px-3 py-1 rounded-full border border-red-100">
@@ -179,19 +200,195 @@ const Home: React.FC = () => {
           </div>
           <button 
             onClick={() => navigate('/about')}
-            className="text-red-600 text-xs font-extrabold uppercase tracking-wider hover:text-red-700 transition-colors flex items-center gap-1.5 pt-4"
+            className="text-red-600 text-xs font-extrabold uppercase tracking-wider hover:text-red-700 transition-colors flex items-center gap-1.5 pt-4 cursor-pointer"
           >
             <span>{language === 'en' ? 'Read Our Mission' : 'اقرأ المزيد عن من نحن ورؤيتنا'}</span>
             <ArrowUpRight className="w-4 h-4" />
           </button>
         </div>
-        <div className="w-full md:w-[320px] h-[240px] rounded-2xl overflow-hidden shadow-md shrink-0 border border-slate-200">
+        <div className="w-full md:w-[360px] h-[260px] rounded-2xl overflow-hidden shadow-lg shrink-0 border border-slate-200 relative group">
           <img 
-            src="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=500&fit=crop" 
-            alt="Engineering Works" 
-            className="w-full h-full object-cover"
+            src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=600&fit=crop" 
+            alt="Engineering Team on site" 
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             referrerPolicy="no-referrer"
           />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/40 to-transparent pointer-events-none" />
+        </div>
+      </div>
+
+      {/* NEW: LIVE FIELD OPERATIONS & REAL IMAGES SHOWCASE */}
+      <div className="space-y-6">
+        <div>
+          <div className="inline-block bg-blue-50 text-blue-600 font-extrabold text-[10px] uppercase px-3 py-1 rounded-full border border-blue-100 mb-2">
+            {language === 'en' ? 'Field Execution' : 'صناعة الإتقان الميداني والإنشائي'}
+          </div>
+          <h2 className="text-2xl md:text-3xl font-black text-slate-950 tracking-tight">
+            {language === 'en' ? 'GCC Live Operations Gallery & heavy machinery' : 'معرض المعدات وعمليات المقاولات الميدانية الحية'}
+          </h2>
+          <p className="text-slate-400 font-sans text-xs mt-1 leading-relaxed">
+            {language === 'en' 
+              ? 'Real-world photography depicting active construction sites, expert technicians calibration, electrical panels, safety loops and heavy logistics crane dispatch.' 
+              : 'نستعرض صوراً حقيقية من مواقع التدشين الإنشائية الثقيلة لبث الثقة، بدءاً من لوحات القواطع ومحركات الديزل وأنظمة الإطفاء وفريق الإشراف.'}
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Card 1: Heavy Construction Sites */}
+          <div className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-200 group flex flex-col justify-between">
+            <div className="h-48 overflow-hidden relative">
+              <img 
+                src="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=500&fit=crop" 
+                alt="GCC Heavy Construction Sites" 
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                referrerPolicy="no-referrer"
+              />
+              <span className="absolute top-3 left-3 bg-slate-950/85 text-white text-[9px] font-mono font-bold px-2 py-0.5 rounded">01</span>
+            </div>
+            <div className="p-5 flex-1 flex flex-col justify-between space-y-3">
+              <div>
+                <h3 className="text-xs font-black tracking-wider text-slate-400 uppercase font-mono mb-1">{language === 'en' ? 'Construction Sites' : 'مواقع إنشائية مهيبة'}</h3>
+                <h4 className="text-sm font-black text-slate-950 leading-tight">
+                  {language === 'en' ? 'High-Rise Steel & Foundation Rigs' : 'أعمال صب الخرسانات ورافعات الهياكل الهندسية'}
+                </h4>
+              </div>
+              <p className="text-slate-500 text-[11px] leading-relaxed">
+                {language === 'en'
+                  ? 'Executing grand excavations, deep piling foundation engineering complying with structural engineering SBC safety metrics.'
+                  : 'تجهيز وتشييد المباني الشاهقة وحسابات الحفر العميقة ودعم الأنفاق بالأبراج السكنية والطبية.'}
+              </p>
+            </div>
+          </div>
+
+          {/* Card 2: On-site Engineers */}
+          <div className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-200 group flex flex-col justify-between">
+            <div className="h-48 overflow-hidden relative">
+              <img 
+                src="https://images.unsplash.com/photo-1581092921461-eab62e97a780?w=500&fit=crop" 
+                alt="On-site Engineers at Work" 
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                referrerPolicy="no-referrer"
+              />
+              <span className="absolute top-3 left-3 bg-blue-650 text-white text-[9px] font-mono font-bold px-2 py-0.5 rounded">02</span>
+            </div>
+            <div className="p-5 flex-1 flex flex-col justify-between space-y-3">
+              <div>
+                <h3 className="text-xs font-black tracking-wider text-slate-400 uppercase font-mono mb-1">{language === 'en' ? 'On-site Engineers' : 'مهندسين واستشاريين بالموقع'}</h3>
+                <h4 className="text-sm font-black text-slate-950 leading-tight">
+                  {language === 'en' ? 'Precision Calibration & Live Diagnostics' : 'الفحص الرقمي والمعاينة الميدانية بدقة'}
+                </h4>
+              </div>
+              <p className="text-slate-500 text-[11px] leading-relaxed">
+                {language === 'en'
+                  ? 'Our engineers supervise installations with advanced computerized analysis for thermal readings and signal circuits.'
+                  : 'مراقبة دائمة وإشراف هندسي متكامل لضمان مطابقة التركيبات للمخططات التكعيبية والمصادقات الرسمية.'}
+              </p>
+            </div>
+          </div>
+
+          {/* Card 3: Electrical Boards */}
+          <div className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-200 group flex flex-col justify-between">
+            <div className="h-48 overflow-hidden relative">
+              <img 
+                src="https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=500&fit=crop" 
+                alt="Electrical boards and cabinets" 
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                referrerPolicy="no-referrer"
+              />
+              <span className="absolute top-3 left-3 bg-red-650 text-white text-[9px] font-mono font-bold px-2 py-0.5 rounded">03</span>
+            </div>
+            <div className="p-5 flex-1 flex flex-col justify-between space-y-3">
+              <div>
+                <h3 className="text-xs font-black tracking-wider text-slate-400 uppercase font-mono mb-1">{language === 'en' ? 'Control Distribution Panels' : 'لوحات كهربائية ونحاسية'}</h3>
+                <h4 className="text-sm font-black text-slate-950 leading-tight">
+                  {language === 'en' ? 'ATS Switches & Heavy-Duty Busbar Layout' : 'قواطع ضغط ومفاتيح التحويل التلقائية المزدوجة'}
+                </h4>
+              </div>
+              <p className="text-slate-500 text-[11px] leading-relaxed">
+                {language === 'en'
+                  ? 'Structuring high-voltage breakers and weatherproof cabinet shelters to withstand harsh Saudi desert environments.'
+                  : 'توفير وتجميع خلايا التوزيع الكهربائية ونقاط التماس المحكومة لتجنب انقطاع التيار والتأثر بالغبار والحرارة.'}
+              </p>
+            </div>
+          </div>
+
+          {/* Card 4: Safety Systems */}
+          <div className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-200 group flex flex-col justify-between">
+            <div className="h-48 overflow-hidden relative">
+              <img 
+                src="https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=600&fit=crop" 
+                alt="Safety and Fire Safety Systems" 
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                referrerPolicy="no-referrer"
+              />
+              <span className="absolute top-3 left-3 bg-emerald-650 text-white text-[9px] font-mono font-bold px-2 py-0.5 rounded">04</span>
+            </div>
+            <div className="p-5 flex-1 flex flex-col justify-between space-y-3">
+              <div>
+                <h3 className="text-xs font-black tracking-wider text-slate-400 uppercase font-mono mb-1">{language === 'en' ? 'Safety Systems' : 'أنظمة السلامة ومكافحة الحريق'}</h3>
+                <h4 className="text-sm font-black text-slate-950 leading-tight">
+                  {language === 'en' ? 'NFPA Compliant Valves & FM-205 Loops' : 'شبكات مرشات التدفق المائي ومضخات مكافحة اللهب'}
+                </h4>
+              </div>
+              <p className="text-slate-500 text-[11px] leading-relaxed">
+                {language === 'en'
+                  ? 'Heavy engineering design for dry and wet alarm check valves keeping continuous automatic pressure indicators safe.'
+                  : 'شبكات متدفقة جافة لغرف التحكم وخراطيم تغذية رئيسية مطابقة لاشتراطات الدفاع المدني السعودي.'}
+              </p>
+            </div>
+          </div>
+
+          {/* Card 5: Heavy Cranes & Equipment */}
+          <div className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-200 group flex flex-col justify-between">
+            <div className="h-48 overflow-hidden relative">
+              <img 
+                src="https://images.unsplash.com/photo-1578575437130-527eed3abbec?w=600&fit=crop" 
+                alt="Heavy cranes and industrial machinery" 
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                referrerPolicy="no-referrer"
+              />
+              <span className="absolute top-3 left-3 bg-amber-500 text-white text-[9px] font-mono font-bold px-2 py-0.5 rounded">05</span>
+            </div>
+            <div className="p-5 flex-1 flex flex-col justify-between space-y-3">
+              <div>
+                <h3 className="text-xs font-black tracking-wider text-slate-400 uppercase font-mono mb-1">{language === 'en' ? 'Heavy Cranes & Equipment' : 'رافعات حفر ومعدات ثقيلة'}</h3>
+                <h4 className="text-sm font-black text-slate-950 leading-tight">
+                  {language === 'en' ? 'Hydraulic Rigs & Precision High Lift Solutions' : 'رافعات الإنشاءات والأنظمة الهيدروليكية الضخمة'}
+                </h4>
+              </div>
+              <p className="text-slate-500 text-[11px] leading-relaxed">
+                {language === 'en'
+                  ? 'Logistical muscle using multi-ton mobile and crawler cranes to place massive modular chiller coils with precision.'
+                  : 'معدات مناولة ونقل أحمال الروابط والـ Chiller والصمامات الكونية الكبرى لضمان تدشين سريع وآمن.'}
+              </p>
+            </div>
+          </div>
+
+          {/* Card 6: Teams and Support */}
+          <div className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-200 group flex flex-col justify-between">
+            <div className="h-48 overflow-hidden relative">
+              <img 
+                src="https://images.unsplash.com/photo-1573164713988-8665fc963095?w=500&fit=crop" 
+                alt="GCC engineering execution teams" 
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                referrerPolicy="no-referrer"
+              />
+              <span className="absolute top-3 left-3 bg-purple-650 text-white text-[9px] font-mono font-bold px-2 py-0.5 rounded">06</span>
+            </div>
+            <div className="p-5 flex-1 flex flex-col justify-between space-y-3">
+              <div>
+                <h3 className="text-xs font-black tracking-wider text-slate-400 uppercase font-mono mb-1">{language === 'en' ? 'Collaborative Teams' : 'المشرفين وفرق عمل الهندسة'}</h3>
+                <h4 className="text-sm font-black text-slate-950 leading-tight">
+                  {language === 'en' ? 'Unified MEP Engineering CAD Supervision' : 'التخطيط وتوزيع المهام بموقع التشييد المباشر'}
+                </h4>
+              </div>
+              <p className="text-slate-500 text-[11px] leading-relaxed">
+                {language === 'en'
+                  ? 'Our qualified management division aligning work schedules with clients to ensure seamless occupancy approval.'
+                  : 'تضامن هندسي رصين بين الرسامين ومراقبي الجودة والموقع لإتمام رخص المبنى بكفاءة قبل مواعيدها.'}
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 

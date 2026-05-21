@@ -614,7 +614,7 @@ const Track: React.FC = () => {
                     </button>
                     
                     <a
-                      href={`https://wa.me/966500000000?text=${encodeURIComponent(
+                      href={`https://wa.me/966550307003?text=${encodeURIComponent(
                         `السلام عليكم، بخصوص عرض السعر المالي لطلب كود (${ticketData.ticketId})، أود استكمال التنسيق حول المشروع والجدول الزمني.`
                       )}`}
                       target="_blank"
@@ -626,7 +626,7 @@ const Track: React.FC = () => {
                     </a>
 
                     <a
-                      href="tel:+966500000000"
+                      href="tel:+966550307003"
                       className="bg-blue-600 hover:bg-blue-700 text-white font-black px-4 py-3.5 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all shadow-md"
                     >
                       <Clock className="w-4 h-4" />
