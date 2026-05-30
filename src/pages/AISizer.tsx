@@ -64,6 +64,51 @@ const AISizer: React.FC = () => {
   const [progress, setProgress] = useState(0);
   const [loadingStatus, setLoadingStatus] = useState('');
   const [generatedTicketId, setGeneratedTicketId] = useState('');
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const triggerToast = (msg: string) => {
+    setToastMessage(msg);
+    const timer = setTimeout(() => {
+      setToastMessage(null);
+    }, 3500);
+  };
+
+  const copyToClipboard = (text: string): boolean => {
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text);
+        return true;
+      }
+    } catch (err) {
+      console.warn("Navigator clipboard failed, using fallback:", err);
+    }
+    
+    // Bulletproof offscreen fallback
+    try {
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.style.position = "fixed";
+      textarea.style.top = "0";
+      textarea.style.left = "0";
+      textarea.style.width = "2em";
+      textarea.style.height = "2em";
+      textarea.style.padding = "0";
+      textarea.style.border = "none";
+      textarea.style.outline = "none";
+      textarea.style.boxShadow = "none";
+      textarea.style.background = "transparent";
+      textarea.style.opacity = "0";
+      document.body.appendChild(textarea);
+      textarea.focus();
+      textarea.select();
+      const successful = document.execCommand("copy");
+      document.body.removeChild(textarea);
+      return successful;
+    } catch (err) {
+      console.error("Fallback copy to clipboard failed:", err);
+      return false;
+    }
+  };
 
   // Client Identification fields
   const [clientName, setClientName] = useState('');
@@ -1381,10 +1426,14 @@ const AISizer: React.FC = () => {
               </span>
               <button 
                 onClick={() => {
-                  navigator.clipboard.writeText(generatedTicketId);
-                  alert(language === 'en' ? 'Ticket Code Copied!' : 'تم نسخ رقم الطلب بنجاح للتحقق!');
+                  const success = copyToClipboard(generatedTicketId);
+                  if (success) {
+                    triggerToast(language === 'en' ? 'Ticket Tracking Code Copied!' : 'تم نسخ رقم الطلب فورا وهو محفوظ الآن في حافظتك!');
+                  } else {
+                    triggerToast(language === 'en' ? 'Unable to self-copy, please highlight the text to copy.' : 'فشل النسخ التلقائي، يرجى تظليل الرمز ونسخه يدوياً.');
+                  }
                 }}
-                className="p-1.5 bg-white border border-slate-200 rounded hover:bg-slate-50 text-slate-600 transition-colors"
+                className="p-1.5 bg-slate-900 text-white rounded hover:bg-slate-800 transition-colors cursor-pointer focus:outline-none"
                 title={language === 'en' ? 'Copy ID' : 'نسخ الرمز'}
               >
                 <Copy className="w-3.5 h-3.5" />
@@ -1416,6 +1465,25 @@ const AISizer: React.FC = () => {
 
         </div>
       )}
+
+      {/* Toast Notification Banner */}
+      <AnimatePresence>
+        {toastMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            className="fixed bottom-10 left-6 right-6 md:left-auto md:right-10 z-[99999] max-w-sm bg-slate-900 border border-slate-805 text-white rounded-2xl py-3.5 px-4 shadow-2xl flex items-center gap-3 font-sans"
+          >
+            <div className="bg-red-500/10 rounded-lg p-2 shrink-0">
+              <CheckCircle className="w-5 h-5 text-red-500" />
+            </div>
+            <div className="flex-1 text-xs font-semibold leading-normal text-right">
+              {toastMessage}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
     </div>
   );

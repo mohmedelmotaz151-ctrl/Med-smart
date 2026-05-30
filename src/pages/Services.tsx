@@ -52,7 +52,7 @@ const Services: React.FC = () => {
         { label: language === 'en' ? 'Standard Code' : 'الكود المتبع', value: 'NFPA 13, 14, 20' }
       ],
       color: 'red',
-      img: 'https://images.unsplash.com/photo-1558389186-438424b00a32?w=600&fit=crop'
+      img: '/images/fire-pump.jpg'
     },
     fire_detection: {
       title: language === 'en' ? 'Early Detection & Alarms' : 'أنظمة الإنذار والتوجيه المبكر',
@@ -70,7 +70,7 @@ const Services: React.FC = () => {
         { label: language === 'en' ? 'Loop Capacity' : 'سعة الدائرة الواحدة', value: 'Up to 250 Devices' },
       ],
       color: 'amber',
-      img: 'https://images.unsplash.com/photo-1558389186-438424b00a32?w=600&fit=crop'
+      img: '/images/alarm-system.jpg'
     },
     hvac: {
       title: language === 'en' ? 'Air Conditioning & Cooling (HVAC)' : 'أنظمة التكييف والتهوية وتبريد المجمعات',

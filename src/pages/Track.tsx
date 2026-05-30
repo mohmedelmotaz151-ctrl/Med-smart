@@ -56,6 +56,7 @@ interface InquiryData {
     discountPercent: number;
     totalAmount: number;
     comments?: string;
+    items?: Array<{ id: string; nameAr: string; nameEn: string; qty: number; unitPrice: number; total: number }>;
   };
 }
 
@@ -78,6 +79,120 @@ const Track: React.FC = () => {
   const [errorMsg, setErrorMsg] = useState('');
   const [ticketData, setTicketData] = useState<InquiryData | null>(null);
   const [showInvoiceMock, setShowInvoiceMock] = useState(false);
+  const [activeTab, setActiveTab] = useState<'pdf' | 'tracking'>('pdf');
+  const [pdfZoom, setPdfZoom] = useState<number>(100);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const triggerToast = (msg: string) => {
+    setToastMessage(msg);
+    // Automatically dismiss the toast after 3.5 seconds
+    const timer = setTimeout(() => {
+      setToastMessage(null);
+    }, 3500);
+  };
+
+  const copyToClipboard = (text: string): boolean => {
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text);
+        return true;
+      }
+    } catch (err) {
+      console.warn("Navigator clipboard failed, using fallback:", err);
+    }
+    
+    // Bulletproof offscreen fallback
+    try {
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.style.position = "fixed";
+      textarea.style.top = "0";
+      textarea.style.left = "0";
+      textarea.style.width = "2em";
+      textarea.style.height = "2em";
+      textarea.style.padding = "0";
+      textarea.style.border = "none";
+      textarea.style.outline = "none";
+      textarea.style.boxShadow = "none";
+      textarea.style.background = "transparent";
+      textarea.style.opacity = "0";
+      document.body.appendChild(textarea);
+      textarea.focus();
+      textarea.select();
+      const successful = document.execCommand("copy");
+      document.body.removeChild(textarea);
+      return successful;
+    } catch (err) {
+      console.error("Fallback copy to clipboard failed:", err);
+      return false;
+    }
+  };
+
+  const handlePrint = () => {
+    const printContent = document.getElementById('printed-invoice');
+    if (!printContent) return;
+    
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'fixed';
+    iframe.style.right = '0';
+    iframe.style.bottom = '0';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.style.border = 'none';
+    document.body.appendChild(iframe);
+    
+    const iframeDoc = iframe.contentWindow?.document || iframe.contentDocument;
+    if (!iframeDoc) return;
+    
+    let styles = '';
+    document.querySelectorAll('style, link[rel="stylesheet"]').forEach(el => {
+      styles += el.outerHTML;
+    });
+
+    const htmlContent = `
+      <html>
+        <head>
+          <title>Quotation-${ticketData?.ticketId}</title>
+          ${styles}
+          <style>
+            @media print {
+              body {
+                background: white !important;
+                color: black !important;
+                padding: 1.5cm !important;
+                font-family: system-ui, sans-serif !important;
+              }
+              #printed-invoice {
+                transform: scale(1) !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                box-shadow: none !important;
+                border: none !important;
+                padding: 0 !important;
+              }
+            }
+          </style>
+        </head>
+        <body dir="rtl">
+          <div id="printed-invoice" class="bg-white p-6 leading-relaxed text-slate-800">
+            ${printContent.innerHTML}
+          </div>
+          <script>
+            setTimeout(() => {
+              window.print();
+              setTimeout(() => {
+                window.parent.document.body.removeChild(window.frameElement);
+              }, 100);
+            }, 500);
+          </script>
+        </body>
+      </html>
+    `;
+
+    iframe.contentWindow?.document.open();
+    iframe.contentWindow?.document.write(htmlContent);
+    iframe.contentWindow?.document.close();
+  };
 
   // Direct Interactive Tech Support Discussion states
   const [chatMessages, setChatMessages] = useState<{ sender: 'client' | 'engineer'; text: string; time: string }[]>([
@@ -281,15 +396,11 @@ const Track: React.FC = () => {
     return map[serviceType] || { ar: 'مقاولة هندسية', en: 'General MEP Contract', icon: <FileText className="w-4 h-4" /> };
   };
 
-  const handlePrint = () => {
-    window.print();
-  };
-
   const downloadPDFMock = () => {
     // Elegant animation helper then browser download simulation
     const link = document.createElement('a');
     link.href = '#';
-    alert(
+    triggerToast(
       language === 'en' 
         ? "Dynamic technical PDF report compiled and saved successfully!" 
         : "تم صياغة وطرح الملف المحاسبي الموحد وتصديره بصيغة PDF بنجاح!"
@@ -401,10 +512,32 @@ const Track: React.FC = () => {
           >
 
             {/* Left Content Area (Columns 8: Process & Pricing) */}
-            <div className="lg:col-span-8 space-y-8">
+            <div className="lg:col-span-8 space-y-6">
               
-              {/* 1. Milestone / Timeline Indicator */}
-              <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 space-y-6 shadow-sm">
+              {/* Tab Capsule Navigation switcher */}
+              <div className="flex bg-slate-100 p-1 rounded-2xl border border-slate-200 text-right mb-4" dir={language === 'ar' ? 'rtl' : 'ltr'}>
+                <button 
+                  type="button"
+                  onClick={() => setActiveTab('pdf')}
+                  className={`flex-1 py-3 text-xs font-black rounded-xl transition-all flex items-center justify-center gap-1.5 ${activeTab === 'pdf' ? 'bg-[#0f2d59] text-white shadow-md' : 'text-slate-605 hover:text-slate-900'}`}
+                >
+                  <FileText className="w-4.5 h-4.5 text-red-500" />
+                  <span>{language === 'en' ? 'Quotation Document (PDF)' : 'عرض السعر الرسمي المعتمد (PDF)'}</span>
+                </button>
+                <button 
+                  type="button"
+                  onClick={() => setActiveTab('tracking')}
+                  className={`flex-1 py-3 text-xs font-black rounded-xl transition-all flex items-center justify-center gap-1.5 ${activeTab === 'tracking' ? 'bg-[#0f2d59] text-white shadow-md' : 'text-slate-605 hover:text-slate-900'}`}
+                >
+                  <Clock className="w-4.5 h-4.5 text-blue-500 animate-pulse" />
+                  <span>{language === 'en' ? 'SLA Milestone Progress' : 'مسار تقدم الطلب والمعاينة'}</span>
+                </button>
+              </div>
+
+              {activeTab === 'tracking' ? (
+                <div className="space-y-6">
+                  {/* 1. Milestone / Timeline Indicator */}
+                  <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 space-y-6 shadow-sm">
                 <div className="flex justify-between items-center pb-4 border-b border-slate-100">
                   <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider">
                     {textDict.statusTimeline}
@@ -697,9 +830,410 @@ const Track: React.FC = () => {
                 </motion.div>
               )}
             </div>
+          ) : (
+            /* activeTab === 'pdf' */
+            <div className="space-y-6">
+              {/* Embedded Professional PDF Viewer Interface */}
+              <div className="bg-slate-950 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl flex flex-col">
+                
+                {/* PDF Control Panel Row (Grey theme Adobe style) */}
+                <div className="bg-slate-900 px-4 py-3 border-b border-slate-800 flex items-center justify-between gap-3 flex-wrap">
+                  {/* Left: Document details metadata info */}
+                  <div className="flex items-center gap-2">
+                    <div className="bg-red-600 text-white font-black text-[9px] px-2 py-0.5 rounded leading-none">
+                      PDF
+                    </div>
+                    <span className="text-slate-300 text-[10px] font-mono font-bold select-all truncate max-w-[120px] sm:max-w-none">
+                      Quotation-{ticketData.ticketId}.pdf
+                    </span>
+                  </div>
+
+                  {/* Middle: PDF controls (zoom) */}
+                  <div className="flex items-center gap-2.5 bg-slate-950 px-3 py-1 rounded-lg border border-slate-850">
+                    <button 
+                      type="button"
+                      onClick={() => setPdfZoom(prev => Math.max(50, prev - 10))}
+                      className="text-slate-400 hover:text-white font-mono font-black text-xs px-1.5 cursor-pointer"
+                      title="Zoom Out"
+                    >
+                      -
+                    </button>
+                    <span className="text-slate-300 font-mono text-[9px] font-bold shrink-0 min-w-[32px] text-center">
+                      {pdfZoom}%
+                    </span>
+                    <button 
+                      type="button"
+                      onClick={() => setPdfZoom(prev => Math.min(150, prev + 10))}
+                      className="text-slate-400 hover:text-white font-mono font-black text-xs px-1.5 cursor-pointer"
+                      title="Zoom In"
+                    >
+                      +
+                    </button>
+                    <div className="w-[1px] h-3 bg-slate-800" />
+                    <button 
+                      type="button"
+                      onClick={() => setPdfZoom(100)}
+                      className="text-slate-400 hover:text-slate-200 text-[9.5px] font-black font-sans cursor-pointer"
+                    >
+                      {language === 'en' ? 'Reset' : 'إعادة'}
+                    </button>
+                  </div>
+
+                  {/* Right: Actions */}
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={handlePrint}
+                      className="bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white p-1.5 rounded-lg border border-slate-700/50 transition-all font-sans cursor-pointer focus:outline-none"
+                      title={language === 'en' ? 'Print Document' : 'طباعة مستند عرض السعر'}
+                    >
+                      <Printer className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={downloadPDFMock}
+                      className="bg-red-650 hover:bg-red-700 text-white hover:text-white px-3 py-1.5 text-[10px] font-black rounded-lg transition-all flex items-center gap-1 font-sans cursor-pointer focus:outline-none"
+                    >
+                      <FileDown className="w-3 h-3" />
+                      <span className="hidden sm:inline">{language === 'en' ? 'Download' : 'تحميل PDF'}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const trackingUrl = `${window.location.origin}/track?id=${ticketData.ticketId}&contact=${ticketData.phone || ticketData.email}`;
+                        const success = copyToClipboard(trackingUrl);
+                        if (success) {
+                          triggerToast(language === 'en' ? 'Dedicated tracking URL copied to clipboard!' : 'تم نسخ رابط تتبع ومطابقة العرض بنجاح للحافظة!');
+                        } else {
+                          triggerToast(language === 'en' ? 'Unable to copy automatically, please copy the URL from browser.' : 'فشل النسخ التلقائي، يرجى مشاركة الرابط أو تصوير الشاشة.');
+                        }
+                      }}
+                      className="bg-slate-800 hover:bg-slate-750 text-slate-200 border border-slate-700 text-[10px] font-black px-2.5 py-1.5 rounded-lg transition-all font-sans cursor-pointer focus:outline-none"
+                    >
+                      {language === 'en' ? 'Share / Copy Link' : 'مشاركة ونسخ الرابط'}
+                    </button>
+                  </div>
+                </div>
+
+                {/* PDF Document Viewer Container Screen */}
+                <div className="bg-slate-850 p-4 sm:p-8 flex items-start justify-center overflow-auto max-h-[850px] relative">
+                  
+                  {/* Document board (A4 structured paper sheet) */}
+                  <div 
+                    id="printed-invoice"
+                    className="bg-white border border-slate-300 w-full rounded-md shadow-2xl p-6 sm:p-10 space-y-6 relative text-right text-slate-800 aspect-[1/1.41] origin-top transition-all"
+                    style={{ 
+                      transform: `scale(${pdfZoom / 100})`, 
+                      marginBottom: `${(pdfZoom > 100) ? (pdfZoom - 100) * 6 : 0}px`,
+                      maxWidth: '700px',
+                      direction: 'rtl'
+                    }}
+                  >
+                    {/* Company official header */}
+                    <div className="flex flex-col sm:flex-row justify-between items-start border-b-2 border-[#0f2d59] pb-4 gap-4">
+                      <div className="space-y-1 block text-right">
+                        <h2 className="text-sm font-black text-[#0f2d59] leading-none tracking-tight">شركة الخليج للاستشارات والحلول الهندسية</h2>
+                        <p className="text-[8.5px] font-bold text-slate-400 block uppercase leading-none tracking-widest text-right">GCC ELECTRO-MECHANICAL & SAFETY SOLUTIONS</p>
+                        <span className="text-[8px] text-slate-400 block font-semibold leading-tight">عضو الهيئة السعودية للمهندسين • ترخيص رقم ٣٣٥١/ص</span>
+                      </div>
+
+                      <div className="text-left font-sans shrink-0 sm:self-center">
+                        <div className="bg-[#0f2d59] text-white text-[9.5px] font-black tracking-wider px-2.5 py-1 rounded-sm block text-center">
+                          {language === 'en' ? 'OFFICIAL QUOTATION' : 'عرض سعر مالي وفني'}
+                        </div>
+                        <span className="text-[8.5px] text-slate-400 block mt-1 leading-none text-left font-mono">
+                          REF: {ticketData.ticketId}
+                        </span>
+                        <span className="text-[8px] text-slate-400 block font-mono text-left">
+                          DATE: {new Date(ticketData.createdAt).toLocaleDateString('ar-EG')}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Customer profile and scope metadata card */}
+                    <div className="grid grid-cols-2 gap-4 text-[10px] pt-1 pb-1">
+                      <div className="space-y-1 text-right">
+                        <span className="text-[8px] font-black text-[#000] border-b border-rose-500 pb-0.5 block uppercase">معلومات وتفاصيل العميل:</span>
+                        <div className="font-extrabold text-slate-900 mt-1">{ticketData.name}</div>
+                        {ticketData.company && <div className="text-slate-600 font-bold">{ticketData.company}</div>}
+                        <div className="text-slate-500 font-mono">{ticketData.phone}</div>
+                        <div className="text-slate-500 font-mono truncate max-w-[200px]">{ticketData.email}</div>
+                      </div>
+
+                      <div className="space-y-1 text-right border-r border-[#ececec] pr-4">
+                        <span className="text-[8px] font-black text-[#000] border-b border-rose-500 pb-0.5 block uppercase">مواصفات ونطاق المشروع:</span>
+                        <div className="font-extrabold text-slate-900 mt-1">{getServiceLabel(ticketData.serviceType).ar}</div>
+                        <div className="text-slate-600 font-bold">{ticketData.projectArea} متر مربع</div>
+                        <div className="text-slate-510 flex items-center justify-start gap-1 font-semibold">
+                          <MapPin className="w-3 h-3 text-red-500 shrink-0" />
+                          <span>الموقع: {ticketData.location || 'الرياض'}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Document Items Table */}
+                    <div className="border border-slate-300 rounded-xl overflow-hidden text-[10.5px]">
+                      <table className="w-full text-right border-collapse">
+                        <thead>
+                          <tr className="bg-slate-50 border-b border-slate-300 text-[#0f2d59] font-black text-[9px] uppercase">
+                            <th className="p-2.5 text-right font-black">وصف البند الفني والتوريد / Description</th>
+                            <th className="p-2.5 text-center font-black">الكمية</th>
+                            <th className="p-2.5 text-center font-black">سعر الوحدة</th>
+                            <th className="p-2.5 text-left font-black">المجموع الصافي</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100 text-slate-700">
+                          {['priced', 'completed', 'proposal'].includes(ticketData.status) && ticketData.priceDetails ? (
+                            <>
+                              {ticketData.priceDetails.items && ticketData.priceDetails.items.length > 0 ? (
+                                ticketData.priceDetails.items.map((item, idx) => (
+                                  <tr key={item.id || idx} className="hover:bg-slate-50/20">
+                                    <td className="p-2.5 font-bold leading-snug">
+                                      <div>{item.nameAr}</div>
+                                      <div className="text-[8px] text-slate-400 font-mono mt-0.5">{item.nameEn}</div>
+                                    </td>
+                                    <td className="p-2.5 text-center font-mono font-extrabold">{item.qty}</td>
+                                    <td className="p-2.5 text-center font-mono font-semibold">{item.unitPrice.toLocaleString('ar-EG')} ريال</td>
+                                    <td className="p-2.5 text-left font-mono font-black text-slate-900">{(item.qty * item.unitPrice).toLocaleString('ar-EG')} ريال</td>
+                                  </tr>
+                                ))
+                              ) : (
+                                <>
+                                  {/* Fallback to three standard estimation groups */}
+                                  <tr className="hover:bg-slate-50/25">
+                                    <td className="p-2.5 font-bold">
+                                      <div>توريد المواد الأساسية وخطوط الكواشف والمكائن</div>
+                                      <div className="text-[8px] text-slate-400 font-mono mt-0.5">Primary Electro-Mechanical sizing Hardware Nodes</div>
+                                    </td>
+                                    <td className="p-2.5 text-center font-mono">١</td>
+                                    <td className="p-2.5 text-center font-mono">{ticketData.priceDetails.componentsCost.toLocaleString('ar-EG')} ريال</td>
+                                    <td className="p-2.5 text-left font-mono font-black text-slate-900">{(ticketData.priceDetails.componentsCost).toLocaleString('ar-EG')} ريال</td>
+                                  </tr>
+
+                                  <tr className="hover:bg-slate-50/25">
+                                    <td className="p-2.5 font-bold">
+                                      <div>أعمال التأسيس والتصميم السيزمي والتركيب التخصصي للموقع</div>
+                                      <div className="text-[8px] text-slate-400 font-mono mt-0.5 font-sans">Civil Defense Compliant Installation & Calibration labor</div>
+                                    </td>
+                                    <td className="p-2.5 text-center font-mono">١</td>
+                                    <td className="p-2.5 text-center font-mono">{ticketData.priceDetails.laborFee.toLocaleString('ar-EG')} ريال</td>
+                                    <td className="p-2.5 text-left font-mono font-black text-slate-900">{(ticketData.priceDetails.laborFee).toLocaleString('ar-EG')} ريال</td>
+                                  </tr>
+
+                                  <tr className="hover:bg-slate-50/25">
+                                    <td className="p-2.5 font-bold">
+                                      <div>رسوم حوكمة المخططات والتراخيص السريعة ومنصة سلامة</div>
+                                      <div className="text-[8px] text-slate-400 font-mono mt-0.5">Engineering Stamp & Regulatory Validation Seals</div>
+                                    </td>
+                                    <td className="p-2.5 text-center font-mono">١</td>
+                                    <td className="p-2.5 text-center font-mono">{ticketData.priceDetails.complianceFee.toLocaleString('ar-EG')} ريال</td>
+                                    <td className="p-2.5 text-left font-mono font-black text-slate-900">{(ticketData.priceDetails.complianceFee).toLocaleString('ar-EG')} ريال</td>
+                                  </tr>
+                                </>
+                              )}
+                            </>
+                          ) : (
+                            <tr>
+                              <td colSpan={4} className="p-8 text-center text-slate-400 font-bold font-sans">
+                                <div className="flex flex-col items-center justify-center space-y-1.5">
+                                  <Loader2 className="w-5 h-5 animate-spin text-[#0f2d59]" />
+                                  <span className="block text-slate-700 text-[11px] font-sans">
+                                    {language === 'en' 
+                                      ? 'Technical specifications and pricing sheets are currently being formulated by Eng. Fahad.' 
+                                      : 'جاري مراجعة المخططات الهندسية وتفصيل وحصر البنود حالياً من قبل المهندس المقدر وفريق الحسابات.'}
+                                  </span>
+                                </div>
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* Calculated pricing summaries */}
+                    {['priced', 'completed', 'proposal'].includes(ticketData.status) && ticketData.priceDetails && (
+                      <div className="flex flex-col space-y-1.5 text-[10.5px]">
+                        
+                        {/* Voucher discount layer */}
+                        {ticketData.priceDetails.discountPercent > 0 && (
+                          <div className="flex justify-between items-baseline text-emerald-650 bg-emerald-50 px-2 py-1.5 rounded-lg border border-emerald-100">
+                            <span className="font-bold">خصم تعميد وتسهيل خاص بالعميل (-{ticketData.priceDetails.discountPercent}%)</span>
+                            <span className="font-mono font-black">
+                              -{((ticketData.priceDetails.items && ticketData.priceDetails.items.length > 0 
+                                  ? ticketData.priceDetails.items.reduce((sum, item) => sum + (item.qty * item.unitPrice), 0) 
+                                  : (ticketData.priceDetails.componentsCost + ticketData.priceDetails.laborFee)) * (ticketData.priceDetails.discountPercent / 100)).toLocaleString('ar-EG')} ريال
+                            </span>
+                          </div>
+                        )}
+
+                        {/* VAT math visual */}
+                        <div className="flex justify-between items-baseline text-slate-500 pt-1.5 font-bold px-1 select-all">
+                          <span>المبلغ الصافي الخاضع للضريبة (قبل الضريبة)</span>
+                          <span className="font-mono font-bold">{(ticketData.priceDetails.totalAmount * 0.85).toLocaleString('ar-EG', { maximumFractionDigits: 0 })} ريال</span>
+                        </div>
+
+                        <div className="flex justify-between items-baseline text-slate-500 font-bold px-1 select-all">
+                          <span>ضريبة القيمة المضافة لخدمات المقاولات ١٥٪ (VAT)</span>
+                          <span className="font-mono font-bold">{(ticketData.priceDetails.totalAmount * 0.15).toLocaleString('ar-EG', { maximumFractionDigits: 0 })} ريال</span>
+                        </div>
+
+                        {/* Grand total highlight */}
+                        <div className="flex justify-between items-baseline border-t border-[#0f2d59]/30 pt-3 px-1">
+                          <span className="text-xs font-black text-slate-900 border-r-3 border-red-500 pr-1.5 leading-none font-sans">الإجمالي المعتمد النهائي (شامل الضريبة):</span>
+                          <div className="text-left font-sans">
+                            <span className="text-base font-black text-red-650 font-mono tracking-tight leading-none text-left block">
+                              {ticketData.priceDetails.totalAmount.toLocaleString('ar-EG')} ريال كهروميكانيكي
+                            </span>
+                          </div>
+                        </div>
+                        
+                        <p className="text-[7.5px] text-slate-400 mt-1 uppercase leading-snug tracking-tighter text-right font-sans">
+                          {textDict.vatNote}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Lead engineer signature and stamp of authentication */}
+                    <div className="flex justify-between items-end pt-2 border-t border-dashed border-slate-200">
+                      <div className="text-right text-[8.5px] max-w-[280px]">
+                        <span className="font-black text-slate-900 block">شروط وأحكام الاعتماد الكهروميكانيكي:</span>
+                        <p className="text-slate-450 font-medium leading-snug mt-0.5 font-sans">
+                          - يلتزم الطرف المنفذ GCC بكافة معايير الدفاع المدني وكود البناء السعودي SBC للتراخيص.
+                          - يسري عرض السعر المرفق لمدة ١٥ يوماً من تاريخ التحرير المقيد بأعلى تتبع المستند وتعد المخططات ثبوتية ومحمية قانونياً.
+                        </p>
+                      </div>
+
+                      <div className="text-center shrink-0 space-y-1 relative pr-4 border-r border-[#ececec] min-w-[120px]">
+                        {/* GCC Stamp Graphic Badge */}
+                        <div className="mx-auto w-14 h-14 rounded-full border-2 border-dashed border-red-600/30 bg-red-50/40 rotate-12 flex items-center justify-center font-black text-red-600 text-[6.5px] leading-tight text-center uppercase tracking-tighter shadow-sm font-sans">
+                          <div>
+                            <span className="block text-red-600">عُمد معتمداً</span>
+                            <span className="block font-sans text-[5.5px] scale-90 mt-0.5 text-slate-500 font-mono text-center">GCC SAUDI HQ</span>
+                          </div>
+                        </div>
+                        <span className="block text-[7.5px] font-black text-slate-400 tracking-tight">ختم الاعتماد الفني والمالي</span>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+
+              {/* PDF Viewer Action links footer panel */}
+              {['priced', 'completed', 'proposal'].includes(ticketData.status) && ticketData.priceDetails && (
+                <div className="bg-[#0f2d59] text-white border border-[#0d264a] p-6 rounded-3xl space-y-4 shadow-md text-right" dir={language === 'ar' ? 'rtl' : 'ltr'}>
+                  <div className="space-y-1 block">
+                    <span className="text-[12px] font-black text-rose-450 block uppercase tracking-wider">
+                      {language === 'en' ? 'Direct Authorization & Execution' : 'تعميد عرض السعر وبدء تسيير المخططات:'}
+                    </span>
+                    <p className="text-[11px] text-slate-300 font-medium leading-normal font-sans">
+                      {language === 'en' 
+                        ? 'You can instantly approve this civil-compliant proposal to authorize our technicians to start mechanical line sizing on-site.' 
+                        : 'يمكنكم تعميد وضمان هذا العرض مباشرة إما بالضغط على زر تحميل وتعميد المستند، أو بالتنسيق الفوري مع مهندس الموقع والمخططات المختصة عبر بوابات التواصل بالأسفل.'}
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row gap-2.5 pt-2">
+                    <button
+                      type="button"
+                      onClick={downloadPDFMock}
+                      className="flex-1 bg-red-650 hover:bg-neutral-900 text-white font-black py-3.5 rounded-xl text-xs uppercase tracking-widest transition-all shadow-md flex items-center justify-center gap-1.5 font-sans"
+                    >
+                      <FileDown className="w-4.5 h-4.5" />
+                      <span>{language === 'en' ? 'Approve & Download Proposal' : 'التعميد والاعتماد المباشر وتحميل العرض'}</span>
+                    </button>
+                    
+                    <a
+                      href={`https://wa.me/966550307003?text=${encodeURIComponent(
+                        `السلام عليكم، بخصوص عرض السعر المالي لطلب كود (${ticketData.ticketId})، أود استكمال التنسيق حول المشروع والجدول الزمني.`
+                      )}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white font-black px-4 py-3.5 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all shadow-md font-sans"
+                    >
+                      <Phone className="w-4 h-4" />
+                      <span>{language === 'en' ? 'WhatsApp Support' : 'تنسيق واتساب'}</span>
+                    </a>
+
+                    <a
+                      href="tel:+966550307003"
+                      className="bg-blue-600 hover:bg-blue-700 text-white font-black px-4 py-3.5 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all shadow-md font-sans"
+                    >
+                      <Clock className="w-4 h-4" />
+                      <span>{language === 'en' ? 'Call Office' : 'اتصال هاتفي'}</span>
+                    </a>
+                  </div>
+                </div>
+              )}
+
+              {/* Interactive Tech Chat Discussion Board */}
+              {['priced', 'completed', 'proposal'].includes(ticketData.status) && (
+                <div className="bg-slate-50 border border-slate-150 rounded-2xl p-4.5 space-y-3.5 font-sans" dir="rtl">
+                  <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
+                    <div className="flex items-center gap-2 text-right">
+                      <MessageSquare className="w-4.5 h-4.5 text-[#0f2d59]" />
+                      <span className="text-xs font-black text-slate-800">
+                        {language === 'en' ? 'Direct Engineer Chat Channel' : 'النقاش والاستفسار الفني مع رئيس المراجعة الميكانيكية'}
+                      </span>
+                    </div>
+                    <span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-600">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse animate-infinite" />
+                      {language === 'en' ? 'Consultant Online' : 'مستشار المخططات متصل'}
+                    </span>
+                  </div>
+
+                  {/* Message Log */}
+                  <div className="space-y-3 max-h-56 overflow-y-auto p-1 text-[11px] leading-relaxed flex flex-col text-right">
+                    {chatMessages.map((msg, i) => (
+                      <div 
+                        key={i} 
+                        className={`flex flex-col max-w-[85%] rounded-2xl px-3.5 py-2.5 ${
+                          msg.sender === 'engineer' 
+                            ? 'bg-slate-200/70 text-slate-800 self-start mr-auto rounded-tl-none text-right' 
+                            : 'bg-[#0f2d59] text-white self-end ml-auto rounded-tr-none text-right'
+                        }`}
+                      >
+                        <span className="font-extrabold text-[9px] opacity-75 mb-0.5 text-right font-sans">
+                          {msg.sender === 'engineer' ? (language === 'en' ? 'Eng. Fahad (Design Lead)' : 'المهندس فهد النفيعي (رئيس مراجعة الكود)') : (language === 'en' ? 'You' : 'أنت')}
+                        </span>
+                        <p className="font-sans leading-relaxed whitespace-pre-line text-right">{msg.text}</p>
+                        <span className="text-[7.5px] opacity-60 mt-1 self-end block leading-none">{msg.time}</span>
+                      </div>
+                    ))}
+
+                    {chatTyping && (
+                      <div className="bg-slate-200/50 text-slate-500 border border-slate-200/30 rounded-2xl px-3.5 py-2.5 self-start mr-auto flex items-center gap-1.5 max-w-[50%]">
+                        <Loader2 className="w-3 h-3 animate-spin text-[#0f2d59]" />
+                        <span className="font-bold text-[10px]">{language === 'en' ? 'Engineer is typing...' : 'يعمل المهندس على الرد...'}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Message Form input */}
+                  <form onSubmit={handleSendChatMessage} className="flex gap-2 text-right font-sans">
+                    <input
+                      type="text"
+                      value={chatInput}
+                      onChange={(e) => setChatInput(e.target.value)}
+                      placeholder={language === 'en' ? 'Ask about pipes, scheduling site checks...' : 'اسأل بخصوص: جدول الأحمال، سماكة المواسير، موعد النزول للموقع...'}
+                      className="flex-1 bg-white border border-slate-200 focus:border-red-500 text-slate-800 rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:ring-4 focus:ring-red-500/5 transition-all outline-none text-right font-sans"
+                    />
+                    <button
+                      type="submit"
+                      disabled={chatTyping || !chatInput.trim()}
+                      className="bg-[#0f2d59] hover:bg-[#071933] text-white p-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center shrink-0 disabled:opacity-45 font-sans"
+                    >
+                      <Send className="w-4 h-4 rotate-180" />
+                    </button>
+                  </form>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
 
 
-            {/* Right Information Column Dashboard (Columns 4: Project and Client Metadata) */}
+        {/* Right Information Column Dashboard (Columns 4: Project and Client Metadata) */}
             <div className="lg:col-span-4 space-y-6">
               
               <div className="bg-slate-900 text-white border border-slate-800 rounded-3xl p-6 sm:p-7 space-y-5 shadow-sm">
@@ -977,6 +1511,25 @@ const Track: React.FC = () => {
               </div>
 
             </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Toast Notification Banner */}
+      <AnimatePresence>
+        {toastMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            className="fixed bottom-10 left-6 right-6 md:left-auto md:right-10 z-[99999] max-w-sm bg-slate-900 border border-slate-805 text-white rounded-2xl py-3.5 px-4 shadow-2xl flex items-center gap-3 font-sans"
+          >
+            <div className="bg-red-500/10 rounded-lg p-2 shrink-0">
+              <CheckCircle className="w-5 h-5 text-red-500" />
+            </div>
+            <div className="flex-1 text-xs font-semibold leading-normal text-right">
+              {toastMessage}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

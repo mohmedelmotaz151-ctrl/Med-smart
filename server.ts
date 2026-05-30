@@ -31,6 +31,9 @@ async function startServer() {
   // Serve the uploads directory statically
   app.use("/uploads", express.static(uploadRoot));
 
+  // Serve the public directory statically
+  app.use(express.static(path.join(process.cwd(), "public")));
+
   // Dynamic uploads endpoint
   app.post("/api/upload", (req, res) => {
     try {

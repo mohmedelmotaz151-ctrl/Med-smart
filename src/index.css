@@ -7,6 +7,9 @@
   --color-secondary: #0f172a;
   --color-surface: #ffffff;
   --color-background: #f1f5f9;
+  --color-red-650: #dc2650;
+  --color-red-105: #fee0e0;
+  --color-red-55: #fff5f5;
 }
 
 @layer utilities {

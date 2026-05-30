@@ -14,6 +14,7 @@ import {
   TrendingUp, 
   Trash2, 
   Check, 
+  CheckCircle,
   X, 
   FileText, 
   AlertCircle, 
@@ -117,6 +118,11 @@ const Admin: React.FC = () => {
   const [complianceFee, setComplianceFee] = useState<number>(0);
   const [discountPercent, setDiscountPercent] = useState<number>(0);
   const [comments, setComments] = useState<string>('');
+  const [customItems, setCustomItems] = useState<Array<{ id: string; nameAr: string; nameEn: string; qty: number; unitPrice: number; total: number }>>([]);
+  const [newItemNameAr, setNewItemNameAr] = useState('');
+  const [newItemNameEn, setNewItemNameEn] = useState('');
+  const [newItemQty, setNewItemQty] = useState<number>(1);
+  const [newItemPrice, setNewItemPrice] = useState<number>(0);
   
   // Custom tracking metadata states
   const [engineerName, setEngineerName] = useState<string>('');
@@ -126,6 +132,51 @@ const Admin: React.FC = () => {
 
   // Simulated notification triggers
   const [notificationMsg, setNotificationMsg] = useState<{ text: string; type: 'whatsapp' | 'email' | 'toast' } | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const triggerToast = (msg: string) => {
+    setToastMessage(msg);
+    const timer = setTimeout(() => {
+      setToastMessage(null);
+    }, 3500);
+  };
+
+  const copyToClipboard = (text: string): boolean => {
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text);
+        return true;
+      }
+    } catch (err) {
+      console.warn("Navigator clipboard failed, using fallback:", err);
+    }
+    
+    // Bulletproof offscreen fallback
+    try {
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.style.position = "fixed";
+      textarea.style.top = "0";
+      textarea.style.left = "0";
+      textarea.style.width = "2em";
+      textarea.style.height = "2em";
+      textarea.style.padding = "0";
+      textarea.style.border = "none";
+      textarea.style.outline = "none";
+      textarea.style.boxShadow = "none";
+      textarea.style.background = "transparent";
+      textarea.style.opacity = "0";
+      document.body.appendChild(textarea);
+      textarea.focus();
+      textarea.select();
+      const successful = document.execCommand("copy");
+      document.body.removeChild(textarea);
+      return successful;
+    } catch (err) {
+      console.error("Fallback copy to clipboard failed:", err);
+      return false;
+    }
+  };
 
   useEffect(() => {
     fetchInquiries();
@@ -428,12 +479,14 @@ const Admin: React.FC = () => {
       setComplianceFee(inq.priceDetails.complianceFee || 0);
       setDiscountPercent(inq.priceDetails.discountPercent || 0);
       setComments(inq.priceDetails.comments || '');
+      setCustomItems((inq.priceDetails as any).items || []);
     } else {
       setComponentsCost(0);
       setLaborFee(0);
       setComplianceFee(0);
       setDiscountPercent(0);
       setComments('');
+      setCustomItems([]);
     }
     // Set custom tracking inputs
     setEngineerName((inq as any).engineerName || '');
@@ -444,10 +497,40 @@ const Admin: React.FC = () => {
 
   // Live Auto-calculated total amount
   const calculatedTotal = React.useMemo(() => {
-    const sum = componentsCost + laborFee + complianceFee;
+    let sum = 0;
+    if (customItems && customItems.length > 0) {
+      sum = customItems.reduce((acc, item) => acc + item.total, 0) + complianceFee;
+    } else {
+      sum = componentsCost + laborFee + complianceFee;
+    }
     const discount = sum * (discountPercent / 100);
     return Math.max(0, sum - discount);
-  }, [componentsCost, laborFee, complianceFee, discountPercent]);
+  }, [componentsCost, laborFee, complianceFee, discountPercent, customItems]);
+
+  const handleAddCustomItem = () => {
+    if (!newItemNameEn && !newItemNameAr) {
+      alert(language === 'en' ? 'Please fill in at least one description name.' : 'يرجى كتابة وصف البند بالعربية أو الإنجليزية أولاً.');
+      return;
+    }
+    const total = newItemQty * newItemPrice;
+    const newItem = {
+      id: Math.random().toString(36).substr(2, 9),
+      nameAr: newItemNameAr || newItemNameEn,
+      nameEn: newItemNameEn || newItemNameAr,
+      qty: newItemQty,
+      unitPrice: newItemPrice,
+      total
+    };
+    setCustomItems(prev => [...prev, newItem]);
+    setNewItemNameAr('');
+    setNewItemNameEn('');
+    setNewItemQty(1);
+    setNewItemPrice(0);
+  };
+
+  const handleRemoveCustomItem = (id: string) => {
+    setCustomItems(prev => prev.filter(item => item.id !== id));
+  };
 
   // Update Status
   const handleUpdateStatus = async (status: 'new' | 'under_review' | 'priced' | 'completed') => {
@@ -459,7 +542,8 @@ const Admin: React.FC = () => {
       complianceFee,
       discountPercent,
       totalAmount: status === 'priced' || status === 'completed' ? calculatedTotal : 0,
-      comments
+      comments,
+      items: customItems
     };
 
     const updatedInquiry = {
@@ -580,10 +664,12 @@ const Admin: React.FC = () => {
   };
 
   const filterInquiries = inquiries.filter(inq => {
-    const matchesSearch = inq.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          inq.ticketId.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          (inq.company && inq.company.toLowerCase().includes(searchTerm.toLowerCase())) ||
-                          inq.location.toLowerCase().includes(searchTerm.toLowerCase());
+    const term = searchTerm.toLowerCase();
+    const matchesSearch = 
+      (inq.name || '').toLowerCase().includes(term) || 
+      (inq.ticketId || '').toLowerCase().includes(term) || 
+      (inq.company || '').toLowerCase().includes(term) ||
+      (inq.location || '').toLowerCase().includes(term);
                           
     const matchesStatus = statusFilter === 'all' || inq.status === statusFilter;
     return matchesSearch && matchesStatus;
@@ -937,9 +1023,147 @@ const Admin: React.FC = () => {
                         </div>
                       </div>
 
+                      {/* Detailed custom items builder */}
+                      <div className="sm:col-span-2 border border-slate-200 bg-slate-50/50 rounded-2xl p-4.5 space-y-4 text-right">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 pb-2.5 border-b border-slate-200">
+                          <div>
+                            <span className="text-xs font-black text-slate-850 block uppercase tracking-tight">
+                              {language === 'en' ? 'Quotation Custom Line Items' : 'أصناف ومواد عرض السعر التفصيلية المخصصة (اختياري)'}
+                            </span>
+                            <span className="text-[10px] text-slate-450 block font-semibold leading-tight mt-0.5">
+                              {language === 'en' ? 'Define precise items/services overrides for the visual proposal.' : 'أدخل أصناف مواد فنية بالتفصيل لتظهر في جدول الفاتورة وعرض السعر للعميل بدقة بدلاً من المدخلات الثلاثة الكلية أعلاه.'}
+                            </span>
+                          </div>
+                          {customItems.length > 0 && (
+                            <span className="bg-[#0f2d59] text-white text-[9.5px] font-black px-2.5 py-1 rounded-md uppercase">
+                              {customItems.length} {language === 'en' ? 'Items' : 'بند مالي مضاف'}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* List of custom items */}
+                        {customItems.length === 0 ? (
+                          <div className="text-center py-6 border border-dashed border-slate-200 rounded-xl bg-white">
+                            <p className="text-[11px] text-slate-400 font-semibold font-sans">
+                              {language === 'en' ? 'No custom line items added. The system will fall back to using global costs.' : 'لا توجد أصناف تفصيلية مضافة حالياً لعلامة المطبوعات المعاينة. سيستخدم النظام المدخلات الإجمالية أعلاه.'}
+                            </p>
+                          </div>
+                        ) : (
+                          <div className="bg-white border border-slate-200 rounded-xl overflow-hidden text-[11px] font-sans">
+                            <table className="w-full text-right border-collapse">
+                              <thead>
+                                <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 font-black text-[9.5px] uppercase">
+                                  <th className="p-2 text-right">{language === 'en' ? 'Item Details' : 'البند / المادة الموردة'}</th>
+                                  <th className="p-2 text-center">{language === 'en' ? 'Price' : 'سعر الوحدة'}</th>
+                                  <th className="p-2 text-center">{language === 'en' ? 'Qty' : 'الكمية'}</th>
+                                  <th className="p-2 text-left">{language === 'en' ? 'Total' : 'الإجمالي'}</th>
+                                  <th className="p-2 text-center"></th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-slate-100 text-slate-700">
+                                {customItems.map((item) => (
+                                  <tr key={item.id} className="hover:bg-slate-50/50">
+                                    <td className="p-2 font-bold text-right">
+                                      <div className="text-slate-900 leading-snug">{item.nameAr}</div>
+                                      <div className="text-[9.5px] text-slate-400 font-mono mt-0.5 text-right">{item.nameEn}</div>
+                                    </td>
+                                    <td className="p-2 text-center font-mono font-bold text-slate-800">{item.unitPrice.toLocaleString()} {language === 'en' ? 'SAR' : 'ريال'}</td>
+                                    <td className="p-2 text-center font-mono font-extrabold">{item.qty}</td>
+                                    <td className="p-2 text-left font-mono font-black text-rose-650">{(item.qty * item.unitPrice).toLocaleString()} {language === 'en' ? 'SAR' : 'ريال'}</td>
+                                    <td className="p-2 text-center">
+                                      <button
+                                        type="button"
+                                        onClick={() => handleRemoveCustomItem(item.id)}
+                                        className="text-[10px] font-black text-red-650 hover:text-red-850 hover:bg-red-50 px-2 py-1 rounded-lg transition-all"
+                                      >
+                                        {language === 'en' ? 'Delete' : 'حذف'}
+                                      </button>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
+
+                        {/* New Item Form Controls Row */}
+                        <div className="bg-white border border-slate-200 rounded-xl p-3.5 space-y-3">
+                          <span className="text-[10.5px] font-black text-slate-700 block uppercase tracking-wider text-right">
+                            {language === 'en' ? 'Add New Quotation Line Item' : 'إدراج بند مالي/أصناف جديد لعرض السعر:'}
+                          </span>
+                          
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-right">
+                            {/* Title Arab */}
+                            <div className="space-y-1">
+                              <label className="text-[9px] font-black text-slate-400 uppercase tracking-wider block text-right">
+                                {language === 'en' ? 'Item Title (Arabic) *' : 'وصف الصنف بالعربية *'}
+                              </label>
+                              <input
+                                type="text"
+                                value={newItemNameAr}
+                                onChange={(e) => setNewItemNameAr(e.target.value)}
+                                placeholder="مثال: توريد وتركيب مجاري الهواء (الدكت) والمخارج"
+                                className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-bold font-sans text-slate-850 focus:outline-none focus:border-red-500 text-right"
+                              />
+                            </div>
+
+                            {/* Title Eng */}
+                            <div className="space-y-1">
+                              <label className="text-[9px] font-black text-slate-400 uppercase tracking-wider block text-right">
+                                {language === 'en' ? 'Item Title (English)' : 'الوصف الفني بالإنجليزية (اختياري)'}
+                              </label>
+                              <input
+                                type="text"
+                                value={newItemNameEn}
+                                onChange={(e) => setNewItemNameEn(e.target.value)}
+                                placeholder="e.g. Supply and Installation of Ducts and Diffusers"
+                                className="w-full bg-slate-50 border border-slate-100/80 rounded-lg px-3 py-2 text-xs font-bold text-left font-mono text-slate-850 focus:outline-none focus:border-red-500"
+                              />
+                            </div>
+
+                            {/* Price unit */}
+                            <div className="space-y-1">
+                              <label className="text-[9px] font-black text-slate-400 uppercase tracking-wider block text-right">
+                                {language === 'en' ? 'Unit Price (SAR)' : 'سعر الوحدة (ريال)'}
+                              </label>
+                              <input
+                                type="number"
+                                value={newItemPrice || ''}
+                                onChange={(e) => setNewItemPrice(Number(e.target.value))}
+                                placeholder="e.g. 5000"
+                                className="w-full bg-slate-50 border border-slate-150 rounded-lg px-3 py-2 text-xs font-bold font-mono text-slate-850 focus:outline-none focus:border-red-500 text-left"
+                              />
+                            </div>
+
+                            {/* Qty */}
+                            <div className="space-y-1">
+                              <label className="text-[9px] font-black text-[#0f2d59] uppercase tracking-wider block text-right">
+                                {language === 'en' ? 'Quantity' : 'الكمية المطلوب توريدها'}
+                              </label>
+                              <input
+                                type="number"
+                                value={newItemQty || ''}
+                                min="1"
+                                onChange={(e) => setNewItemQty(Math.max(1, Number(e.target.value)))}
+                                placeholder="e.g. 2"
+                                className="w-full bg-slate-50 border border-slate-150 rounded-lg px-3 py-2 text-xs font-semibold font-mono text-slate-850 focus:outline-none focus:border-red-500 text-left"
+                              />
+                            </div>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={handleAddCustomItem}
+                            className="w-full bg-[#0f2d59] hover:bg-slate-900 text-white text-[10px] font-black uppercase tracking-wider py-2 rounded-lg transition-all"
+                          >
+                            + {language === 'en' ? 'Add Item To Quotation' : 'إدراج هذا البند في جدول عرض السعر المعتمد'}
+                          </button>
+                        </div>
+                      </div>
+
                       {/* Comments leading lead */}
                       <div className="sm:col-span-2 space-y-1.5">
-                        <label className="text-[10px] font-black text-slate-600 block">
+                        <label className="text-[10px] font-black text-slate-600 block text-right">
                           {language === 'en' ? 'Engineering Lead Comments & SLA notes' : 'توجيه وملاحظات المهندس المسؤول'}
                         </label>
                         <input
@@ -1057,6 +1281,36 @@ const Admin: React.FC = () => {
                           </button>
                         ))}
                       </div>
+                    </div>
+
+                    {/* Direct Client Tracking Link copied or shared */}
+                    <div className="bg-indigo-50/60 border border-indigo-100 rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between gap-3 text-right">
+                      <div className="space-y-1 block flex-1 text-right">
+                        <span className="text-[10px] font-black text-[#0f2d59] uppercase tracking-wider block">
+                          {language === 'en' ? 'Client Dedicated Tracking URL' : 'رابط تتبع عرض السعر المباشر والآمن للزبون'}
+                        </span>
+                        <span className="text-[10px] text-slate-450 font-semibold block leading-snug">
+                          {language === 'en' ? 'Copy and send this unique URL for direct quotation review:' : 'قم بنسخ هذا الرابط ومشاركته مع العميل ليدخل مباشرة على عارض الـ PDF الخاص بمشروعه:'}
+                        </span>
+                        <span className="text-[10px] font-mono text-indigo-700 block truncate select-all max-w-sm mt-1 bg-white border border-indigo-100 p-2.5 rounded-lg select-all">
+                          {window.location.origin}/track?id={selectedInquiry.ticketId}&contact={selectedInquiry.phone || selectedInquiry.email}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const trackingUrl = `${window.location.origin}/track?id=${selectedInquiry.ticketId}&contact=${selectedInquiry.phone || selectedInquiry.email}`;
+                          const success = copyToClipboard(trackingUrl);
+                          if (success) {
+                            triggerToast(language === 'en' ? 'Dedicated tracking URL copied to clipboard!' : 'تم نسخ رابط تتبع ومطابقة العرض بنجاح وبدء النسخ المباشر حافظة!');
+                          } else {
+                            triggerToast(language === 'en' ? 'Unable to copy automatically, please copy the URL from text above.' : 'فشل النسخ التلقائي، يرجى تظليل الرابط أعلاه ونسخه.');
+                          }
+                        }}
+                        className="bg-[#0f2d59] hover:bg-slate-900 text-white font-black text-[10px] px-4 py-2.5 rounded-xl transition-all shadow-sm shrink-0 uppercase tracking-wider cursor-pointer"
+                      >
+                        {language === 'en' ? 'Copy Link' : 'نسخ رابط العميل'}
+                      </button>
                     </div>
 
                   </div>
@@ -1434,6 +1688,25 @@ const Admin: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Toast Notification Banner */}
+      <AnimatePresence>
+        {toastMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            className="fixed bottom-10 left-6 right-6 md:left-auto md:right-10 z-[99999] max-w-sm bg-slate-900 border border-slate-805 text-white rounded-2xl py-3.5 px-4 shadow-2xl flex items-center gap-3 font-sans"
+          >
+            <div className="bg-red-500/10 rounded-lg p-2 shrink-0">
+              <CheckCircle className="w-5 h-5 text-red-500" />
+            </div>
+            <div className="flex-1 text-xs font-semibold leading-normal text-right">
+              {toastMessage}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
     </div>
   );

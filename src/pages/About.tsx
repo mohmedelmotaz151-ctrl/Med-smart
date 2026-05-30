@@ -38,6 +38,7 @@ const About: React.FC = () => {
   const { language } = useLanguage();
   const [activeTab, setActiveTab] = useState<'overview' | 'services' | 'projects' | 'documents' | 'slides'>('overview');
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [openedModal, setOpenedModal] = useState<'cover' | 'about' | null>(null);
 
   const downloadProfilePDF = () => {
     const pages = [
@@ -421,16 +422,16 @@ const About: React.FC = () => {
       titleEn: 'Corporate Profile Cover Card',
       content: (
         <div 
-          onClick={downloadProfilePDF}
+          onClick={() => setOpenedModal('cover')}
           className="bg-slate-900 text-white rounded-2xl p-8 flex flex-col justify-between h-96 relative overflow-hidden border border-slate-800 text-center items-center justify-center space-y-4 cursor-pointer group hover:border-red-650/50 transition-all active:scale-[0.99]"
-          title={language === 'en' ? 'Click to Download Full PDF Document' : 'اضغط لتحميل ملف البروفايل PDF الكامل'}
+          title={language === 'en' ? 'Click to Open Interactive Front Cover' : 'اضغط لفتح غلاف البروفايل التفاعلي'}
         >
           <div className="absolute top-0 right-0 w-64 h-64 bg-red-650/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none group-hover:bg-red-650/15 transition-all" />
           <div className="absolute bottom-0 left-0 w-80 h-80 bg-blue-600/10 rounded-full blur-3xl -ml-24 -mb-24 pointer-events-none" />
           
           <div className="z-10 bg-red-650 text-white font-black text-[10px] tracking-widest px-3 py-1 rounded-full uppercase border border-red-500/30 flex items-center gap-1">
-            <Download className="w-3 h-3 text-white animate-bounce" />
-            {language === 'en' ? 'CLICK TO DOWNLOAD FULL PDF' : 'اضغط للتحميل المباشر للبروفايل'}
+            <Sparkles className="w-3 h-3 text-white animate-pulse" />
+            {language === 'en' ? 'CLICK TO OPEN PREVIEW' : 'اضغط لفتح المعاينة التفاعلية'}
           </div>
 
           <div className="space-y-3 z-10 max-w-md mx-auto pointer-events-none">
@@ -459,7 +460,7 @@ const About: React.FC = () => {
       content: (
         <div className="bg-white text-slate-800 rounded-2xl p-6 sm:p-8 h-96 flex flex-col justify-between border border-slate-200">
           <div>
-            <span className="text-[9px] font-black text-red-600 uppercase tracking-wider block mb-1">
+            <span className="text-[9px] font-black text-red-650 uppercase tracking-wider block mb-1">
               {language === 'en' ? 'PDF OUTLINE' : 'فهرس المحتويات التنظيمي'}
             </span>
             <h3 className="text-lg font-black text-slate-950">
@@ -468,29 +469,33 @@ const About: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-2 gap-x-6 gap-y-2.5 my-auto text-xs font-sans">
-            <div className="flex justify-between items-center py-1.5 border-b border-slate-100">
-              <span className="font-extrabold text-slate-700">1. من نحن / Overview</span>
-              <span className="font-mono text-red-650 font-black">صفحة ٣</span>
+            <div 
+              onClick={() => setOpenedModal('about')}
+              className="flex justify-between items-center py-1.5 border-b border-slate-100 hover:bg-slate-50 p-1.5 rounded-lg transition-all cursor-pointer group"
+              title={language === 'en' ? 'Click to Open Company Overview Page' : 'اضغط لفتح صفحة من نحن بالتفصيل'}
+            >
+              <span className="font-extrabold text-slate-700 group-hover:text-red-600 transition-colors">1. من نحن / Overview • 👀</span>
+              <span className="font-mono text-red-600 font-black">صفحة ٣</span>
             </div>
-            <div className="flex justify-between items-center py-1.5 border-b border-slate-100">
+            <div className="flex justify-between items-center py-1.5 border-b border-slate-100 p-1.5">
               <span className="font-extrabold text-slate-700">2. الرؤية والرسالة / Vision</span>
-              <span className="font-mono text-red-650 font-black">صفحة ٤</span>
+              <span className="font-mono text-slate-400 font-bold">صفحة ٤</span>
             </div>
-            <div className="flex justify-between items-center py-1.5 border-b border-slate-100">
+            <div className="flex justify-between items-center py-1.5 border-b border-slate-100 p-1.5">
               <span className="font-extrabold text-slate-700">3. خدماتنا / Services</span>
-              <span className="font-mono text-red-650 font-black">صفحة ٥</span>
+              <span className="font-mono text-slate-400 font-bold">صفحة ٥</span>
             </div>
-            <div className="flex justify-between items-center py-1.5 border-b border-slate-100">
+            <div className="flex justify-between items-center py-1.5 border-b border-slate-100 p-1.5">
               <span className="font-extrabold text-slate-700">4. المشاريع المنفذة / Portfolio</span>
-              <span className="font-mono text-red-650 font-black">صفحة ٩</span>
+              <span className="font-mono text-slate-400 font-bold">صفحة ٩</span>
             </div>
-            <div className="flex justify-between items-center py-1.5 border-b border-slate-100">
+            <div className="flex justify-between items-center py-1.5 border-b border-slate-100 p-1.5">
               <span className="font-extrabold text-slate-700">5. ما يميزنا / Distinct Edge</span>
-              <span className="font-mono text-red-650 font-black">صفحة ١١</span>
+              <span className="font-mono text-slate-400 font-bold">صفحة ١١</span>
             </div>
-            <div className="flex justify-between items-center py-1.5 border-b border-slate-100">
+            <div className="flex justify-between items-center py-1.5 border-b border-slate-100 p-1.5">
               <span className="font-extrabold text-slate-700">6. المستندات الرسمية / Docs</span>
-              <span className="font-mono text-red-650 font-black">صفحة ٢٥</span>
+              <span className="font-mono text-slate-400 font-bold">صفحة ٢٥</span>
             </div>
           </div>
 
@@ -505,23 +510,49 @@ const About: React.FC = () => {
       titleAr: 'قصة التميز والمقدمة',
       titleEn: 'Corporate Narrative & Overview',
       content: (
-        <div className="bg-white text-slate-800 rounded-2xl p-6 sm:p-8 h-96 flex flex-col justify-between border border-slate-200 overflow-y-auto">
-          <div>
-            <span className="text-[9px] font-black text-red-600 block uppercase tracking-wider mb-0.5">PAGE 3 • COMPANY OVERVIEW</span>
-            <h3 className="text-base font-black text-slate-900">{language === 'en' ? 'Introduction Summary' : 'قصة تأسيس شركة GCC للمقاولات'}</h3>
+        <div className="bg-slate-300 text-slate-800 rounded-2xl p-6 sm:p-7 h-auto md:h-96 flex flex-col md:flex-row gap-6 md:gap-8 border border-slate-450 relative overflow-y-auto font-sans shadow-inner">
+          {/* Left Column: Arched Image of crane */}
+          <div className="w-full md:w-5/12 h-44 md:h-full relative overflow-hidden rounded-t-[100px] border border-slate-400 shrink-0 shadow-md bg-slate-400">
+            <img 
+              src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=500&fit=crop" 
+              className="w-full h-full object-cover" 
+              alt="Hardworking Exhausted Electro-Mechanical Engineers in Office Desk"
+              referrerPolicy="no-referrer"
+            />
           </div>
 
-          <div className="space-y-3 font-sans my-auto py-2">
-            <p className="text-[11px] leading-relaxed text-slate-700 text-justify">
-              <strong>AR:</strong> تُعد شركة جي سي سي للمقاولات شركة ذات رؤية مستقبلية تسعى إلى تقديم مستوى لا مثيل له من التميز عبر مجموعة واسعة من خدمات المقاولات. استطاعت الشركة أن ترسخ مكانتها كشريك موثوق يعتمد عليه في مختلف القطاعات مدفوعة بالتزامها بالجودة العالية والابتكار ورضا العملاء.
-            </p>
-            <p className="text-[11.5px] leading-relaxed text-slate-600 text-justify italic">
-              <strong>EN:</strong> GCC Company for Contracting is a dynamic and forward-thinking company dedicated to delivering unparalleled excellence across a wide spectrum of contracting services. Driven by a commitment to high quality, groundbreaking innovation, and profound client satisfaction.
-            </p>
-          </div>
+          {/* Right Column: Content */}
+          <div className="flex-1 flex flex-col justify-between space-y-4 md:space-y-0 h-full">
+            {/* Header Tabs */}
+            <div className="flex rounded-md overflow-hidden self-start border border-slate-450 shadow-xs">
+              <div className="bg-[#0f2d59] text-white px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-center flex items-center justify-center">
+                Company Overview
+              </div>
+              <div className="bg-slate-200 text-slate-700 px-3.5 py-1.5 text-[11px] font-black text-center flex items-center justify-center border-l border-slate-350">
+                من نحن
+              </div>
+            </div>
 
-          <div className="bg-slate-50 p-2.5 rounded-xl text-[9.5px] text-slate-500 font-semibold border border-slate-100/80 leading-tight">
-            {language === 'en' ? '• 100% compliant with Zakat, ZATCA VAT standards & Municipal rules.' : '• ملتزمون بقواعد كود البناء ولائحة السلامة، وتصنيف الهيئة السعودية للمقاولين.'}
+            {/* Paragraph Block */}
+            <div className="space-y-2.5 my-auto py-1">
+              <p className="text-[11px] sm:text-[12px] leading-relaxed text-slate-900 text-justify font-sans font-extrabold" style={{ direction: 'rtl' }}>
+                تُعد شركة جي سي سي للمقاولات شركة ذات رؤية مستقبلية تسعى إلى تقديم مستوى لا مثيل له من التميز عبر مجموعة واسعة من خدمات المقاولات. استطاعت الشركة أن ترسخ مكانتها كشريك موثوق يُعتمد عليه في مختلف القطاعات مدفوعة بالتزامها بالجودة العالية والابتكار ورضا العملاء.
+              </p>
+              <div className="flex justify-center text-slate-450 font-bold tracking-widest leading-none h-2">...</div>
+              <p className="text-[9.5px] sm:text-[10px] leading-relaxed text-slate-800 text-justify font-sans font-semibold">
+                GCC Company for Contracting is a dynamic and forward-thinking company dedicated to delivering unparalleled excellence across a wide spectrum of contracting services. The company has rapidly established its position as a trusted and reliable partner in diverse industries, driven by a commitment to high quality, groundbreaking innovation, and profound client satisfaction.
+              </p>
+            </div>
+
+            {/* Footer Row */}
+            <div className="flex justify-between items-center border-t border-slate-350 pt-2 text-[9px] font-black">
+              <div className="bg-white text-slate-950 px-2.5 py-0.5 rounded border border-slate-400 font-mono">
+                3
+              </div>
+              <div className="text-slate-650 font-sans tracking-wide">
+                شركة جي سي سي للمقاولات / GCC COMPANY CONTRACTING
+              </div>
+            </div>
           </div>
         </div>
       )
@@ -850,7 +881,16 @@ const About: React.FC = () => {
               
               {/* Left description text */}
               <div className="lg:col-span-7 space-y-5">
-                <span className="text-[10px] font-black text-red-600 uppercase tracking-widest block">{language === 'en' ? 'PAGE 3 SUMMARY' : 'ملخص الصفحة الثالثة للبروفايل'}</span>
+                <div className="flex justify-between items-center">
+                  <span className="text-[10px] font-black text-red-600 uppercase tracking-widest block">{language === 'en' ? 'PAGE 3 SUMMARY' : 'ملخص الصفحة الثالثة للبروفايل'}</span>
+                  <button
+                    onClick={() => setOpenedModal('about')}
+                    className="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-900 border border-slate-200 rounded-xl transition-all font-black text-[10px] inline-flex items-center gap-1 cursor-pointer active:scale-95"
+                  >
+                    <Sparkles className="w-3 h-3 text-red-600 animate-pulse" />
+                    <span>{language === 'en' ? 'PREVIEW PAGE • 👀' : 'المعاينة التفاعلية • 👀'}</span>
+                  </button>
+                </div>
                 
                 <h2 className="text-2.5xl font-black text-slate-950 tracking-tight leading-tight">
                   {language === 'en' 
@@ -878,15 +918,15 @@ const About: React.FC = () => {
 
               {/* Right decorative visual box resembling cover */}
               <div 
-                onClick={downloadProfilePDF}
-                className="lg:col-span-5 bg-slate-900 text-white rounded-2xl p-6 sm:p-8 flex flex-col justify-between h-80 relative overflow-hidden border border-slate-850 cursor-pointer group hover:border-red-600/50 transition-all active:scale-[0.99]"
-                title={language === 'en' ? 'Download Corporate Profile PDF' : 'تحميل الملف التعريفي والبروفايل للشركة PDF'}
+                onClick={() => setOpenedModal('cover')}
+                className="lg:col-span-5 bg-slate-900 text-white rounded-2xl p-6 sm:p-8 flex flex-col justify-between h-80 relative overflow-hidden border border-slate-850 cursor-pointer group hover:border-red-650 transition-all active:scale-[0.99]"
+                title={language === 'en' ? 'Preview Corporate Profile Cover' : 'معاينة غلاف البروفايل للشركة تفاعلياً'}
               >
                 <div className="absolute top-0 right-0 w-32 h-32 bg-red-650/15 rounded-full blur-2xl pointer-events-none group-hover:bg-red-650/25 transition-all" />
                 
-                <span className="bg-slate-800 text-slate-350 border border-slate-700 text-[8.5px] px-2 py-0.5 rounded uppercase self-start leading-none font-mono flex items-center gap-1">
-                  <Download className="w-2.5 h-2.5 text-red-500 animate-pulse" />
-                  {language === 'en' ? 'GCC COVER • CLICK TO DOWNLOAD' : 'غلاف جي سي سي • اضغط للتحميل'}
+                <span className="bg-slate-850 text-red-500 border border-slate-700/60 text-[8.5px] px-2 py-0.5 rounded-lg uppercase self-start leading-none font-mono flex items-center gap-1 font-black shadow-sm group-hover:border-red-500/30 transition-all">
+                  <Sparkles className="w-2.5 h-2.5 text-red-500 animate-pulse" />
+                  {language === 'en' ? 'GCC COVER • CLICK TO PREVIEW' : 'غلاف جي سي سي • اضغط للمعاينة'}
                 </span>
 
                 <div className="space-y-2 pointer-events-none">
@@ -955,16 +995,38 @@ const About: React.FC = () => {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-                {tocItems.map((item, idx) => (
-                  <div key={idx} className="bg-slate-50 border border-slate-100 p-3.5 rounded-2xl flex flex-col justify-between hover:border-slate-350 transition-all">
-                    <div>
-                      <span className="font-mono text-[9px] text-red-600 font-black block">PAGE {item.page}</span>
-                      <h4 className="text-xs font-black text-slate-900 mt-1 leading-snug">
-                        {language === 'en' ? item.titleEn : item.titleAr}
-                      </h4>
+                {tocItems.map((item, idx) => {
+                  const isInteractive = item.page === 1 || item.page === 3;
+                  return (
+                    <div 
+                      key={idx} 
+                      onClick={() => {
+                        if (item.page === 1) setOpenedModal('cover');
+                        if (item.page === 3) setOpenedModal('about');
+                      }}
+                      className={`bg-slate-50 border p-3.5 rounded-2xl flex flex-col justify-between transition-all ${
+                        isInteractive 
+                          ? 'border-red-100 hover:border-red-650/40 bg-gradient-to-tr from-slate-50 to-red-50/15 cursor-pointer hover:shadow-sm active:scale-95' 
+                          : 'border-slate-100 opacity-80'
+                      }`}
+                      title={isInteractive ? (language === 'en' ? 'Click to Preview Section' : 'اضغط لمعاينة القسم تفاعلياً') : undefined}
+                    >
+                      <div>
+                        <div className="flex justify-between items-center">
+                          <span className="font-mono text-[9px] text-red-650 font-black block">PAGE {item.page}</span>
+                          {isInteractive && (
+                            <span className="text-[7.5px] bg-red-100 text-red-600 font-black px-1.5 py-0.5 rounded uppercase tracking-wider scale-95 origin-right">
+                              {language === 'en' ? 'PREVIEW • 👀' : 'معاينة • 👀'}
+                            </span>
+                          )}
+                        </div>
+                        <h4 className="text-xs font-black text-slate-900 mt-1.5 leading-snug">
+                          {language === 'en' ? item.titleEn : item.titleAr}
+                        </h4>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
 
@@ -1571,6 +1633,227 @@ const About: React.FC = () => {
         </div>
       </div>
 
+      {/* PROFESSIONAL HIGH-END LIGHTBOX MODALS */}
+      <AnimatePresence>
+        {openedModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md"
+            onClick={() => setOpenedModal(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, y: 15 }}
+              animate={{ scale: 1, y: 0, transition: { type: 'spring', damping: 25, stiffness: 220 } }}
+              exit={{ scale: 0.95, y: 15 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative w-full max-w-4xl bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl flex flex-col md:flex-row h-[580px] text-white"
+            >
+              {/* Close Button */}
+              <button
+                onClick={() => setOpenedModal(null)}
+                className="absolute top-4 right-4 z-20 p-2 bg-slate-850 hover:bg-slate-800 border border-slate-700/60 rounded-full text-slate-300 hover:text-white transition-all cursor-pointer backdrop-blur-sm shadow-md"
+                aria-label="Close"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+
+              {openedModal === 'cover' ? (
+                <>
+                  {/* Left Column: Artistic blueprint engineering decoration */}
+                  <div className="w-full md:w-5/12 bg-slate-950 p-8 flex flex-col justify-between relative overflow-hidden h-1/2 md:h-full border-b md:border-b-0 md:border-r border-slate-800">
+                    <div className="absolute inset-0 opacity-20 pointer-events-none">
+                      {/* Blueprint grid lines representation */}
+                      <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(circle, rgba(239, 68, 68, 0.1) 1px, transparent 1px)', backgroundSize: '16px 16px' }} />
+                      <div className="absolute top-1/4 left-1/4 w-40 h-40 border-t border-l border-red-500/20 rounded-tl-3xl animate-pulse" />
+                      <div className="absolute bottom-1/4 right-1/4 w-32 h-32 border-b border-r border-red-500/20" />
+                    </div>
+
+                    <div className="z-10 flex justify-between items-start">
+                      <span className="text-[10px] font-black text-red-550 uppercase tracking-widest font-mono">
+                        OFFICIAL DOCUMENT • GCC
+                      </span>
+                    </div>
+
+                    {/* Isometric outline shape drawing */}
+                    <div className="my-auto z-10 flex justify-center opacity-80 scale-105">
+                      <div className="relative w-44 h-44 border border-dashed border-slate-800 rounded-full flex items-center justify-center p-6 bg-slate-950/40">
+                        <div className="absolute inset-0 rounded-full border border-red-500/20 animate-pulse" />
+                        <svg viewBox="0 0 100 100" fill="none" className="w-28 h-28 stroke-slate-400 stroke-[0.5] tracking-widest leading-none">
+                          <polygon points="50,10 85,30 85,70 50,90 15,70 15,30" className="stroke-slate-700 fill-none" />
+                          <polygon points="50,23 75,37 75,63 50,77 25,63 25,37" className="stroke-red-500/30 fill-none" />
+                          <path d="M50,10 L50,90 M15,30 L85,70 M15,70 L85,30" className="stroke-slate-800" />
+                          <circle cx="50" cy="50" r="12" className="stroke-red-500/50 fill-slate-900" />
+                        </svg>
+                      </div>
+                    </div>
+
+                    <div className="z-10 text-[9.5px] font-mono text-slate-500 leading-normal">
+                      SAUDI BUILDING CODE (SBC) COMPLIANT • DEFENSE REGISTERED ID 7042113659
+                    </div>
+                  </div>
+
+                  {/* Right Column: Beautiful book cover layout */}
+                  <div className="w-full md:w-7/12 bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 p-8 sm:p-12 flex flex-col justify-between h-1/2 md:h-full relative overflow-hidden">
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-red-650/5 rounded-full blur-3xl pointer-events-none" />
+                    
+                    <div>
+                      <div className="flex items-center gap-2 mb-4">
+                        <div className="w-2.5 h-2.5 rounded-full bg-red-650 animate-pulse" />
+                        <span className="text-[10px] sm:text-xs font-black tracking-widest text-red-500 font-mono uppercase">
+                          {language === 'en' ? 'BROCHURE • PAGE 1' : 'بروفايل الشركة • الغلاف الرئيسي'}
+                        </span>
+                      </div>
+
+                      <div className="space-y-4">
+                        <span className="block font-black text-rose-500 font-mono text-[11px] uppercase tracking-wider">
+                          {language === 'en' ? 'GCC COMPANY FOR CONTRACTING' : 'شركة جي سي سي للمقاولات العامة'}
+                        </span>
+                        <h1 className="text-3.5xl sm:text-4.5xl font-black text-white leading-tight uppercase font-sans tracking-tight">
+                          COMPANY <br/>
+                          <span className="text-red-500">PROFILE</span>
+                        </h1>
+                        <div className="w-20 h-1 bg-red-650 rounded-full" />
+                        <p className="text-xs sm:text-sm text-slate-300 leading-normal text-justify">
+                          {language === 'en'
+                            ? 'The official corporate execution book. Highlights electromechanical designs, mechanical refrigeration air ducting, safety engineering codes and verifiable infrastructure projects.'
+                            : 'المستند الفني المعتمد والموثق لشركة جي سي سي للمقاولات العامة والأعمال الكهروميكانيكية المتكاملة، المصمم خصيصاً لمطابقة لوائح ومعايير السلامة والأكواد الإنشائية.'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      {/* Sub-details */}
+                      <div className="grid grid-cols-2 gap-4 text-[10px] font-sans border-t border-slate-800/80 pt-4">
+                        <div>
+                          <span className="text-slate-500 font-bold block">{language === 'en' ? 'CR NUMBER' : 'رقم السجل التجاري'}</span>
+                          <span className="font-mono text-slate-300 block font-bold">5855377113</span>
+                        </div>
+                        <div>
+                          <span className="text-slate-500 font-bold block">{language === 'en' ? 'VAT ZATCA ID' : 'الرقم الضريبي الموحد'}</span>
+                          <span className="font-mono text-slate-300 block font-bold">312596124700003</span>
+                        </div>
+                      </div>
+
+                      {/* Download PDF button */}
+                      <div className="flex flex-col sm:flex-row gap-3">
+                        <button
+                          onClick={() => {
+                            downloadProfilePDF();
+                            setOpenedModal(null);
+                          }}
+                          className="px-6 py-3 bg-red-650 hover:bg-red-700 text-white font-black text-xs rounded-xl flex items-center justify-center gap-2 tracking-wide transition-all active:scale-[0.98] cursor-pointer shadow-md shadow-red-950/20 shrink-0"
+                        >
+                          <Download className="w-4 h-4 animate-bounce" />
+                          <span>{language === 'en' ? 'DOWNLOAD PDF FILE' : 'تحميل مستند البروفايل PDF'}</span>
+                        </button>
+                        <button
+                          onClick={() => setOpenedModal(null)}
+                          className="px-5 py-3 bg-slate-800 hover:bg-slate-750 border border-slate-700 text-slate-300 font-bold text-xs rounded-xl transition-all cursor-pointer"
+                        >
+                          {language === 'en' ? 'Close Preview' : 'إغلاق المعاينة'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  {/* Left Column: About Us visual layout with high-rise golden frame */}
+                  <div className="w-full md:w-5/12 bg-slate-950 p-8 flex flex-col justify-between relative overflow-hidden h-1/2 md:h-full border-b md:border-b-0 md:border-r border-slate-800">
+                    {/* Glowing yellow background light */}
+                    <div className="absolute top-1/4 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+                    
+                    <div className="z-10 flex justify-between items-start">
+                      <span className="text-[10px] font-black text-amber-500 uppercase tracking-widest font-mono">
+                        PAGE 3 • ABOUT US
+                      </span>
+                      <span className="font-serif font-black text-6xl text-slate-800/50 leading-none">03</span>
+                    </div>
+
+                    {/* Highly-styled abstract high-rise layout representing GCC infrastructure */}
+                    <div className="my-auto z-10 space-y-3.5 pl-4 relative">
+                      <div className="h-28 w-24 border-r-2 border-t-2 border-amber-500/30 rounded-tr-3xl relative p-4 flex flex-col justify-end">
+                        <div className="absolute -left-3 top-6 w-16 h-0.5 bg-slate-800" />
+                        <div className="absolute left-6 -bottom-3 w-0.5 h-12 bg-slate-850" />
+                        <div className="w-1.5 h-1.5 rounded-full bg-amber-500 absolute top-0 right-0 animate-ping" />
+                        
+                        <div className="space-y-1.5 font-sans">
+                          <div className="h-1 w-10 bg-slate-600 rounded" />
+                          <div className="h-1.5 w-14 bg-amber-500/70 rounded" />
+                          <div className="h-1 w-8 bg-slate-700 rounded" />
+                        </div>
+                      </div>
+                      <p className="text-[10.5px] text-slate-400 font-semibold italic max-w-[190px] leading-relaxed">
+                        {language === 'en'
+                          ? '"Delivering unparalleled excellence across complex industries."'
+                          : '"تقديم باقة استثنائية من الخدمات الهندسية تمنح هدوء البال لملاك البنى التحتية."'
+                        }
+                      </p>
+                    </div>
+
+                    <div className="z-10 text-[9px] font-mono text-slate-500">
+                      REGISTERED IN MINISTRIES PORTAL • ARS CERTIFIED ISO 9001:2015
+                    </div>
+                  </div>
+
+                  {/* Right Column: Editorial story text */}
+                  <div className="w-full md:w-7/12 bg-slate-900 p-8 sm:p-12 flex flex-col justify-between h-1/2 md:h-full relative overflow-y-auto">
+                    <div>
+                      <div className="flex items-center gap-2 mb-4">
+                        <div className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse" />
+                        <span className="text-[10px] sm:text-xs font-black tracking-widest text-amber-500 font-mono uppercase">
+                          {language === 'en' ? 'BROCHURE • PAGE 3' : 'بروفايل الشركة • قصة التميز'}
+                        </span>
+                      </div>
+
+                      <div className="space-y-4">
+                        <h2 className="text-2.5xl font-black text-white leading-tight">
+                          {language === 'en' ? 'Company Overview' : 'مَن نَحْنُ • قِصّةُ رِيَادَتِنَا'}
+                        </h2>
+                        <div className="w-12 h-1 bg-amber-500 rounded" />
+                        
+                        {/* Beautifully columned book typesetting */}
+                        <div className="text-xs sm:text-[13px] text-slate-300 leading-relaxed space-y-4 text-justify font-sans">
+                          <p>
+                            {language === 'en' ? (
+                              <span>
+                                <strong className="text-amber-500 text-lg float-left mr-2 font-serif font-black leading-none mt-0.5">G</strong>
+                                CC Contracting represents a dynamic first-class electromechanical force, specializing in robust architectural HVAC controls, addressable fire alarm grids, and civil transport roadwork. By prioritizing the regulations of SBC (Saudi Building Code), we deliver lasting solutions that fully protect lives and build secure structural assets.
+                              </span>
+                            ) : (
+                              <span>
+                                <strong className="text-amber-500 text-2xl float-right ml-2 font-serif font-black leading-none mt-1">تُ</strong>
+                                عتبر شركة جي سي سي (GCC) للمقاولات من الكيانات الهندسية المرموقة وذات الرؤية المستقبلية الواعدة، حيث أخذنا على عاتقنا تقديم مستوى لا مثيل له من التميز عبر باقة متكاملة من الأعمال الإنشائية والكهروميكانيكية. نجحنا في ترسيخ مكانتنا كشريك استراتيجي رائد يمنح أصحاب المشاريع التجارية والصناعية والتطويرية هدوء البال بفضل تماشينا المطلق مع لوائح كود البناء السعودي ومعايير الدفاع المدني.
+                              </span>
+                            )}
+                          </p>
+                          <p>
+                            {language === 'en'
+                              ? 'Through active partnerships and highly credentialed logistics teams, we conform with standard codes NFPA 1, 13, and 72, assuring maximum safety across Khamis Mushayt, Abha, Riyadh, and Jeddah.'
+                              : 'نتميز بفريق هندسي كهروميكانيكي يمتلك فهماً عميقاً لأعمال مكافحة الحريق والإنذار المعنون، بجانب تمديدات مجاري التكييف المركزي العملاقة وسحب الأدخنة. تمتد تغطيتنا التشغيلية لتشمل المشاريع الحيوية في كود البناء السعودي (SBC) وتجهيز السبل الوقائية بمناطق عسير وجدة والرياض.'}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="border-t border-slate-800 pt-5 mt-6 flex justify-between items-center text-[10px] text-slate-400">
+                      <span className="font-mono">GCC ARCHIVAL BOOK • REGISTERED</span>
+                      <button
+                        onClick={() => setOpenedModal(null)}
+                        className="px-4 py-2 bg-slate-800 hover:bg-slate-750 text-white font-bold rounded-lg transition-all cursor-pointer"
+                      >
+                        {language === 'en' ? 'Close' : 'إغلاق'}
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

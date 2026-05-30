@@ -364,28 +364,28 @@ const Home: React.FC = () => {
             </div>
           </div>
 
-          {/* Card 6: Teams and Support */}
+          {/* Card 6: UL/FM Certified Pump Installation */}
           <div className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-200 group flex flex-col justify-between">
             <div className="h-48 overflow-hidden relative">
               <img 
-                src="https://images.unsplash.com/photo-1573164713988-8665fc963095?w=500&fit=crop" 
-                alt="GCC engineering execution teams" 
+                src="/images/fire-pump.jpg" 
+                alt="UL/FM Certified Fire Fighting Pump Installation" 
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 referrerPolicy="no-referrer"
               />
-              <span className="absolute top-3 left-3 bg-purple-650 text-white text-[9px] font-mono font-bold px-2 py-0.5 rounded">06</span>
+              <span className="absolute top-3 left-3 bg-red-650 text-white text-[9px] font-mono font-bold px-2 py-0.5 rounded">06</span>
             </div>
             <div className="p-5 flex-1 flex flex-col justify-between space-y-3">
               <div>
-                <h3 className="text-xs font-black tracking-wider text-slate-400 uppercase font-mono mb-1">{language === 'en' ? 'Collaborative Teams' : 'المشرفين وفرق عمل الهندسة'}</h3>
+                <h3 className="text-xs font-black tracking-wider text-slate-400 uppercase font-mono mb-1">{language === 'en' ? 'Pumping Systems' : 'أنظمة مكافحة اللهب'}</h3>
                 <h4 className="text-sm font-black text-slate-950 leading-tight">
-                  {language === 'en' ? 'Unified MEP Engineering CAD Supervision' : 'التخطيط وتوزيع المهام بموقع التشييد المباشر'}
+                  {language === 'en' ? 'Installation of UL/FM Certified Fire Pumps' : 'توريد وتركيب مضخات الحريق المعتمدة UL/FM'}
                 </h4>
               </div>
-              <p className="text-slate-500 text-[11px] leading-relaxed">
+              <p className="text-slate-500 text-[11px] sm:text-xs leading-relaxed">
                 {language === 'en'
-                  ? 'Our qualified management division aligning work schedules with clients to ensure seamless occupancy approval.'
-                  : 'تضامن هندسي رصين بين الرسامين ومراقبي الجودة والموقع لإتمام رخص المبنى بكفاءة قبل مواعيدها.'}
+                  ? 'Supply and installation of certified fire pumps in accordance with international safety standards, with complete execution of firefighting networks and control systems.'
+                  : 'توريد وتركيب مضخات الحريق المعتمدة وفق معايير السلامة العالمية، مع تنفيذ كامل لشبكات الإطفاء وأنظمة التحكم لضمان أعلى مستويات الحماية والكفاءة التشغيلية.'}
               </p>
             </div>
           </div>
