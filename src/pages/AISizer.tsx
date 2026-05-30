@@ -39,10 +39,21 @@ import {
   Activity,
   CheckCircle,
   Copy,
-  ChevronDown
+  ChevronDown,
+  UploadCloud,
+  FileText,
+  Trash2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import ReactMarkdown from 'react-markdown';
+
+interface UploadedFile {
+  id: string;
+  name: string;
+  size: string;
+  progress: number;
+  status: 'uploading' | 'completed' | 'error';
+}
 
 // Define the systems categories available
 type SystemCategory = 'alarm_control' | 'generators' | 'hvac' | 'fire_fighting';
@@ -119,6 +130,81 @@ const AISizer: React.FC = () => {
 
   // Input Error State
   const [validationError, setValidationError] = useState('');
+
+  // Files uploading states
+  const [files, setFiles] = useState<UploadedFile[]>([]);
+  const [dragActive, setDragActive] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  };
+
+  const simulateProgress = (fileId: string) => {
+    let current = 0;
+    const interval = setInterval(() => {
+      current += Math.floor(Math.random() * 15) + 5;
+      if (current >= 100) {
+        current = 100;
+        clearInterval(interval);
+        setFiles(prev => prev.map(f => f.id === fileId ? { ...f, progress: 100, status: 'completed' } : f));
+      } else {
+        setFiles(prev => prev.map(f => f.id === fileId ? { ...f, progress: current } : f));
+      }
+    }, 150);
+  };
+
+  const addFilesToList = (fileList: FileList) => {
+    const newFiles: UploadedFile[] = Array.from(fileList).map(file => {
+      const sizeStr = file.size > 1024 * 1024 
+        ? `${(file.size / (1024 * 1024)).toFixed(2)} MB` 
+        : `${(file.size / 1024).toFixed(1)} KB`;
+      const id = Math.random().toString(36).substring(2, 9);
+      
+      return {
+        id,
+        name: file.name,
+        size: sizeStr,
+        progress: 0,
+        status: 'uploading'
+      };
+    });
+
+    setFiles(prev => [...prev, ...newFiles]);
+
+    newFiles.forEach(f => {
+      simulateProgress(f.id);
+    });
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      addFilesToList(e.dataTransfer.files);
+    }
+  };
+
+  const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      addFilesToList(e.target.files);
+    }
+  };
+
+  const triggerFileSelect = () => {
+    fileInputRef.current?.click();
+  };
+
+  const removeFile = (id: string) => {
+    setFiles(prev => prev.filter(f => f.id !== id));
+  };
 
   // ============================================
   // SYSTEM 1: ALARM & CONTROL STATE
@@ -443,7 +529,9 @@ const AISizer: React.FC = () => {
       ticketId: ticketStr,
       status: 'new',
       createdAt: new Date().toISOString(),
-      uploadedFiles: ['Interactive-Config-Generated.pdf', 'Estimated-Layout.cad'],
+      uploadedFiles: files.length > 0 
+        ? files.map(f => f.name) 
+        : ['Interactive-Config-Generated.pdf', 'Estimated-Layout.cad'],
       priceDetails: {
         componentsCost: estimatedCostData.min,
         laborFee: Math.ceil(estimatedCostData.min * 0.15),
@@ -1311,6 +1399,106 @@ const AISizer: React.FC = () => {
                         placeholder={language === 'en' ? 'e.g. GCC Saudi Contracting Co.' : 'مثال: شركة المقاولات السعودية'}
                         className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:border-red-500 font-bold"
                       />
+                    </div>
+
+                    {/* Blueprints / Images Upload Section */}
+                    <div className="space-y-1.5 pt-2 border-t border-slate-150">
+                      <label className="text-[10.5px] font-black text-slate-600 block">
+                        {language === 'en' ? 'Attach Project Blueprints & Site Photos' : 'إرفاق مخططات المنشأة وصور الموقع'}
+                      </label>
+                      
+                      {/* Drag and Drop Zone */}
+                      <div 
+                        onDragEnter={handleDrag}
+                        onDragLeave={handleDrag}
+                        onDragOver={handleDrag}
+                        onDrop={handleDrop}
+                        className={`border border-dashed rounded-xl p-4 text-center cursor-pointer transition-all ${
+                          dragActive 
+                            ? 'border-red-500 bg-red-50/20 shadow-inner' 
+                            : 'border-slate-300 hover:border-slate-400 bg-white hover:bg-slate-50'
+                        }`}
+                        onClick={triggerFileSelect}
+                      >
+                        <input 
+                          ref={fileInputRef}
+                          type="file" 
+                          multiple 
+                          onChange={handleFileInput}
+                          className="hidden" 
+                          accept=".pdf,.dwg,.png,.jpg,.jpeg,.zip"
+                        />
+                        
+                        <div className="flex flex-col items-center gap-1.5">
+                          <UploadCloud className="w-5 h-5 text-red-650" />
+                          <div>
+                            <span className="text-[10px] font-black text-slate-850 block">
+                              {language === 'en' 
+                                ? 'Click to select drawings or drag files here' 
+                                : 'انقر لتحديد المخططات الهندسية أو اسحبها هنا'}
+                            </span>
+                            <span className="text-[9px] text-slate-400 block mt-0.5">
+                              {language === 'en' 
+                                ? 'Supports PDF, CAD (.dwg), Site images or ZIP' 
+                                : 'يقبل مستندات PDF، رسومات أوتوكاد، صور، ملفات مضغوطة'}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Display Uploaded File Queue Progressively */}
+                      {files.length > 0 && (
+                        <div className="space-y-1.5 mt-2.5">
+                          <span className="text-[9px] font-black tracking-wider text-slate-400 uppercase block">
+                            {language === 'en' ? 'Attached Schematics' : 'الملفات والمخططات المرفقة'}
+                          </span>
+                          
+                          <div className="divide-y divide-slate-100 border border-slate-150 rounded-xl overflow-hidden bg-white max-h-48 overflow-y-auto no-scrollbar">
+                            {files.map((file) => (
+                              <div key={file.id} className="p-2 flex items-center justify-between gap-3 text-xs">
+                                <div className="flex items-center gap-2 min-w-0 flex-1">
+                                  <FileText className="w-4 h-4 text-slate-500 shrink-0" />
+                                  <div className="min-w-0 flex-1">
+                                    <div className="font-bold text-slate-800 truncate text-[10px] block">{file.name}</div>
+                                    <div className="text-[9px] text-slate-450 flex items-center gap-1.5 mt-0.5">
+                                      <span>{file.size}</span>
+                                      <span>•</span>
+                                      {file.status === 'uploading' ? (
+                                        <span className="text-blue-500 animate-pulse text-[9px]">{language === 'en' ? `Uploading (${file.progress}%)` : `جاري الرفع (${file.progress}%)`}</span>
+                                      ) : (
+                                        <span className="text-emerald-600 flex items-center gap-0.5 font-bold text-[9px]">
+                                          <Check className="w-3 h-3 text-emerald-600" />
+                                          {language === 'en' ? 'Uploaded' : 'جاهز وآمن'}
+                                        </span>
+                                      )}
+                                    </div>
+                                    
+                                    {file.status === 'uploading' && (
+                                      <div className="w-full bg-slate-100 h-1 rounded-full overflow-hidden mt-1.5">
+                                        <div 
+                                          className="bg-red-500 h-full transition-all duration-150" 
+                                          style={{ width: `${file.progress}%` }}
+                                        />
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                                
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    removeFile(file.id);
+                                  }}
+                                  className="w-6 h-6 rounded-full border border-slate-100 hover:bg-slate-50 text-slate-400 hover:text-red-650 flex items-center justify-center transition-all cursor-pointer"
+                                >
+                                  <Trash2 className="w-3 h-3" />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
 

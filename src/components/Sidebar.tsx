@@ -62,7 +62,7 @@ const Sidebar: React.FC = () => {
     : baseItems;
 
   return (
-    <aside className="sidebar-width bg-slate-900 text-white border-r border-slate-800 flex flex-col items-center py-6 gap-8 z-50 shrink-0">
+    <aside className="sidebar-width bg-slate-900 text-white border-r border-slate-800 flex flex-col items-center py-6 gap-6 z-50 shrink-0 h-full overflow-y-auto no-scrollbar">
       <button 
         onClick={handleLogoTap} 
         className="w-12 h-12 transition-transform active:scale-95 duration-200 cursor-pointer relative group flex items-center justify-center"

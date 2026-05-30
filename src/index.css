@@ -42,6 +42,14 @@
     width: 80px;
   }
 
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
   .rtl-flip {
     transform: scaleX(-1);
   }
