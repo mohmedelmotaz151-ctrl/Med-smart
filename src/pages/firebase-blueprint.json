@@ -76,6 +76,34 @@
         "attachments": { "type": "array" }
       },
       "required": ["senderId", "text", "timestamp"]
+    },
+    "GccDynamicMedia": {
+      "title": "GCC Dynamic Media",
+      "description": "Equipment, projects, services, or images managed by GCC Admins.",
+      "type": "object",
+      "properties": {
+        "titleEn": { "type": "string" },
+        "titleAr": { "type": "string" },
+        "category": { "type": "string" },
+        "descriptionEn": { "type": "string" },
+        "descriptionAr": { "type": "string" },
+        "type": { "type": "string" },
+        "imageUrls": { "type": "array" }
+      },
+      "required": ["titleEn", "titleAr"]
+    },
+    "Inquiry": {
+      "title": "Customer Inquiry",
+      "description": "Quote requests and customer contacts for contracting estimates.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "phone": { "type": "string" },
+        "email": { "type": "string" },
+        "ticketId": { "type": "string" },
+        "status": { "type": "string" }
+      },
+      "required": ["name", "phone", "email", "ticketId", "status"]
     }
   },
   "firestore": {
@@ -98,6 +126,14 @@
     "/chats/{chatId}/messages/{messageId}": {
       "schema": "ChatMessage",
       "description": "Messages for consultation chats."
+    },
+    "/gcc_dynamic_media/{mediaId}": {
+      "schema": "GccDynamicMedia",
+      "description": "Equipment, projects, actions and image references."
+    },
+    "/inquiries/{inquiryId}": {
+      "schema": "Inquiry",
+      "description": "Custom MEP, HVAC, firefighting quotes and contact entries."
     }
   }
 }
