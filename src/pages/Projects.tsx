@@ -69,7 +69,7 @@ const Projects: React.FC = () => {
             year: item.year || '2026',
             scopeEn: item.descriptionEn,
             scopeAr: item.descriptionAr,
-            img: item.imageUrls && item.imageUrls[0] ? item.imageUrls[0] : 'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=600&fit=crop',
+            img: item.imageUrls && item.imageUrls[0] ? item.imageUrls[0] : 'https://images.pexels.com/photos/257736/pexels-photo-257736.jpeg?auto=compress&cs=tinysrgb&w=1200',
             detailsEn: item.descriptionEn,
             detailsAr: item.descriptionAr
           }));
