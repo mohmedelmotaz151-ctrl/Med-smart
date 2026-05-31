@@ -34,7 +34,9 @@ import {
   FolderPlus,
   Upload,
   Plus,
-  Edit
+  Edit,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -71,7 +73,8 @@ export interface MediaItem {
   descriptionEn: string;
   descriptionAr: string;
   imageUrls: string[];
-  type: 'project' | 'service';
+  type: 'project' | 'service' | 'equipment';
+  visible?: boolean;
   clientEn?: string;
   clientAr?: string;
   locationEn?: string;
@@ -99,12 +102,15 @@ const Admin: React.FC = () => {
   const [mediaCategory, setMediaCategory] = useState<'projects' | 'services' | 'fire' | 'cooling' | 'power' | 'cctv'>('projects');
   const [mediaDescriptionEn, setMediaDescriptionEn] = useState('');
   const [mediaDescriptionAr, setMediaDescriptionAr] = useState('');
-  const [mediaType, setMediaType] = useState<'project' | 'service'>('project');
+  const [mediaType, setMediaType] = useState<'project' | 'service' | 'equipment'>('project');
   const [mediaClientEn, setMediaClientEn] = useState('GCC Saudi Arabia');
   const [mediaClientAr, setMediaClientAr] = useState('شركة جي سي سي للمقاولات العامة');
   const [mediaLocationEn, setMediaLocationEn] = useState('Riyadh, KSA');
   const [mediaLocationAr, setMediaLocationAr] = useState('الرياض، المملكة العربية السعودية');
   const [mediaYear, setMediaYear] = useState(new Date().getFullYear().toString());
+  const [mediaVisible, setMediaVisible] = useState<boolean>(true);
+  const [mediaListFilter, setMediaListFilter] = useState<'all' | 'project' | 'service' | 'equipment'>('all');
+  const [selectedPreviewMedia, setSelectedPreviewMedia] = useState<MediaItem | null>(null);
   
   // Multi-image selection state
   const [selectedUploads, setSelectedUploads] = useState<{ name: string; base64: string }[]>([]);
@@ -289,6 +295,7 @@ const Admin: React.FC = () => {
     setMediaLocationEn('Riyadh, KSA');
     setMediaLocationAr('الرياض، المملكة العربية السعودية');
     setMediaYear(new Date().getFullYear().toString());
+    setMediaVisible(true);
     setSelectedUploads([]);
     setUploadError('');
     setEditingMedia(null);
@@ -312,22 +319,28 @@ const Admin: React.FC = () => {
       // 1. Upload new files to Node/Express backend folder structure
       const uploadedUrls: string[] = [];
       for (const upload of selectedUploads) {
-        // Post base64 file to server /api/upload
-        const response = await fetch('/api/upload', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            filename: `${Date.now()}_${upload.name}`,
-            content: upload.base64,
-            category: mediaCategory
-          })
-        });
+        try {
+          // Post base64 file to server /api/upload
+          const response = await fetch('/api/upload', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              filename: `${Date.now()}_${upload.name}`,
+              content: upload.base64,
+              category: mediaCategory
+            })
+          });
 
-        if (!response.ok) {
-          throw new Error(await response.text());
+          if (!response.ok) {
+            throw new Error(await response.text());
+          }
+          const data = await response.json();
+          uploadedUrls.push(data.url);
+        } catch (uploadErr) {
+          console.warn("Backend file upload failed, falling back to base64 encoding directly:", uploadErr);
+          // Fallback directly to the base64 content
+          uploadedUrls.push(upload.base64);
         }
-        const data = await response.json();
-        uploadedUrls.push(data.url);
       }
 
       // If editing, combine older image URLs with the newly uploaded ones
@@ -348,6 +361,7 @@ const Admin: React.FC = () => {
         locationEn: mediaLocationEn,
         locationAr: mediaLocationAr,
         year: mediaYear,
+        visible: mediaVisible,
         createdAt: editingMedia ? editingMedia.createdAt : new Date().toISOString()
       };
 
@@ -405,6 +419,7 @@ const Admin: React.FC = () => {
     setMediaLocationEn(media.locationEn || 'Riyadh, KSA');
     setMediaLocationAr(media.locationAr || 'الرياض، المملكة العربية السعودية');
     setMediaYear(media.year || new Date().getFullYear().toString());
+    setMediaVisible(media.visible !== false);
     setSelectedUploads([]);
   };
 
@@ -428,6 +443,32 @@ const Admin: React.FC = () => {
     if (editingMedia?.id === mediaId) {
       clearMediaForm();
     }
+  };
+
+  const handleToggleVisibility = async (item: MediaItem) => {
+    if (!item.id) return;
+    const updatedVisible = item.visible === false ? true : false;
+    const updatedItem = { ...item, visible: updatedVisible };
+    
+    // update locally
+    const localMedia: MediaItem[] = JSON.parse(localStorage.getItem('gcc_dynamic_media') || '[]');
+    const updatedLocal = localMedia.map(m => m.id === item.id ? updatedItem : m);
+    localStorage.setItem('gcc_dynamic_media', JSON.stringify(updatedLocal));
+    setMediaItems(updatedLocal);
+    
+    // update in Firestore (if not local-only)
+    if (!item.id.startsWith('local_')) {
+      try {
+        await updateDoc(doc(db, 'gcc_dynamic_media', item.id), { visible: updatedVisible });
+      } catch (err) {
+        console.warn("Could not toggle visibility in Firestore, kept offline change", err);
+      }
+    }
+    triggerToast(
+      language === 'en' 
+        ? `Status updated to ${updatedVisible ? 'Visible' : 'Hidden'}` 
+        : `تم تعديل حالة العرض إلى ${updatedVisible ? 'معروض للزوار' : 'مخفي مؤقتاً بالواجهة'}`
+    );
   };
 
   const fetchInquiries = async () => {
@@ -1399,6 +1440,7 @@ const Admin: React.FC = () => {
                     >
                       <option value="project">{language === 'en' ? 'Project' : 'مشروع (سوابق الأعمال)'}</option>
                       <option value="service">{language === 'en' ? 'Service Tab' : 'خدمة (بيانات وقدرات)'}</option>
+                      <option value="equipment">{language === 'en' ? 'Equipment / Gallery' : 'معرض المعدات والعمليات الحية (الصناعية)'}</option>
                     </select>
                   </div>
 
@@ -1416,6 +1458,33 @@ const Admin: React.FC = () => {
                       <option value="cctv">{language === 'en' ? 'CCTV Camera' : 'كاميرات مراقبة وحماية'}</option>
                     </select>
                   </div>
+                </div>
+
+                {/* Live Site Visibility Toggle */}
+                <div className="bg-slate-50 rounded-2xl p-4.5 border border-slate-200 flex items-center justify-between gap-4">
+                  <div>
+                    <span className="font-extrabold text-slate-900 block text-xs">
+                      {language === 'en' ? 'Publish Status' : 'حالة العرض والنشاط مباشرة'}
+                    </span>
+                    <span className="text-[10px] text-slate-400 block font-medium mt-0.5">
+                      {language === 'en' 
+                        ? 'Control whether this resource is visible in the public galleries.' 
+                        : 'تحكم في ما إذا كان هذا الـمشروع/الـمعدة يظهر للعملاء في الواجهة العامة.'}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setMediaVisible(!mediaVisible)}
+                    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                      mediaVisible ? 'bg-emerald-600' : 'bg-slate-300'
+                    }`}
+                  >
+                    <span
+                      className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
+                        mediaVisible ? (language === 'en' ? 'translate-x-5' : '-translate-x-5') : 'translate-x-0'
+                      }`}
+                    />
+                  </button>
                 </div>
 
                 {/* Optional Project specifications fields if mediaType === 'project' */}
@@ -1591,20 +1660,68 @@ const Admin: React.FC = () => {
           {/* Right Column: Library and Directory layout (Col-span-7) */}
           <div className="lg:col-span-7 space-y-6">
             <div className="bg-white border border-slate-200 rounded-3xl p-6 space-y-4 shadow-sm">
-              <div className="flex justify-between items-center">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <h3 className="text-sm font-black text-slate-900 uppercase">
                     {language === 'en' ? 'Live Dynamic Media list' : 'المستودع ومكتبة الصور النشطة'}
                   </h3>
-                  <p className="text-[10px] text-slate-400 font-bold mt-1">
+                  <p className="text-[10px] text-slate-400 font-bold mt-1 shadow-none">
                     {language === 'en' 
                       ? 'Media objects are served instantly across slider widget, projects catalogue, and specialized tabs.'
                       : 'الصور والملفات المدرجة هنا تظهر تلقائياً في السلايدر، صفحات المشاريع المنجزة وضمن خانات الخدمات التكتيكية.'}
                   </p>
                 </div>
-                <span className="bg-indigo-50 text-indigo-700 px-3 py-1 border border-indigo-100 rounded-full text-[10px] font-black font-mono">
+                <span className="bg-indigo-50 text-indigo-700 px-3 py-1 border border-indigo-100 rounded-full text-[10px] font-black font-mono self-start sm:self-auto">
                   {mediaItems.length} {language === 'en' ? 'Total' : 'عناصر معتمدة'}
                 </span>
+              </div>
+
+              {/* Segmented filtering buttons */}
+              <div className="flex flex-wrap gap-1.5 border-b border-slate-100 pb-3">
+                <button
+                  type="button"
+                  onClick={() => setMediaListFilter('all')}
+                  className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wide transition-all ${
+                    mediaListFilter === 'all'
+                      ? 'bg-red-650 text-white'
+                      : 'bg-slate-50 text-slate-500 hover:text-slate-800 border border-slate-200'
+                  }`}
+                >
+                  {language === 'en' ? 'All' : 'عرض الكل'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMediaListFilter('project')}
+                  className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wide transition-all ${
+                    mediaListFilter === 'project'
+                      ? 'bg-red-650 text-white'
+                      : 'bg-slate-50 text-slate-500 hover:text-slate-800 border border-slate-200'
+                  }`}
+                >
+                  {language === 'en' ? 'Projects' : 'المشروعات (السيناريوهات)'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMediaListFilter('service')}
+                  className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wide transition-all ${
+                    mediaListFilter === 'service'
+                      ? 'bg-red-650 text-white'
+                      : 'bg-slate-50 text-slate-500 hover:text-slate-800 border border-slate-200'
+                  }`}
+                >
+                  {language === 'en' ? 'Services' : 'الخدمات'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMediaListFilter('equipment')}
+                  className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wide transition-all ${
+                    mediaListFilter === 'equipment'
+                      ? 'bg-red-650 text-white'
+                      : 'bg-slate-50 text-slate-500 hover:text-slate-800 border border-slate-200'
+                  }`}
+                >
+                  {language === 'en' ? 'Equipment' : 'معرض المعدات'}
+                </button>
               </div>
 
               {/* Dynamic list rendering */}
@@ -1613,81 +1730,238 @@ const Admin: React.FC = () => {
                   <Loader2 className="w-8 h-8 animate-spin text-red-650 mx-auto" />
                   <p className="text-xs text-slate-400 font-extrabold mt-3">{language === 'en' ? 'Querying static routes catalogs...' : 'جاري تجميع روابط المجلدات والملفات...'}</p>
                 </div>
-              ) : mediaItems.length === 0 ? (
+              ) : mediaItems.filter(item => mediaListFilter === 'all' || item.type === mediaListFilter).length === 0 ? (
                 <div className="text-center py-20 bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl text-slate-400 italic font-semibold text-xs">
-                  {language === 'en' ? 'No dynamic images uploaded yet.' : 'لا توجد صور أو مصادر كهروميكانيكية مضاف حالياً.'}
+                  {language === 'en' ? 'No assets matching selected filter yet.' : 'لا توجد عناصر هندسية تتبع هذا الفرز حالياً.'}
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {mediaItems.map((item) => (
-                    <div 
-                      key={item.id} 
-                      className="bg-white rounded-2xl border border-slate-200 overflow-hidden flex flex-col justify-between group hover:shadow-md transition-shadow"
-                    >
-                      <div className="relative h-40 bg-slate-100 overflow-hidden shrink-0">
-                        {item.imageUrls && item.imageUrls.length > 0 ? (
-                          <img src={item.imageUrls[0]} alt={item.titleEn} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-slate-300">
-                            <ImageIcon className="w-10 h-10" />
+                  {mediaItems
+                    .filter(item => mediaListFilter === 'all' || item.type === mediaListFilter)
+                    .map((item) => (
+                      <div 
+                        key={item.id} 
+                        className={`bg-white rounded-2xl border overflow-hidden flex flex-col justify-between group hover:shadow-md transition-shadow ${
+                          item.visible === false ? 'border-amber-200/60 bg-amber-50/5' : 'border-slate-200'
+                        }`}
+                      >
+                        <div className="relative h-40 bg-slate-100 overflow-hidden shrink-0">
+                          {item.imageUrls && item.imageUrls.length > 0 ? (
+                            <img src={item.imageUrls[0]} alt={item.titleEn} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-slate-300">
+                              <ImageIcon className="w-10 h-10" />
+                            </div>
+                          )}
+                          
+                          {/* Visibility and Type labels */}
+                          <div className="absolute top-2.5 left-2.5 right-2.5 flex justify-between items-center gap-2">
+                            <span className="bg-slate-900/80 backdrop-blur-md text-white text-[8px] font-black uppercase tracking-widest px-2 py-1 rounded-lg border border-white/10">
+                              {item.type === 'equipment' 
+                                ? (language === 'en' ? 'Equipment' : 'معرض المعدات')
+                                : item.type === 'project' 
+                                  ? (language === 'en' ? 'Project' : 'مشاريع وتركيبات') 
+                                  : (language === 'en' ? 'Service Tab' : 'خدمات وتأسيس')
+                              }
+                            </span>
+                            
+                            {item.visible === false ? (
+                              <span className="bg-amber-500/90 text-white text-[7.5px] font-black px-2 py-0.5 rounded-lg flex items-center gap-1">
+                                <EyeOff className="w-2.5 h-2.5" />
+                                <span>{language === 'en' ? 'Hidden' : 'مخفي بالموقع'}</span>
+                              </span>
+                            ) : (
+                              <span className="bg-emerald-600/95 text-white text-[7.5px] font-black px-2 py-0.5 rounded-lg flex items-center gap-1">
+                                <Eye className="w-2.5 h-2.5" />
+                                <span>{language === 'en' ? 'Live' : 'نشط ومعروض'}</span>
+                              </span>
+                            )}
                           </div>
-                        )}
-                        <span className="absolute top-2.5 left-2.5 bg-slate-900/80 backdrop-blur-md text-white text-[8px] font-black uppercase tracking-widest px-2 py-1 rounded-lg border border-white/10">
-                          {item.type === 'project' ? (language === 'en' ? 'Project' : 'مشاريع وتركيبات') : (language === 'en' ? 'Service Tab' : 'خدمات وتأسيس')}
-                        </span>
-                        {item.imageUrls && item.imageUrls.length > 1 && (
-                          <span className="absolute bottom-2.5 right-2.5 bg-red-650/90 text-white text-[8px] font-black px-2 py-1 rounded-lg">
-                            +{item.imageUrls.length - 1} {language === 'en' ? 'More Images' : 'صور إضافية'}
-                          </span>
-                        )}
-                      </div>
-
-                      <div className="p-4 space-y-3 font-sans">
-                        <div>
-                          <h4 className="font-extrabold text-slate-900 text-xs line-clamp-1">
-                            {language === 'en' ? item.titleEn : item.titleAr}
-                          </h4>
-                          <span className="inline-block bg-slate-50 border border-slate-150 text-[8px] px-2 py-0.5 rounded font-mono text-slate-400 mt-1 uppercase">
-                            /{item.category} • {item.year || '2026'}
-                          </span>
+                          
+                          {item.imageUrls && item.imageUrls.length > 1 && (
+                            <span className="absolute bottom-2.5 right-2.5 bg-red-650/90 text-white text-[8px] font-black px-2 py-1 rounded-lg">
+                              +{item.imageUrls.length - 1} {language === 'en' ? 'More Images' : 'صور إضافية'}
+                            </span>
+                          )}
                         </div>
 
-                        <p className="text-[10.5px] text-slate-500 leading-normal line-clamp-2">
-                          {language === 'en' ? item.descriptionEn : item.descriptionAr}
-                        </p>
+                        <div className="p-4 space-y-3 font-sans">
+                          <div>
+                            <h4 className="font-extrabold text-slate-900 text-xs line-clamp-1">
+                              {language === 'en' ? item.titleEn : item.titleAr}
+                            </h4>
+                            <span className="inline-block bg-slate-50 border border-slate-150 text-[8px] px-2 py-0.5 rounded font-mono text-slate-400 mt-1 uppercase">
+                              /{item.category} • {item.year || '2026'}
+                            </span>
+                          </div>
 
-                        <div className="flex justify-between items-center pt-2.5 border-t border-slate-100 shrink-0">
-                          {/* Live path readout */}
-                          <span className="font-mono text-[8.5px] text-slate-450 select-all truncate max-w-[120px]" title={item.imageUrls && item.imageUrls[0]}>
-                            {item.imageUrls && item.imageUrls[0]}
-                          </span>
+                          <p className="text-[10.5px] text-slate-500 leading-normal line-clamp-2">
+                            {language === 'en' ? item.descriptionEn : item.descriptionAr}
+                          </p>
 
-                          <div className="flex gap-2">
-                            <button 
-                              onClick={() => handleEditInit(item)}
-                              className="p-1.5 border border-slate-200 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-slate-50 transition-colors"
-                              title={language === 'en' ? 'Edit details' : 'تعديل البيانات'}
-                            >
-                              <Edit className="w-3.5 h-3.5" />
-                            </button>
-                            <button 
-                              onClick={() => handleDeleteMedia(item.id)}
-                              className="p-1.5 border border-slate-200 rounded-lg text-slate-500 hover:text-red-650 hover:bg-slate-50 transition-colors"
-                              title={language === 'en' ? 'Delete resource' : 'حذف المصادر والصورة'}
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
+                          <div className="flex justify-between items-center pt-2.5 border-t border-slate-100 shrink-0">
+                            {/* Shortened URL preview */}
+                            <span className="font-mono text-[8px] text-slate-400 select-all truncate max-w-[90px]" title={item.imageUrls && item.imageUrls[0]}>
+                              {item.imageUrls && item.imageUrls[0]?.split('/').pop()}
+                            </span>
+
+                            <div className="flex gap-1.5">
+                              {/* View click (Eye icon) */}
+                              <button 
+                                onClick={() => setSelectedPreviewMedia(item)}
+                                className="p-1.5 border border-slate-200 rounded-lg text-[#0f2d59] hover:bg-slate-50 transition-colors"
+                                title={language === 'en' ? 'View/Inspect details' : 'عرض ومعاينة التفاصيل'}
+                              >
+                                <Eye className="w-3.5 h-3.5" />
+                              </button>
+                              
+                              {/* Quick visibility toggle */}
+                              <button 
+                                onClick={() => handleToggleVisibility(item)}
+                                className={`p-1.5 border rounded-lg transition-colors ${
+                                  item.visible === false 
+                                    ? 'border-amber-300 text-amber-500 hover:bg-amber-50' 
+                                    : 'border-slate-200 text-emerald-600 hover:bg-slate-50'
+                                }`}
+                                title={item.visible === false 
+                                  ? (language === 'en' ? 'Make active on site' : 'بث وتفعيل بالموقع')
+                                  : (language === 'en' ? 'Hide from public catalog' : 'إخفاء وحجب بالموقع')
+                                }
+                              >
+                                {item.visible === false ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                              </button>
+
+                              <button 
+                                onClick={() => handleEditInit(item)}
+                                className="p-1.5 border border-slate-200 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-slate-50 transition-colors"
+                                title={language === 'en' ? 'Edit details' : 'تعديل البيانات'}
+                              >
+                                <Edit className="w-3.5 h-3.5" />
+                              </button>
+                              
+                              <button 
+                                onClick={() => handleDeleteMedia(item.id)}
+                                className="p-1.5 border border-slate-200 rounded-lg text-slate-500 hover:text-red-650 hover:bg-slate-50 transition-colors"
+                                title={language === 'en' ? 'Delete resource' : 'حذف المصادر والصورة'}
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
                 </div>
               )}
             </div>
           </div>
         </div>
       )}
+
+      {/* Dynamic Detail Viewer Modal */}
+      <AnimatePresence>
+        {selectedPreviewMedia && (
+          <div className="fixed inset-0 bg-slate-950/50 backdrop-blur-md z-[99999] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              className="bg-white rounded-3xl border border-slate-200 max-w-2xl w-full overflow-hidden shadow-2xl flex flex-col font-sans"
+            >
+              <div className="bg-[#0f2d59] p-5 text-white flex justify-between items-center">
+                <div>
+                  <h4 className="font-extrabold text-xs uppercase tracking-wider">
+                    {language === 'en' ? 'Detailed Resource Inspection' : 'معاينة تفاصيل وبيانات الملف الهندسي'}
+                  </h4>
+                  <span className="text-[10px] text-slate-300 block mt-0.5">
+                    {language === 'en' ? 'Live status: ' : 'حالة النشاط بالموقع: '} 
+                    <span className="font-black text-white">
+                      {selectedPreviewMedia.visible !== false ? (language === 'en' ? 'VISIBLE' : 'نشط ومعروض للزوار') : (language === 'en' ? 'HIDDEN' : 'مخفي حالياً')}
+                    </span>
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedPreviewMedia(null)}
+                  className="bg-white/10 hover:bg-white/25 p-2 rounded-xl text-white transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="p-6 space-y-5 overflow-y-auto max-h-[70vh]">
+                {selectedPreviewMedia.imageUrls && selectedPreviewMedia.imageUrls.length > 0 && (
+                  <div className="h-48 overflow-hidden rounded-2xl border border-slate-100">
+                    <img 
+                      src={selectedPreviewMedia.imageUrls[0]} 
+                      alt="Primary showcase" 
+                      className="w-full h-full object-cover" 
+                      referrerPolicy="no-referrer"
+                    />
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-sans">
+                  <div>
+                    <h5 className="font-extrabold text-[#0f2d59] mb-1">{language === 'en' ? 'English Content' : 'المحتوى بالإنجليزية'}</h5>
+                    <div className="bg-slate-50 border border-slate-150 p-3.5 rounded-xl space-y-2">
+                      <p className="font-bold text-slate-800"><span className="text-[#0f2d59] font-black">Title:</span> {selectedPreviewMedia.titleEn}</p>
+                      <p className="text-slate-550 leading-relaxed font-semibold"><span className="text-[#0f2d59] font-black">Description:</span> {selectedPreviewMedia.descriptionEn}</p>
+                      {selectedPreviewMedia.clientEn && <p className="text-slate-650"><span className="text-[#0f2d59] font-black">Client:</span> {selectedPreviewMedia.clientEn}</p>}
+                      {selectedPreviewMedia.locationEn && <p className="text-slate-650"><span className="text-[#0f2d59] font-black">Location:</span> {selectedPreviewMedia.locationEn}</p>}
+                    </div>
+                  </div>
+
+                  <div>
+                    <h5 className="font-extrabold text-[#0f2d59] mb-1">{language === 'en' ? 'Arabic Output' : 'المحتوى بالعربية (جاهز للنشر)'}</h5>
+                    <div className="bg-slate-50 border border-slate-150 p-3.5 rounded-xl space-y-2 text-right" dir="rtl">
+                      <p className="font-bold text-slate-800"><span className="text-[#0f2d59] font-black">العنوان:</span> {selectedPreviewMedia.titleAr}</p>
+                      <p className="text-slate-550 leading-relaxed font-semibold"><span className="text-[#0f2d59] font-black">الوصف:</span> {selectedPreviewMedia.descriptionAr}</p>
+                      {selectedPreviewMedia.clientAr && <p className="text-slate-650"><span className="text-[#0f2d59] font-black">العميل:</span> {selectedPreviewMedia.clientAr}</p>}
+                      {selectedPreviewMedia.locationAr && <p className="text-slate-650"><span className="text-[#0f2d59] font-black">الموقع:</span> {selectedPreviewMedia.locationAr}</p>}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-3 border-t border-slate-100 pt-4 text-center">
+                  <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-150">
+                    <span className="text-[9px] text-slate-400 block font-bold">{language === 'en' ? 'Placement' : 'خط التوزيع والفرز'}</span>
+                    <span className="text-xs font-black text-slate-800 capitalize">{selectedPreviewMedia.type}</span>
+                  </div>
+                  <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-150">
+                    <span className="text-[9px] text-slate-400 block font-bold">{language === 'en' ? 'Category' : 'القسم الهندسي'}</span>
+                    <span className="text-xs font-black text-slate-800 uppercase">{selectedPreviewMedia.category}</span>
+                  </div>
+                  <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-150">
+                    <span className="text-[9px] text-slate-400 block font-bold">{language === 'en' ? 'Execution Year' : 'سنة التنفيذ والتدشين'}</span>
+                    <span className="text-xs font-black text-slate-800">{selectedPreviewMedia.year || '2026'}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-slate-50 p-4 border-t border-slate-200 flex justify-between gap-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleEditInit(selectedPreviewMedia);
+                    setSelectedPreviewMedia(null);
+                  }}
+                  className="bg-[#0f2d59] hover:bg-[#1e4883] text-white font-extrabold text-[11px] px-5 py-2.5 rounded-xl transition-all uppercase tracking-wider"
+                >
+                  {language === 'en' ? 'Configure & Edit' : 'تعديل البيانات'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedPreviewMedia(null)}
+                  className="bg-white border border-slate-300 hover:bg-slate-50 text-slate-605 font-extrabold text-[11px] px-5 py-2.5 rounded-xl transition-all uppercase tracking-wider"
+                >
+                  {language === 'en' ? 'Close' : 'إغلاق المعاينة'}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* Toast Notification Banner */}
       <AnimatePresence>

@@ -48,7 +48,7 @@ const Projects: React.FC = () => {
       if (stored) {
         const parsed = JSON.parse(stored);
         const filtered = parsed
-          .filter((item: any) => item.type === 'project')
+          .filter((item: any) => item.type === 'project' && item.visible !== false)
           .map((item: any) => ({
             id: item.id || `dynamic-p-${item.createdAt}`,
             nameEn: item.titleEn,

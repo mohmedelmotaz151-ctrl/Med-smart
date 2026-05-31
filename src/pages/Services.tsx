@@ -28,7 +28,7 @@ const Services: React.FC = () => {
       const stored = localStorage.getItem('gcc_dynamic_media');
       if (stored) {
         const parsed = JSON.parse(stored);
-        const filtered = parsed.filter((item: any) => item.type === 'service');
+        const filtered = parsed.filter((item: any) => item.type === 'service' && item.visible !== false);
         setDynamicServices(filtered);
       }
     } catch (e) {

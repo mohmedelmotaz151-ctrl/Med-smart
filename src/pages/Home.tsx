@@ -20,10 +20,37 @@ import {
 import { motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 
+interface HomeMediaItem {
+  id?: string;
+  titleEn: string;
+  titleAr: string;
+  category: string;
+  descriptionEn: string;
+  descriptionAr: string;
+  imageUrls: string[];
+  type: string;
+  visible?: boolean;
+}
+
 const Home: React.FC = () => {
   const { t, language } = useLanguage();
   const { user } = useAuth();
   const navigate = useNavigate();
+
+  const [dynamicEquipment, setDynamicEquipment] = React.useState<HomeMediaItem[]>([]);
+
+  React.useEffect(() => {
+    try {
+      const stored = localStorage.getItem('gcc_dynamic_media');
+      if (stored) {
+        const parsed: HomeMediaItem[] = JSON.parse(stored);
+        const filtered = parsed.filter(item => item.type === 'equipment' && item.visible !== false);
+        setDynamicEquipment(filtered);
+      }
+    } catch (err) {
+      console.error("Failed to parse dynamic equipment items", err);
+    }
+  }, []);
 
   const mockServices = [
     {
@@ -234,6 +261,45 @@ const Home: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Dynamic equipment from admin dashboard */}
+          {dynamicEquipment.map((eq, index) => (
+            <div 
+              key={eq.id || `dyn-eq-${index}`}
+              className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl hover:border-red-500/30 transition-all duration-300 border border-slate-200 group flex flex-col justify-between"
+            >
+              <div className="h-48 overflow-hidden relative">
+                {eq.imageUrls && eq.imageUrls.length > 0 ? (
+                  <img 
+                    src={eq.imageUrls[0]} 
+                    alt={eq.titleEn} 
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    referrerPolicy="no-referrer"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-slate-100 text-slate-300 font-bold text-xs uppercase">
+                    No Images Attached
+                  </div>
+                )}
+                <span className="absolute top-3 left-3 bg-red-650 text-white text-[9px] font-mono font-extrabold px-2 py-0.5 rounded shadow">
+                  {language === 'en' ? 'Live Fleet' : 'معدة نشطة'}
+                </span>
+              </div>
+              <div className="p-5 flex-1 flex flex-col justify-between space-y-3">
+                <div>
+                  <h3 className="text-xs font-black tracking-wider text-[#0f2d59] uppercase font-mono mb-1">
+                    {language === 'en' ? (eq.category === 'projects' ? 'FLEET / OPERATIONS' : eq.category) : 'معدات الإسناد الميداني'}
+                  </h3>
+                  <h4 className="text-sm font-black text-slate-950 leading-tight">
+                    {language === 'en' ? eq.titleEn : eq.titleAr}
+                  </h4>
+                </div>
+                <p className="text-slate-500 text-[11px] leading-relaxed line-clamp-3">
+                  {language === 'en' ? eq.descriptionEn : eq.descriptionAr}
+                </p>
+              </div>
+            </div>
+          ))}
+
           {/* Card 1: Heavy Construction Sites */}
           <div className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-200 group flex flex-col justify-between">
             <div className="h-48 overflow-hidden relative">
