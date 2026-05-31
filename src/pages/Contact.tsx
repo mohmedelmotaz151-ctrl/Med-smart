@@ -37,6 +37,7 @@ interface UploadedFile {
   size: string;
   progress: number;
   status: 'uploading' | 'completed' | 'error';
+  dataUrl?: string;
 }
 
 const Contact: React.FC = () => {
@@ -103,11 +104,20 @@ const Contact: React.FC = () => {
   };
 
   const addFilesToList = (fileList: FileList) => {
-    const newFiles: UploadedFile[] = Array.from(fileList).map(file => {
+    const fileArray = Array.from(fileList);
+    const newFiles: UploadedFile[] = fileArray.map(file => {
       const sizeStr = file.size > 1024 * 1024 
         ? `${(file.size / (1024 * 1024)).toFixed(2)} MB` 
         : `${(file.size / 1024).toFixed(1)} KB`;
       const id = Math.random().toString(36).substring(2, 9);
+      
+      // Convert to base64 Data URL
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const resultString = reader.result as string;
+        setFiles(prev => prev.map(f => f.id === id ? { ...f, dataUrl: resultString } : f));
+      };
+      reader.readAsDataURL(file);
       
       return {
         id,
@@ -156,12 +166,17 @@ const Contact: React.FC = () => {
     setLoading(true);
     // Generate an elegant, easily traceable engineering ticket ID conforming to: GCC-2026-XXXX
     const computedTicketId = `GCC-2026-${Math.floor(1000 + Math.random() * 9000)}`;
-    const uploadedFileNames = files.map(f => f.name);
+    const uploadedFilePayloads = files.map(f => {
+      if (f.dataUrl) {
+        return `${f.name}||${f.dataUrl}`;
+      }
+      return f.name;
+    });
 
     const inquiryPayload = {
       ...formData,
       ticketId: computedTicketId,
-      uploadedFiles: uploadedFileNames,
+      uploadedFiles: uploadedFilePayloads,
       userId: user?.uid || 'guest',
       userEmail: user?.email || formData.email,
       status: 'new', // 'new' | 'under_review' | 'priced' | 'completed'

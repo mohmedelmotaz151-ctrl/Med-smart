@@ -38,7 +38,11 @@ import {
   Eye,
   EyeOff,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  ZoomIn,
+  ZoomOut,
+  RotateCcw,
+  Layers
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -142,6 +146,72 @@ const Admin: React.FC = () => {
   const [inspectionDate, setInspectionDate] = useState<string>('');
   const [attachedPdfUrl, setAttachedPdfUrl] = useState<string>('');
   const [customStatusNotes, setCustomStatusNotes] = useState<string>('');
+
+  // Interactive CAD Blueprint and drawing viewer states
+  const [activeBlueprintFile, setActiveBlueprintFile] = useState<string | null>(null);
+  const [blueprintModalOpen, setBlueprintModalOpen] = useState<boolean>(false);
+  const [blueprintZoom, setBlueprintZoom] = useState<number>(1.0);
+  const [blueprintPanX, setBlueprintPanX] = useState<number>(0);
+  const [blueprintPanY, setBlueprintPanY] = useState<number>(0);
+  const [blueprintLayers, setBlueprintLayers] = useState<string[]>(['shell', 'devices', 'labels', 'pipes']);
+  const [blueprintTheme, setBlueprintTheme] = useState<'cyan' | 'navy' | 'light'>('cyan');
+  const [blueprintAnnotations, setBlueprintAnnotations] = useState<Array<{ id: string; x: number; y: number; textAr: string; textEn: string }>>([]);
+  const [newAnnotationTextAr, setNewAnnotationTextAr] = useState<string>('');
+  const [newAnnotationTextEn, setNewAnnotationTextEn] = useState<string>('');
+  const [tempAnnotationCoords, setTempAnnotationCoords] = useState<{ x: number; y: number } | null>(null);
+
+  const handleOpenBlueprint = (fileStr: string) => {
+    setActiveBlueprintFile(fileStr);
+    setBlueprintModalOpen(true);
+    setBlueprintZoom(1.0);
+    setBlueprintPanX(0);
+    setBlueprintPanY(0);
+    setTempAnnotationCoords(null);
+    setNewAnnotationTextAr('');
+    setNewAnnotationTextEn('');
+    
+    // Inject default illustrative annotations to seed the plan
+    const defaultAnnotations = [
+      { id: '1', x: 260, y: 150, textAr: 'فحص ضغط الأنابيب وتدفق المياه لمطابقة NFPA', textEn: 'Verify branch pipe pressure SLA' },
+      { id: '2', x: 420, y: 280, textAr: 'تثبيت صمام تحكم كود البناء SBC', textEn: 'Set SBC compliance flow check' }
+    ];
+    setBlueprintAnnotations(defaultAnnotations);
+  };
+
+  const handleAddAnnotation = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!tempAnnotationCoords || (!newAnnotationTextAr && !newAnnotationTextEn)) return;
+
+    const newAnn = {
+      id: Math.random().toString(36).substr(2, 9),
+      x: tempAnnotationCoords.x,
+      y: tempAnnotationCoords.y,
+      textAr: newAnnotationTextAr || newAnnotationTextEn,
+      textEn: newAnnotationTextEn || newAnnotationTextAr
+    };
+
+    setBlueprintAnnotations(prev => [...prev, newAnn]);
+    setTempAnnotationCoords(null);
+    setNewAnnotationTextAr('');
+    setNewAnnotationTextEn('');
+    triggerToast(language === 'en' ? 'Engineering annotation marked on drawing.' : 'تم تثبيت بطاقة المعاينة الهندسية على المخطط.');
+  };
+
+  const handleClearAnnotations = () => {
+    setBlueprintAnnotations([]);
+    triggerToast(language === 'en' ? 'All canvas markings cleared.' : 'تم مسح جميع العلامات والبطاقات المضافة.');
+  };
+
+  const [isDragging, setIsDragging] = useState<boolean>(false);
+  const [dragStart, setDragStart] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+
+  const handleSvgClick = (e: React.MouseEvent<SVGSVGElement>) => {
+    const svg = e.currentTarget;
+    const rect = svg.getBoundingClientRect();
+    const x = Math.round(((e.clientX - rect.left) / rect.width) * 800);
+    const y = Math.round(((e.clientY - rect.top) / rect.height) * 480);
+    setTempAnnotationCoords({ x, y });
+  };
 
   // Simulated notification triggers
   const [notificationMsg, setNotificationMsg] = useState<{ text: string; type: 'whatsapp' | 'email' | 'toast' } | null>(null);
@@ -1134,21 +1204,26 @@ const Admin: React.FC = () => {
                     {selectedInquiry.uploadedFiles && selectedInquiry.uploadedFiles.length > 0 && (
                       <div className="sm:col-span-2">
                         <span className="text-slate-400 block font-bold mb-1.5">{language === 'en' ? 'Uploaded Blueprints & CAD Files' : 'المخططات وصور المنشأة المرفوعة'}</span>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                          {selectedInquiry.uploadedFiles.map((f, i) => (
-                            <div key={i} className="flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-150 text-[11px]">
-                              <span className="truncate flex-1 font-mono text-slate-600">{f}</span>
-                              <div className="flex gap-1.5 shrink-0 pl-2">
-                                {/* Open link simulated */}
-                                <button 
-                                  onClick={() => alert(language === 'en' ? `Opening document ${f}` : `جاري فتح المستند ${f}`)}
-                                  className="p-1 text-slate-400 hover:text-slate-900 hover:bg-slate-200 rounded"
-                                >
-                                  <ExternalLink className="w-3.5 h-3.5" />
-                                </button>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          {selectedInquiry.uploadedFiles.map((f, i) => {
+                            const isDataUrl = f.includes('||');
+                            const displayName = isDataUrl ? f.split('||')[0] : f;
+                            return (
+                              <div key={i} className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-150 text-[11px] hover:border-red-200 transition-all">
+                                <span className="truncate flex-1 font-mono text-slate-700 font-bold">{displayName}</span>
+                                <div className="flex gap-1.5 shrink-0 pl-2">
+                                  <button 
+                                    type="button"
+                                    onClick={() => handleOpenBlueprint(f)}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 text-red-650 hover:bg-red-50 hover:text-red-700 bg-white border border-slate-200 text-[10px] font-black rounded-lg transition-all shadow-xs"
+                                  >
+                                    <Eye className="w-3.5 h-3.5" />
+                                    <span>{language === 'en' ? 'Open in Estimator' : 'فتح وبدء المقايسة'}</span>
+                                  </button>
+                                </div>
                               </div>
-                            </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       </div>
                     )}
@@ -2192,6 +2267,568 @@ const Admin: React.FC = () => {
                   {language === 'en' ? 'Close' : 'إغلاق المعاينة'}
                 </button>
               </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Interactive CAD Estimator Blueprint Viewer Modal */}
+      <AnimatePresence>
+        {blueprintModalOpen && activeBlueprintFile && selectedInquiry && (
+          <div className="fixed inset-0 z-[80] overflow-y-auto bg-slate-900/80 backdrop-blur-md flex items-center justify-center p-4 md:p-6 select-none font-sans">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="bg-slate-900 border border-slate-700/50 rounded-3xl w-full max-w-6xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+            >
+              
+              {/* Header bar */}
+              <div className="bg-slate-950 px-6 py-4 border-b border-slate-800 flex items-center justify-between gap-4 shrink-0">
+                <div className="flex items-center gap-3">
+                  <div className="bg-red-650/10 p-2.5 rounded-xl border border-red-500/20 text-red-500">
+                    <FileText className="w-5 h-5 animate-pulse" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-black text-slate-500 tracking-wider block uppercase">
+                      {language === 'en' ? 'INTELLIGENT MEP ESTIMATION PLAN' : 'مخطط المقايسة الرقمية الذكية (كاد GCC)'}
+                    </span>
+                    <h3 className="text-sm font-black text-white font-mono leading-none mt-1">
+                      {activeBlueprintFile.includes('||') ? activeBlueprintFile.split('||')[0] : activeBlueprintFile}
+                    </h3>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className="bg-slate-800 border border-slate-700 text-slate-350 px-3 py-1 rounded-full text-[10px] font-black font-mono">
+                    {selectedInquiry?.ticketId}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setBlueprintModalOpen(false)}
+                    className="p-1.5 text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-lg transition-all border border-slate-700"
+                  >
+                    <X className="w-4.5 h-4.5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Main Workspace */}
+              <div className="flex-1 overflow-hidden grid grid-cols-1 lg:grid-cols-12 font-sans">
+                
+                {/* Visualizer Area (cols-8) */}
+                <div className="lg:col-span-8 p-6 bg-slate-950 flex flex-col gap-4 relative justify-center items-center overflow-hidden border-b lg:border-b-0 lg:border-r border-slate-800">
+                  
+                  {/* Top Canvas Controls Floating bar */}
+                  <div className="absolute top-4 left-6 right-6 z-10 flex flex-wrap gap-2 justify-between items-center bg-slate-900/95 backdrop-blur border border-slate-800 p-2 rounded-2xl shadow-lg">
+                    {/* Theme selector */}
+                    <div className="flex items-center gap-1 bg-slate-950 border border-slate-800 rounded-xl p-1 text-[10px] font-bold">
+                      <button
+                        type="button"
+                        onClick={() => setBlueprintTheme('cyan')}
+                        className={`px-2.5 py-1 rounded-lg transition-all ${blueprintTheme === 'cyan' ? 'bg-cyan-500/20 text-cyan-400' : 'text-slate-400 hover:text-white'}`}
+                      >
+                        {language === 'en' ? 'CAD Cyan' : 'كاد سماوي'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setBlueprintTheme('navy')}
+                        className={`px-2.5 py-1 rounded-lg transition-all ${blueprintTheme === 'navy' ? 'bg-indigo-500/20 text-indigo-400' : 'text-slate-400 hover:text-white'}`}
+                      >
+                        {language === 'en' ? 'Dark navy' : 'كاد كحلي'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setBlueprintTheme('light')}
+                        className={`px-2.5 py-1 rounded-lg transition-all ${blueprintTheme === 'light' ? 'bg-white text-slate-900' : 'text-slate-400 hover:text-white'}`}
+                      >
+                        {language === 'en' ? 'Paper White' : 'رسم ورقي'}
+                      </button>
+                    </div>
+
+                    {/* View Controls */}
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => setBlueprintZoom(prev => Math.min(prev + 0.2, 3.0))}
+                        className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg transition-all border border-slate-700"
+                        title={language === 'en' ? 'Zoom In' : 'تكبير مرئي'}
+                      >
+                        <ZoomIn className="w-4 h-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setBlueprintZoom(prev => Math.max(prev - 0.2, 0.5))}
+                        className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg transition-all border border-slate-700"
+                        title={language === 'en' ? 'Zoom Out' : 'تصغير مرئي'}
+                      >
+                        <ZoomOut className="w-4 h-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setBlueprintZoom(1.0); setBlueprintPanX(0); setBlueprintPanY(0); }}
+                        className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg transition-all border border-slate-700"
+                        title={language === 'en' ? 'Reset View' : 'إعادة ضبط'}
+                      >
+                        <RotateCcw className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Interactive Drawing Stage */}
+                  <div 
+                    className={`w-full max-w-[800px] aspect-[800/480] rounded-2xl relative select-none overflow-hidden border border-slate-800 shadow-inner flex items-center justify-center ${
+                      blueprintTheme === 'cyan' ? 'bg-[#040F1D]' :
+                      blueprintTheme === 'navy' ? 'bg-[#0d1424]' : 'bg-white border-slate-200'
+                    }`}
+                  >
+                    
+                    {/* Render standard image if file is an uploaded base64 image (PNG/JPG/etc) */}
+                    {activeBlueprintFile.includes('||') && activeBlueprintFile.split('||')[1].startsWith('data:image/') ? (
+                      <div 
+                        style={{
+                          transform: `translate(${blueprintPanX}px, ${blueprintPanY}px) scale(${blueprintZoom})`,
+                          transition: 'transform 0.1s ease-out'
+                        }}
+                        className="max-w-[95%] max-h-[95%] pointer-events-none flex items-center justify-center"
+                      >
+                        <img 
+                          src={activeBlueprintFile.split('||')[1]} 
+                          alt="Uploaded Plan Preview" 
+                          className="object-contain max-h-[440px] rounded border border-slate-700" 
+                          referrerPolicy="no-referrer"
+                        />
+                      </div>
+                    ) : (
+                      
+                      /* Draw Interactive Vector CAD blueprint scheme */
+                      <div
+                        style={{
+                          transform: `translate(${blueprintPanX}px, ${blueprintPanY}px) scale(${blueprintZoom})`,
+                          transition: 'transform 0.1s ease-out',
+                          cursor: isDragging ? 'grabbing' : 'grab'
+                        }}
+                        className="w-full h-full relative"
+                      >
+                        <svg 
+                          viewBox="0 0 800 480" 
+                          className="w-full h-full select-none"
+                          onClick={handleSvgClick}
+                        >
+                          {/* 1. Grid Background Overlay */}
+                          {blueprintLayers.includes('shell') && (
+                            <>
+                              {Array.from({ length: 17 }).map((_, col) => (
+                                <line 
+                                  key={`gcol-${col}`}
+                                  x1={col * 50} 
+                                  y1={0} 
+                                  x2={col * 50} 
+                                  y2={480} 
+                                  stroke={blueprintTheme === 'light' ? '#e2e8f0' : (blueprintTheme === 'cyan' ? '#00f6ff' : '#1e293b')} 
+                                  strokeWidth={0.5} 
+                                  strokeOpacity={blueprintTheme === 'cyan' ? 0.15 : 0.4} 
+                                />
+                              ))}
+                              {Array.from({ length: 11 }).map((_, row) => (
+                                <line 
+                                  key={`grow-${row}`}
+                                  x1={0} 
+                                  y1={row * 50} 
+                                  x2={800} 
+                                  y2={row * 50} 
+                                  stroke={blueprintTheme === 'light' ? '#e2e8f0' : (blueprintTheme === 'cyan' ? '#00f6ff' : '#1e293b')} 
+                                  strokeWidth={0.5} 
+                                  strokeOpacity={blueprintTheme === 'cyan' ? 0.15 : 0.4} 
+                                />
+                              ))}
+                            </>
+                          )}
+
+                          {/* 2. Architectural Building Shell (Walls, Doors, Labels) */}
+                          {blueprintLayers.includes('shell') && (
+                            <g stroke={blueprintTheme === 'light' ? '#475569' : (blueprintTheme === 'cyan' ? '#00e5ff' : '#cbd5e1')} strokeWidth={1.5} fill="none" strokeOpacity={blueprintTheme === 'cyan' ? 0.8 : 0.9}>
+                              {/* Outer Perimeter */}
+                              <rect x={40} y={40} width={720} height={400} strokeWidth={2.5} rx={8} />
+                              
+                              {/* Rooms layout */}
+                              <line x1={220} y1={40} x2={220} y2={440} />
+                              <line x1={220} y1={200} x2={40} y2={200} />
+                              <line x1={220} y1={280} x2={580} y2={280} />
+                              <line x1={580} y1={40} x2={580} y2={440} />
+                              <line x1={580} y1={220} x2={760} y2={220} />
+
+                              {/* Door Swings */}
+                              <path d="M 220,110 A 30,30 0 0,1 250,140" strokeDasharray="3,3" />
+                              <path d="M 580,180 A 30,30 0 0,0 550,150" strokeDasharray="3,3" />
+                              <path d="M 120,200 A 20,20 0 0,1 140,220" strokeDasharray="3,3" />
+
+                              {/* CAD Architectural labels */}
+                              {blueprintLayers.includes('labels') && (
+                                <g stroke="none" fill={blueprintTheme === 'light' ? '#475569' : (blueprintTheme === 'cyan' ? '#a5f3fc' : '#94a3b8')} fontSize={10} fontFamily="monospace" fontWeight="bold">
+                                  <text x={65} y={75}>{language === 'en' ? 'FACP CONTROL CTR' : 'غرفة التحكم والإنذار (L1)'}</text>
+                                  <text x={55} y={235}>{language === 'en' ? 'OFFICE AREA A' : 'منطقة المكاتب الإدارية (أ)'}</text>
+                                  <text x={245} y={75}>{language === 'en' ? 'MAIN WAREHOUSE LOGISTICS' : 'مستودع تخزين المواد واللوجستيات'}</text>
+                                  <text x={245} y={315}>{language === 'en' ? 'PRIMARY ESCALATION WALKWAY' : 'ممر التوزيع والاستدعاء الميكانيكي'}</text>
+                                  <text x={605} y={75}>{language === 'en' ? 'HVAC CHILLER LOCK' : 'مظلة مكثفات التبريد الخارجية'}</text>
+                                  <text x={605} y={250}>{language === 'en' ? 'STANDBY POWER ATX' : 'المولدات والمحولات الاحتياطية'}</text>
+                                  <text x={50} y={430} fontSize={9} fill="#ff3450">GCC CAD EST STAGE v4.2</text>
+                                </g>
+                              )}
+                            </g>
+                          )}
+
+                          {/* 3. Engineering Layout: Pipelines & Ductworks (if layers is active) */}
+                          {blueprintLayers.includes('pipes') && (
+                            <>
+                              {/* FIRE FIGHTING / SUPPRESSION */}
+                              {selectedInquiry.serviceType === 'fire_suppression' && (
+                                <g stroke="#ef4444" fill="none" strokeWidth={2}>
+                                  <rect x={60} y={60} width={680} height={360} rx={12} strokeWidth={2.5} />
+                                  <line x1={220} y1={60} x2={220} y2={420} strokeWidth={1.5} />
+                                  <line x1={580} y1={60} x2={580} y2={420} strokeWidth={1.5} />
+                                  <line x1={140} y1={60} x2={140} y2={180} strokeDasharray="3,2" />
+                                  <line x1={380} y1={60} x2={380} y2={280} strokeDasharray="3,2" />
+                                  <line x1={480} y1={60} x2={480} y2={280} strokeDasharray="3,2" />
+                                  <line x1={670} y1={60} x2={670} y2={390} strokeDasharray="3,2" />
+                                </g>
+                              )}
+
+                              {/* HVAC SYSTEMS */}
+                              {selectedInquiry.serviceType === 'hvac' && (
+                                <g fill="none">
+                                  <path d="M 605,95 L 480,95 L 480,180 L 140,180" stroke="#3b82f6" strokeWidth={5} strokeOpacity={0.85} strokeLinecap="round" />
+                                  <path d="M 630,120 L 510,120 L 510,240 L 320,240" stroke="#f97316" strokeWidth={4} strokeOpacity={0.8} strokeLinecap="round" />
+                                  <polygon points="400,180 390,175 390,185" fill="#3b82f6" stroke="none" />
+                                  <polygon points="420,240 410,235 410,245" fill="#f97316" stroke="none" />
+                                </g>
+                              )}
+
+                              {/* FIRE ALARM SYSTEM */}
+                              {selectedInquiry.serviceType === 'fire_alarm' && (
+                                <g stroke="#10b981" strokeWidth={1.5} fill="none" strokeDasharray="4,3">
+                                  <path d="M 130,120 L 300,120 L 400,150 L 520,120 L 680,180 L 680,310 L 480,350 L 300,350 L 130,240 Z" strokeLinecap="round" />
+                                </g>
+                              )}
+
+                              {/* POWER GENERATORS */}
+                              {selectedInquiry.serviceType === 'power' && (
+                                <g stroke="#eab308" strokeWidth={2} fill="none">
+                                  <path d="M 670,290 L 670,390 L 450,390 L 140,250" strokeWidth={3} strokeDasharray="6,4" />
+                                  <path d="M 680,290 L 680,410 L 440,410 L 130,260" strokeWidth={1} strokeOpacity={0.6} />
+                                </g>
+                              )}
+                            </>
+                          )}
+
+                          {/* 4. Devices, Sprinklers, & Hardware Icons (if active) */}
+                          {blueprintLayers.includes('devices') && (
+                            <>
+                              {/* FIRE FIGHTING / SUPPRESSION */}
+                              {selectedInquiry.serviceType === 'fire_suppression' && (
+                                <g fill="#ef4444" stroke="none">
+                                  <circle cx={140} cy={100} r={4} /> <circle cx={140} cy={100} r={8} stroke="#ef4444" strokeWidth={1} fill="none" />
+                                  <circle cx={140} cy={150} r={4} /> <circle cx={140} cy={150} r={8} stroke="#ef4444" strokeWidth={1} fill="none" />
+                                  <circle cx={300} cy={100} r={4} /> <circle cx={300} cy={100} r={8} stroke="#ef4444" strokeWidth={1} fill="none" />
+                                  <circle cx={420} cy={105} r={4} /> <circle cx={420} cy={105} r={8} stroke="#ef4444" strokeWidth={1} fill="none" />
+                                  <circle cx={520} cy={100} r={4} /> <circle cx={520} cy={100} r={8} stroke="#ef4444" strokeWidth={1} fill="none" />
+                                  <circle cx={300} cy={220} r={4} /> <circle cx={300} cy={220} r={8} stroke="#ef4444" strokeWidth={1} fill="none" />
+                                  <circle cx={420} cy={220} r={4} /> <circle cx={420} cy={220} r={8} stroke="#ef4444" strokeWidth={1} fill="none" />
+                                  <circle cx={520} cy={220} r={4} /> <circle cx={520} cy={220} r={8} stroke="#ef4444" strokeWidth={1} fill="none" />
+                                  <circle cx={670} cy={120} r={4} /> <circle cx={670} cy={120} r={8} stroke="#ef4444" strokeWidth={1} fill="none" />
+                                  <circle cx={670} cy={300} r={4} /> <circle cx={670} cy={300} r={8} stroke="#ef4444" strokeWidth={1} fill="none" />
+
+                                  <rect x={70} y={100} width={30} height={40} fill="#f87171" rx={3} />
+                                  <text x={75} y={125} fill="#ffffff" fontWeight="black" fontSize={8} stroke="none">PUMP</text>
+                                  <circle cx={150} cy={350} r={12} stroke="#f87171" strokeWidth={2} fill="none" />
+                                  <line x1={150} y1={338} x2={150} y2={362} stroke="#f87171" strokeWidth={1.5} />
+                                </g>
+                              )}
+
+                              {/* HVAC SYSTEMS */}
+                              {selectedInquiry.serviceType === 'hvac' && (
+                                <g fill="none">
+                                  <rect x={605} y={60} width={45} height={45} stroke="#3b82f6" strokeWidth={2} fill="#3b82f6" fillOpacity={0.15} rx={6} />
+                                  <circle cx={627} cy={82} r={12} stroke="#3b82f6" strokeWidth={1.5} />
+                                  <line x1={615} y1={82} x2={639} y2={82} stroke="#3b82f6" />
+                                  <line x1={627} y1={70} x2={627} y2={94} stroke="#3b82f6" />
+                                  
+                                  <rect x={320} y={160} width={40} height={20} stroke="#3b82f6" strokeWidth={1.5} fill="#bfdbfe" fillOpacity={0.2} />
+                                  <text x={328} y={173} fill="#3b82f6" fontWeight="bold" fontSize={7} stroke="none">AHU-4</text>
+                                  
+                                  <polygon points="140,180 135,170 145,170" fill="#3b82f6" />
+                                  <polygon points="260,180 255,170 265,170" fill="#3b82f6" />
+                                  <polygon points="475,210 465,210 470,220" fill="#f97316" />
+                                </g>
+                              )}
+
+                              {/* FIRE ALARM SYSTEM */}
+                              {selectedInquiry.serviceType === 'fire_alarm' && (
+                                <g fill="#10b981">
+                                  <circle cx={130} cy={120} r={6} stroke="#059669" strokeWidth={1.5} fill="#a7f3d0" />
+                                  <circle cx={300} cy={120} r={6} stroke="#059669" strokeWidth={1.5} fill="#a7f3d0" />
+                                  <circle cx={400} cy={150} r={6} stroke="#059669" strokeWidth={1.5} fill="#a7f3d0" />
+                                  <circle cx={520} cy={120} r={6} stroke="#059669" strokeWidth={1.5} fill="#a7f3d0" />
+                                  <circle cx={680} cy={180} r={6} stroke="#059669" strokeWidth={1.5} fill="#a7f3d0" />
+                                  <circle cx={680} cy={310} r={6} stroke="#059669" strokeWidth={1.5} fill="#a7f3d0" />
+                                  <circle cx={480} cy={350} r={6} stroke="#059669" strokeWidth={1.5} fill="#a7f3d0" />
+                                  <circle cx={300} cy={350} r={6} stroke="#059669" strokeWidth={1.5} fill="#a7f3d0" />
+
+                                  <rect x={115} y={190} width={10} height={10} fill="#f43f5e" />
+                                  <path d="M 125,190 L 130,185 L 130,205 Z" fill="#f43f5e" />
+                                </g>
+                              )}
+
+                              {/* POWER GENERATORS */}
+                              {selectedInquiry.serviceType === 'power' && (
+                                <g fill="none">
+                                  <rect x={605} y={240} width={45} height={50} stroke="#eab308" strokeWidth={2.5} fill="#eab308" fillOpacity={0.15} rx={6} />
+                                  <line x1={615} y1={250} x2={640} y2={250} stroke="#eab308" />
+                                  <line x1={615} y1={260} x2={640} y2={260} stroke="#eab308" />
+                                  <line x1={615} y1={270} x2={640} y2={270} stroke="#eab308" />
+                                  
+                                  <rect x={115} y={215} width={25} height={25} stroke="#f59e0b" strokeWidth={2} fill="#fef3c7" transform="rotate(45 127 227)" />
+                                  <text x={118} y={230} fill="#d97706" fontWeight="bold" fontSize={9} stroke="none">ATS</text>
+                                </g>
+                              )}
+                            </>
+                          )}
+
+                          {/* 5. Custom Live Interactive Marked Engineering Annotations */}
+                          <g stroke="none" fill="none">
+                            {blueprintAnnotations.map((ann) => (
+                              <g 
+                                key={ann.id} 
+                                className="cursor-pointer"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (window.confirm(language === 'en' ? `Remove this annotation trace?` : `هل ترغب في حذف بطاقة المعاينة هذه؟`)) {
+                                    setBlueprintAnnotations(prev => prev.filter(a => a.id !== ann.id));
+                                  }
+                                }}
+                              >
+                                <circle cx={ann.x} cy={ann.y} r={6} fill="#f43f5e" />
+                                <circle cx={ann.x} cy={ann.y} r={12} stroke="#f43f5e" strokeWidth={1} fill="none" strokeDasharray="3,2" />
+                                
+                                <g transform={`translate(${ann.x + 10}, ${ann.y - 12})`}>
+                                  <rect 
+                                    x={0} 
+                                    y={0} 
+                                    width={160} 
+                                    height={36} 
+                                    fill="#0f172a" 
+                                    fillOpacity={0.9} 
+                                    stroke="#ef4444" 
+                                    strokeWidth={1} 
+                                    rx={4} 
+                                  />
+                                  <text x={6} y={15} fill="#ffffff" fontSize={8} fontWeight="bold" stroke="none">
+                                    {language === 'en' ? ann.textEn : ann.textAr}
+                                  </text>
+                                  <text x={6} y={26} fill="#94a3b8" fontSize={7} fontFamily="monospace" stroke="none">
+                                    NODE: {ann.x}px, {ann.y}px
+                                  </text>
+                                </g>
+                              </g>
+                            ))}
+
+                            {tempAnnotationCoords && (
+                              <g>
+                                <circle cx={tempAnnotationCoords.x} cy={tempAnnotationCoords.y} r={8} stroke="#22c55e" strokeWidth={2} fill="none" />
+                                <line x1={tempAnnotationCoords.x - 15} y1={tempAnnotationCoords.y} x2={tempAnnotationCoords.x + 15} y2={tempAnnotationCoords.y} stroke="#22c55e" strokeWidth={1} />
+                                <line x1={tempAnnotationCoords.x} y1={tempAnnotationCoords.y - 15} x2={tempAnnotationCoords.x} y2={tempAnnotationCoords.y + 15} stroke="#22c55e" strokeWidth={1} />
+                                
+                                <g transform={`translate(${tempAnnotationCoords.x + 12}, ${tempAnnotationCoords.y - 8})`}>
+                                  <rect x={0} y={0} width={80} height={18} fill="#22c55e" rx={3} />
+                                  <text x={6} y={12} fill="#ffffff" fontSize={8} fontWeight="black" fontFamily="monospace" stroke="none">SET TAG ZONE</text>
+                                </g>
+                              </g>
+                            )}
+                          </g>
+
+                          <rect x={2} y={2} width={796} height={476} stroke={blueprintTheme === 'light' ? '#cbd5e1' : '#1e293b'} strokeWidth={3} fill="none" />
+                        </svg>
+                      </div>
+                    )}
+
+                    {/* Drag instruction overlay */}
+                    <span className="absolute bottom-3 left-4 bg-slate-950/80 backdrop-blur border border-slate-800 px-3 py-1.5 rounded-xl text-[9px] font-bold text-slate-400 font-sans pointer-events-none">
+                      {language === 'en' ? '🖱️ Drag mouse to pan drawing space' : '🖱️ اسحب بماوس الحاسوب للتحريك يميناً ويساراً'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Sidebar controls (cols-4) */}
+                <div className="lg:col-span-4 p-6 bg-slate-900 border-t lg:border-t-0 border-slate-800 overflow-y-auto flex flex-col justify-between gap-6">
+                  
+                  <div className="space-y-5">
+                    {/* Project and Estimator Header Details */}
+                    <div>
+                      <span className="text-[10px] font-black text-slate-450 uppercase tracking-widest block">
+                        {language === 'en' ? 'BILL OF QUANTITIES METADATA' : 'محددات الكود ومطابقة تسعير وبنود المشاريع'}
+                      </span>
+                      <div className="mt-3 bg-slate-950/80 rounded-2xl border border-slate-800 p-4 space-y-3.5">
+                        <div className="flex justify-between items-center text-xs">
+                          <span className="text-slate-400 font-bold">{language === 'en' ? 'Client' : 'اسم العميل المتقدم:'}</span>
+                          <span className="text-white font-extrabold">{selectedInquiry.name}</span>
+                        </div>
+                        <div className="flex justify-between items-center text-xs">
+                          <span className="text-slate-400 font-bold">{language === 'en' ? 'Building Area' : 'إجمالي المساحة المعنية:'}</span>
+                          <span className="text-slate-300 font-mono font-extrabold">{selectedInquiry.projectArea} m²</span>
+                        </div>
+                        <div className="flex justify-between items-center text-xs">
+                          <span className="text-slate-400 font-bold">{language === 'en' ? 'MEP System' : 'النظام الكهروميكانيكي:'}</span>
+                          <span className="text-emerald-400 font-extrabold">{getServiceBadge(selectedInquiry.serviceType).label}</span>
+                        </div>
+                        <div className="flex justify-between items-center text-xs">
+                          <span className="text-slate-400 font-bold">{language === 'en' ? 'Site Location' : 'إحداثيات وموقع المعاينة:'}</span>
+                          <span className="text-white font-extrabold">{selectedInquiry.location || 'Riyadh, KSA'}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Layer Toggles Block */}
+                    <div>
+                      <span className="text-[9.5px] font-sans font-black text-slate-500 uppercase tracking-widest block mb-1.5">
+                        {language === 'en' ? 'CAD DRAWING SHEETS & LAYERS' : 'طبقات العرض والتحكم بالمستند'}
+                      </span>
+                      <div className="grid grid-cols-2 gap-2">
+                        {[
+                          { id: 'shell', en: 'Architectural Shell', ar: 'الهيكل الخراساني والبناء' },
+                          { id: 'pipes', en: 'System Pipes/Ducts', ar: 'شبكات الأنابيب والمجاري' },
+                          { id: 'devices', en: 'Hardware Nodes', ar: 'نقاط التثبيت والحساسات' },
+                          { id: 'labels', en: 'SBC Dimension Labels', ar: 'أبعاد وأكواد SBC المعتمدة' }
+                        ].map((layer) => {
+                          const isActive = blueprintLayers.includes(layer.id);
+                          return (
+                            <button
+                              key={layer.id}
+                              type="button"
+                              onClick={() => {
+                                setBlueprintLayers(prev => 
+                                  isActive ? prev.filter(l => l !== layer.id) : [...prev, layer.id]
+                                );
+                              }}
+                              className={`flex flex-col items-start p-2.5 rounded-xl border text-[10px] text-right font-bold transition-all ${
+                                isActive 
+                                  ? 'bg-red-500/10 border-red-500/40 text-red-100' 
+                                  : 'bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-white'
+                              }`}
+                            >
+                              <div className="flex items-center gap-1 w-full justify-between mb-1">
+                                <Layers className="w-3.5 h-3.5" />
+                                <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-red-500 animate-pulse' : 'bg-slate-700'}`} />
+                              </div>
+                              <span className="block mt-1 leading-tight text-[10px]">{language === 'en' ? layer.en : layer.ar}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Add Interactive Annotation Area */}
+                    <div className="bg-slate-950/40 border border-slate-800 rounded-2xl p-4 space-y-3">
+                      <div>
+                        <span className="text-[9.5px] font-sans font-black text-slate-400 uppercase tracking-widest block">
+                          {language === 'en' ? 'MARK DESIGN NODE ANNOTATION' : 'إدراج بطاقة فحص وملاحظة هندسية'}
+                        </span>
+                        <p className="text-[10px] text-slate-400 mt-1 leading-normal font-sans text-right">
+                          {language === 'en' ? 'Click anywhere on the blue canvas drafting space to set a red measuring marker node.' : 'انقر على أي نقطة مخصصة على لوح الرسم السماوي باليسار لتعيين إحداثي وتدوين ملاحظة فحص.'}
+                        </p>
+                      </div>
+
+                      {tempAnnotationCoords ? (
+                        <div className="space-y-3 pt-1">
+                          <div className="flex items-center justify-between text-[10px] font-mono text-emerald-400">
+                            <span>GRID BLOCK SET:</span>
+                            <span className="font-extrabold">X: {tempAnnotationCoords.x}px  |  Y: {tempAnnotationCoords.y}px</span>
+                          </div>
+                          
+                          <div className="space-y-1.5">
+                            <input
+                              type="text"
+                              value={newAnnotationTextAr}
+                              onChange={(e) => setNewAnnotationTextAr(e.target.value)}
+                              placeholder="الوصف بالعربية (مثال: صمام تفريغ 2.5 بوصة)"
+                              className="w-full bg-slate-950 text-white border border-slate-800 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-red-500 font-sans font-bold text-right"
+                              dir="rtl"
+                            />
+                            <input
+                              type="text"
+                              value={newAnnotationTextEn}
+                              onChange={(e) => setNewAnnotationTextEn(e.target.value)}
+                              placeholder="Description in English (e.g., 2.5'' Drainage Valve)"
+                              className="w-full bg-slate-950 text-white border border-slate-800 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-red-500 font-sans font-bold"
+                            />
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-2">
+                            <button
+                              type="button"
+                              onClick={(e) => handleAddAnnotation(e as any)}
+                              className="w-full bg-red-600 hover:bg-red-700 text-white text-[11px] font-black py-2 rounded-xl transition-all uppercase"
+                            >
+                              {language === 'en' ? 'Place on Drawing' : 'إضافة وتثبيت'}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setTempAnnotationCoords(null)}
+                              className="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-black py-2 rounded-xl transition-all"
+                            >
+                              {language === 'en' ? 'Cancel' : 'إلغاء التعيين'}
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="text-center py-4 rounded-xl border border-dashed border-slate-800 bg-slate-950/20 text-slate-500 text-[10.5px] font-bold">
+                          {language === 'en' ? '📍 No node selected. Tap on drawing to mark.' : '📍 حدد نقطة على لوح الرسم الأيسر لإدراج إشارة فحص'}
+                        </div>
+                      )}
+
+                      {blueprintAnnotations.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={handleClearAnnotations}
+                          className="w-full mt-2 bg-slate-800 hover:bg-slate-755 border border-slate-700 text-slate-300 font-bold text-[10px] py-2 rounded-xl transition-all flex items-center justify-center gap-1.5"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          <span>{language === 'en' ? 'Clear All Annotations' : 'مسح كافة البطاقات المضافة'}</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Actions footer of sidebar */}
+                  <div className="pt-4 border-t border-slate-800 space-y-2 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const commentsPrefix = language === 'en' 
+                          ? `[Draft Review Complete] Reviewed drawing sheet. System layout elements active: ${blueprintLayers.join(', ')}.`
+                          : `[اكتمال التدقيق الهندسي للمخطط] تم معاينة المخطط الرقمي وإحاطة فريقي المعاينة والمقايسة بـ ${blueprintAnnotations.length} نقاط فحص بالموقع.`;
+                        setComments(prev => prev ? `${prev}\n${commentsPrefix}` : commentsPrefix);
+                        setBlueprintModalOpen(false);
+                        triggerToast(language === 'en' ? 'Drawing specs synchronized with active pricing comment.' : 'تم مطابقة ومعاينة المخطط ونقل تدوين الفحص إلى سجل المقايسة لحساب السعر.');
+                      }}
+                      className="w-full bg-[#10b981] hover:bg-[#059669] text-white text-xs font-black py-3 rounded-2xl transition-all shadow-md flex items-center justify-center gap-2"
+                    >
+                      <Check className="w-4 h-4" />
+                      <span>{language === 'en' ? 'Approve Specs & Integrate with BOQ' : 'اعتماد المقايسات والتعديل على عروض الأسعار'}</span>
+                    </button>
+                    
+                    <button
+                      type="button"
+                      onClick={() => setBlueprintModalOpen(false)}
+                      className="w-full bg-slate-800 hover:bg-slate-750 border border-slate-700 text-white text-xs font-black py-3 rounded-2xl transition-all"
+                    >
+                      {language === 'en' ? 'Close CAD Workspace' : 'العودة لجدول الحسابات الإدارية'}
+                    </button>
+                  </div>
+
+                </div>
+
+              </div>
+
             </motion.div>
           </div>
         )}

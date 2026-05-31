@@ -53,6 +53,7 @@ interface UploadedFile {
   size: string;
   progress: number;
   status: 'uploading' | 'completed' | 'error';
+  dataUrl?: string;
 }
 
 // Define the systems categories available
@@ -161,12 +162,21 @@ const AISizer: React.FC = () => {
   };
 
   const addFilesToList = (fileList: FileList) => {
-    const newFiles: UploadedFile[] = Array.from(fileList).map(file => {
+    const fileArray = Array.from(fileList);
+    const newFiles: UploadedFile[] = fileArray.map(file => {
       const sizeStr = file.size > 1024 * 1024 
         ? `${(file.size / (1024 * 1024)).toFixed(2)} MB` 
         : `${(file.size / 1024).toFixed(1)} KB`;
       const id = Math.random().toString(36).substring(2, 9);
       
+      // Read file content as base64 dataUrl
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const resultString = reader.result as string;
+        setFiles(prev => prev.map(f => f.id === id ? { ...f, dataUrl: resultString } : f));
+      };
+      reader.readAsDataURL(file);
+
       return {
         id,
         name: file.name,
@@ -530,7 +540,7 @@ const AISizer: React.FC = () => {
       status: 'new',
       createdAt: new Date().toISOString(),
       uploadedFiles: files.length > 0 
-        ? files.map(f => f.name) 
+        ? files.map(f => f.dataUrl ? `${f.name}||${f.dataUrl}` : f.name) 
         : ['Interactive-Config-Generated.pdf', 'Estimated-Layout.cad'],
       priceDetails: {
         componentsCost: estimatedCostData.min,
