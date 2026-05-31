@@ -130,7 +130,7 @@ const Home: React.FC = () => {
           {/* Hero Right Visual Column - Powerful Construction Site/Crane Image */}
           <div className="lg:col-span-5 relative h-64 lg:h-[340px] w-full rounded-2xl overflow-hidden shadow-2xl border border-slate-800">
             <img 
-              src="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=800&fit=crop" 
+              src="https://images.pexels.com/photos/1216589/pexels-photo-1216589.jpeg?auto=compress&cs=tinysrgb&w=1200" 
               alt="GCC Heavy Construction Site" 
               className="w-full h-full object-cover brightness-95 contrast-105"
               referrerPolicy="no-referrer"
@@ -208,7 +208,7 @@ const Home: React.FC = () => {
         </div>
         <div className="w-full md:w-[360px] h-[260px] rounded-2xl overflow-hidden shadow-lg shrink-0 border border-slate-200 relative group">
           <img 
-            src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=600&fit=crop" 
+            src="https://images.pexels.com/photos/1108572/pexels-photo-1108572.jpeg?auto=compress&cs=tinysrgb&w=1200" 
             alt="Engineering Team on site" 
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             referrerPolicy="no-referrer"
@@ -238,7 +238,7 @@ const Home: React.FC = () => {
           <div className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-200 group flex flex-col justify-between">
             <div className="h-48 overflow-hidden relative">
               <img 
-                src="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=500&fit=crop" 
+                src="https://images.pexels.com/photos/1216589/pexels-photo-1216589.jpeg?auto=compress&cs=tinysrgb&w=1200" 
                 alt="GCC Heavy Construction Sites" 
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 referrerPolicy="no-referrer"
@@ -264,7 +264,7 @@ const Home: React.FC = () => {
           <div className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-200 group flex flex-col justify-between">
             <div className="h-48 overflow-hidden relative">
               <img 
-                src="https://images.unsplash.com/photo-1581092921461-eab62e97a780?w=500&fit=crop" 
+                src="https://images.pexels.com/photos/1108572/pexels-photo-1108572.jpeg?auto=compress&cs=tinysrgb&w=1200" 
                 alt="On-site Engineers at Work" 
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 referrerPolicy="no-referrer"
@@ -290,7 +290,7 @@ const Home: React.FC = () => {
           <div className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-200 group flex flex-col justify-between">
             <div className="h-48 overflow-hidden relative">
               <img 
-                src="https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=500&fit=crop" 
+                src="https://images.pexels.com/photos/257736/pexels-photo-257736.jpeg?auto=compress&cs=tinysrgb&w=1200" 
                 alt="Electrical boards and cabinets" 
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 referrerPolicy="no-referrer"
@@ -313,19 +313,23 @@ const Home: React.FC = () => {
           </div>
 
           {/* Card 4: Safety Systems */}
-          <div className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-200 group flex flex-col justify-between">
+          <div className="bg-white rounded-3xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 border-2 border-emerald-500 group flex flex-col justify-between relative scale-[1.01] md:scale-105 z-10 shadow-emerald-100">
             <div className="h-48 overflow-hidden relative">
               <img 
-                src="https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=600&fit=crop" 
+                src="https://images.pexels.com/photos/3825585/pexels-photo-3825585.jpeg?auto=compress&cs=tinysrgb&w=1200" 
                 alt="Safety and Fire Safety Systems" 
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 brightness-105 contrast-105"
                 referrerPolicy="no-referrer"
               />
-              <span className="absolute top-3 left-3 bg-emerald-650 text-white text-[9px] font-mono font-bold px-2 py-0.5 rounded">04</span>
+              <span className="absolute top-3 left-3 bg-slate-950/85 text-white text-[9px] font-mono font-bold px-2 py-0.5 rounded">04</span>
+              <span className="absolute top-3 right-3 bg-emerald-600 text-white text-[9px] font-black tracking-wide px-2 py-0.5 rounded-full shadow-lg flex items-center gap-1 animate-pulse">
+                <span className="w-1.5 h-1.5 rounded-full bg-white block animate-ping" />
+                {language === 'en' ? 'RELIABLE & PREFERRED' : 'الأفضل والمفضّل'}
+              </span>
             </div>
-            <div className="p-5 flex-1 flex flex-col justify-between space-y-3">
+            <div className="p-5 flex-1 flex flex-col justify-between space-y-3 bg-emerald-50/10">
               <div>
-                <h3 className="text-xs font-black tracking-wider text-slate-400 uppercase font-mono mb-1">{language === 'en' ? 'Safety Systems' : 'أنظمة السلامة ومكافحة الحريق'}</h3>
+                <h3 className="text-xs font-black tracking-wider text-emerald-600 uppercase font-mono mb-1">{language === 'en' ? 'Safety Systems • Featured' : 'أنظمة السلامة • الخيار الأفضل والمفضّل'}</h3>
                 <h4 className="text-sm font-black text-slate-950 leading-tight">
                   {language === 'en' ? 'NFPA Compliant Valves & FM-205 Loops' : 'شبكات مرشات التدفق المائي ومضخات مكافحة اللهب'}
                 </h4>
@@ -342,7 +346,7 @@ const Home: React.FC = () => {
           <div className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-200 group flex flex-col justify-between">
             <div className="h-48 overflow-hidden relative">
               <img 
-                src="https://images.unsplash.com/photo-1578575437130-527eed3abbec?w=600&fit=crop" 
+                src="https://images.pexels.com/photos/1216589/pexels-photo-1216589.jpeg?auto=compress&cs=tinysrgb&w=1200" 
                 alt="Heavy cranes and industrial machinery" 
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 referrerPolicy="no-referrer"
@@ -368,7 +372,7 @@ const Home: React.FC = () => {
           <div className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-200 group flex flex-col justify-between">
             <div className="h-48 overflow-hidden relative">
               <img 
-                src="https://images.unsplash.com/photo-1584281729155-3c1b3532f170?w=800&fit=crop" 
+                src="/images/fire-pump.jpg" 
                 alt="UL/FM Certified Fire Fighting Pump Installation" 
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 referrerPolicy="no-referrer"

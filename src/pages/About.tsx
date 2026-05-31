@@ -514,9 +514,9 @@ const About: React.FC = () => {
           {/* Left Column: Arched Image of crane */}
           <div className="w-full md:w-5/12 h-44 md:h-full relative overflow-hidden rounded-t-[100px] border border-slate-400 shrink-0 shadow-md bg-slate-400">
             <img 
-              src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=500&fit=crop" 
+              src="https://images.pexels.com/photos/1108572/pexels-photo-1108572.jpeg?auto=compress&cs=tinysrgb&w=1200" 
               className="w-full h-full object-cover" 
-              alt="Hardworking Exhausted Electro-Mechanical Engineers in Office Desk"
+              alt="Hardworking Electro-Mechanical Engineers"
               referrerPolicy="no-referrer"
             />
           </div>

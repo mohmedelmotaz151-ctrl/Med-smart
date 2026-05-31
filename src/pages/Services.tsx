@@ -52,7 +52,7 @@ const Services: React.FC = () => {
         { label: language === 'en' ? 'Standard Code' : 'الكود المتبع', value: 'NFPA 13, 14, 20' }
       ],
       color: 'red',
-      img: 'https://images.unsplash.com/photo-1584281729155-3c1b3532f170?w=800&fit=crop'
+      img: '/images/fire-pump.jpg'
     },
     fire_detection: {
       title: language === 'en' ? 'Early Detection & Alarms' : 'أنظمة الإنذار والتوجيه المبكر',
@@ -89,7 +89,7 @@ const Services: React.FC = () => {
         { label: language === 'en' ? 'Maintenance Service' : 'دورة صيانة متكاملة', value: '2 Hours Response' },
       ],
       color: 'blue',
-      img: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=600&fit=crop'
+      img: 'https://images.pexels.com/photos/3825585/pexels-photo-3825585.jpeg?auto=compress&cs=tinysrgb&w=800'
     },
     power_systems: {
       title: language === 'en' ? 'Generators & Power Solutions' : 'المولدات الكهربائية وتجهيزات الطاقة',
@@ -108,7 +108,7 @@ const Services: React.FC = () => {
         { label: language === 'en' ? 'Max Continuous Power' : 'مستويات الدعم المستمر', value: '72 Hours Prime' },
       ],
       color: 'yellow',
-      img: 'https://images.unsplash.com/photo-1537368910025-700350fe46c7?w=600&fit=crop'
+      img: 'https://images.pexels.com/photos/1108572/pexels-photo-1108572.jpeg?auto=compress&cs=tinysrgb&w=800'
     },
     cctv_security: {
       title: language === 'en' ? 'CCTV & Security Systems' : 'أنظمة كاميرات المراقبة والحماية',
@@ -127,7 +127,7 @@ const Services: React.FC = () => {
         { label: language === 'en' ? 'Advanced Video Analytics' : 'تحليل الفيديو الرقمي المتقدم', value: 'Security Log & Search' },
       ],
       color: 'emerald',
-      img: 'https://images.unsplash.com/photo-1557597774-9d273605dfa9?w=600&fit=crop'
+      img: 'https://images.pexels.com/photos/257736/pexels-photo-257736.jpeg?auto=compress&cs=tinysrgb&w=800'
     }
   };
 
