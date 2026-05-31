@@ -368,7 +368,7 @@ const Home: React.FC = () => {
           <div className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-200 group flex flex-col justify-between">
             <div className="h-48 overflow-hidden relative">
               <img 
-                src="/images/fire-pump.jpg" 
+                src="https://images.unsplash.com/photo-1584281729155-3c1b3532f170?w=800&fit=crop" 
                 alt="UL/FM Certified Fire Fighting Pump Installation" 
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 referrerPolicy="no-referrer"

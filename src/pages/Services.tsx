@@ -52,7 +52,7 @@ const Services: React.FC = () => {
         { label: language === 'en' ? 'Standard Code' : 'الكود المتبع', value: 'NFPA 13, 14, 20' }
       ],
       color: 'red',
-      img: '/images/fire-pump.jpg'
+      img: 'https://images.unsplash.com/photo-1584281729155-3c1b3532f170?w=800&fit=crop'
     },
     fire_detection: {
       title: language === 'en' ? 'Early Detection & Alarms' : 'أنظمة الإنذار والتوجيه المبكر',
