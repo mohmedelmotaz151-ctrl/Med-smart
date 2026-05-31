@@ -95,7 +95,7 @@ const Projects: React.FC = () => {
       year: '2024',
       scopeEn: 'Testing, calibration, and wiring layout of heavy-duty digital control panel units inside outdoor weatherproof shelters.',
       scopeAr: 'أعمال التركيب والمعايرة السلكية واللاسلكية لكبائن التحكم والتشغيل الفنية المخصصة لمراكز ومقرات الهلال الأحمر السعودي.',
-      img: 'https://images.unsplash.com/photo-1581092921461-eab62e97a780?w=600&fit=crop',
+      img: 'https://images.pexels.com/photos/257736/pexels-photo-257736.jpeg?auto=compress&cs=tinysrgb&w=1200',
       detailsEn: 'Integration of direct battery backup modules, ATS monitoring triggers, and customized circuit wiring to secure non-stop dispatch activities.',
       detailsAr: 'توصيل مغذيات البطاريات الاحتياطية المخصصة ومفاتيح التحويل التذكارية وربطها التلقائي بمولدات الطوارئ لضمان استمرارية الخدمة الطبية دون توقف.'
     },
@@ -113,7 +113,7 @@ const Projects: React.FC = () => {
       year: '2024',
       scopeEn: 'Professional high-pressure chemical spray wash of engine radiators, grease degreasing, and heat dissipation maintenance.',
       scopeAr: 'غسيل ضغطي هيدرو-ديناميكي متكامل للشبكات الخارجية للرديتر وخزان الزيت ومحرك المولدات المعزولة لإعادة كفاءة التبريد إلى أقصاها.',
-      img: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=600&fit=crop',
+      img: 'https://images.pexels.com/photos/2760243/pexels-photo-2760243.jpeg?auto=compress&cs=tinysrgb&w=1200',
       detailsEn: 'Complete cleaning of dust layer blockages compiled on cooling systems, raising thermal cooling performance indices by 18%.',
       detailsAr: 'تنظيف شامل لإزالة العوالق الجافة والترسبات الطينية والملحية عن فتحات المبرد المعدني لتفادي ارتفاع حرارة المولد تحت ضغط العمل المستديم.'
     },
@@ -131,7 +131,7 @@ const Projects: React.FC = () => {
       year: '2023',
       scopeEn: 'Manual and analog control gauge re-calibration and mechanical system checks inside heavy backup steel containers.',
       scopeAr: 'فحص ميكانيكي وكهربائي دقيق لتوصيلات مولدات الديزل الضخمة وتعديل ضبط شاشات العرض داخل المقصورات المعدنية العازلة.',
-      img: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=600&fit=crop',
+      img: 'https://images.pexels.com/photos/1108572/pexels-photo-1108572.jpeg?auto=compress&cs=tinysrgb&w=1200',
       detailsEn: 'Refactoring wiring harness protection sleeves, calibrating exhaust ventilation silencers, and aligning power output terminals.',
       detailsAr: 'تأمين حماية العوازل والضفائر وتعديل خافضات الصوت والعوادم وتنظيم مسارات التغذية الكهربائية لرفع مستويات الأمان داخل الحاويات.'
     },
@@ -149,7 +149,7 @@ const Projects: React.FC = () => {
       year: '2024',
       scopeEn: 'Detailed alignment of main circuit breakers, internal terminal block configurations, and copper busbar connections.',
       scopeAr: 'تنظيم مسارات توصيل الكابلات الأرضية والفرعية وتجميع صفائح وقضبان النحاس وحاملات مفاتيح التوزيع الكهربائية الرئيسية.',
-      img: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=600&fit=crop',
+      img: 'https://images.pexels.com/photos/162553/keys-workshop-mechanic-tools-162553.jpeg?auto=compress&cs=tinysrgb&w=1200',
       detailsEn: 'Guaranteed optimal thermal air circulation, completed dustproofing seals, and integrated emergency trip switches for substation protection.',
       detailsAr: 'تنفيذ أعمال العزل الغباري والحراري الداخلي وربط القواطع بنظام الإيقاف التلقائي لمنع حدوث التماس أو زيادة الحمل المفاجئة.'
     },
@@ -167,7 +167,7 @@ const Projects: React.FC = () => {
       year: '2023',
       scopeEn: 'Deployment of synchronized silent-sound standard Tide Power generators over structurally reinforced concrete pads.',
       scopeAr: 'تركيب وربط مولدات صامتة طراز Tide Power وضبط عمل مفتاح النقل الذكي ATS على وسائد خرسانية مسلحة ومضادة للاهتزازات.',
-      img: 'https://images.unsplash.com/photo-1605810230434-7631ac76ec81?w=600&fit=crop',
+      img: 'https://images.pexels.com/photos/1216589/pexels-photo-1216589.jpeg?auto=compress&cs=tinysrgb&w=1200',
       detailsEn: 'Successfully tested complete fuel lines, daytime diesel storage tank integration, and automated startup on emergency load scenarios.',
       detailsAr: 'اختبار دقيق لمدى استجابة تشغيل المولد التلقائي عند قطع التيار وربط خزانات الديزل المغذية لتوفير تشغيل متواصل لأكثر من 48 ساعة.'
     }
