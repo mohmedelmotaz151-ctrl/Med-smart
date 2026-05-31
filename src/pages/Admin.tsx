@@ -36,7 +36,9 @@ import {
   Plus,
   Edit,
   Eye,
-  EyeOff
+  EyeOff,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -111,6 +113,11 @@ const Admin: React.FC = () => {
   const [mediaVisible, setMediaVisible] = useState<boolean>(true);
   const [mediaListFilter, setMediaListFilter] = useState<'all' | 'project' | 'service' | 'equipment'>('all');
   const [selectedPreviewMedia, setSelectedPreviewMedia] = useState<MediaItem | null>(null);
+  const [previewImageIndex, setPreviewImageIndex] = useState<number>(0);
+
+  useEffect(() => {
+    setPreviewImageIndex(0);
+  }, [selectedPreviewMedia]);
   
   // Multi-image selection state
   const [selectedUploads, setSelectedUploads] = useState<{ name: string; base64: string }[]>([]);
@@ -201,7 +208,7 @@ const Admin: React.FC = () => {
 
       // Synchronize/Fallback to LocalStorage
       const localMedia: MediaItem[] = JSON.parse(localStorage.getItem('gcc_dynamic_media') || '[]');
-      const merged = [...items];
+      let merged = [...items];
       localMedia.forEach(localItem => {
         const exists = merged.some(m => m.id === localItem.id || (m.titleEn === localItem.titleEn && m.createdAt === localItem.createdAt));
         if (!exists) {
@@ -209,12 +216,171 @@ const Admin: React.FC = () => {
         }
       });
 
+      const hasEquipment = merged.some(m => m.type === 'equipment');
+      if (!hasEquipment) {
+        const defaultEquipmentSeeds: MediaItem[] = [
+          {
+            id: 'default_eq_1',
+            titleEn: 'High-Rise Steel & Foundation Rigs',
+            titleAr: 'أعمال صب الخرسانات ورافعات الهياكل الهندسية',
+            category: 'projects',
+            descriptionEn: 'Executing grand excavations, deep piling foundation engineering complying with structural engineering SBC safety metrics.',
+            descriptionAr: 'تجهيز وتشييد المباني الشاهقة وحسابات الحفر العميقة ودعم الأنفاق بالأبراج السكنية والطبية.',
+            imageUrls: ['https://images.pexels.com/photos/1216589/pexels-photo-1216589.jpeg?auto=compress&cs=tinysrgb&w=1200'],
+            type: 'equipment',
+            visible: true,
+            createdAt: new Date(Date.now() - 6 * 3600 * 1000).toISOString()
+          },
+          {
+            id: 'default_eq_2',
+            titleEn: 'Precision Calibration & Live Diagnostics',
+            titleAr: 'الفحص الرقمي والمعاينة الميدانية بدقة',
+            category: 'projects',
+            descriptionEn: 'Our engineers supervise installations with advanced computerized analysis for thermal readings and signal circuits.',
+            descriptionAr: 'مراقبة دائمة وإشراف هندسي متكامل لضمان مطابقة التركيبات للمخططات التكعيبية والمصادقات الرسمية.',
+            imageUrls: ['https://images.pexels.com/photos/1108572/pexels-photo-1108572.jpeg?auto=compress&cs=tinysrgb&w=1200'],
+            type: 'equipment',
+            visible: true,
+            createdAt: new Date(Date.now() - 5 * 3600 * 1000).toISOString()
+          },
+          {
+            id: 'default_eq_3',
+            titleEn: 'ATS Switches & Heavy-Duty Busbar Layout',
+            titleAr: 'قواطع ضغط ومفاتيح التحويل التلقائية المزدوجة',
+            category: 'projects',
+            descriptionEn: 'Structuring high-voltage breakers and weatherproof cabinet shelters to withstand harsh Saudi desert environments.',
+            descriptionAr: 'توفير وتجميع خلايا التوزيع الكهربائية ونقاط التماس المحكومة لتجنب انقطاع التيار والتأثر بالغبار والحرارة.',
+            imageUrls: ['https://images.pexels.com/photos/257736/pexels-photo-257736.jpeg?auto=compress&cs=tinysrgb&w=1200'],
+            type: 'equipment',
+            visible: true,
+            createdAt: new Date(Date.now() - 4 * 3600 * 1000).toISOString()
+          },
+          {
+            id: 'default_eq_4',
+            titleEn: 'NFPA Compliant Valves & FM-200 Loops',
+            titleAr: 'شبكات مرشات التدفق المائي ومضخات مكافحة اللهب',
+            category: 'projects',
+            descriptionEn: 'Heavy engineering design for dry and wet alarm check valves keeping continuous automatic pressure indicators safe.',
+            descriptionAr: 'شبكات متدفقة جافة لغرف التحكم وخراطيم تغذية رئيسية مطابقة لاشتراطات الدفاع المدني السعودي.',
+            imageUrls: ['https://images.pexels.com/photos/3825585/pexels-photo-3825585.jpeg?auto=compress&cs=tinysrgb&w=1200'],
+            type: 'equipment',
+            visible: true,
+            createdAt: new Date(Date.now() - 3 * 3600 * 1000).toISOString()
+          },
+          {
+            id: 'default_eq_5',
+            titleEn: 'Hydraulic Rigs & Precision High Lift Solutions',
+            titleAr: 'رافعات الإنشاءات والأنظمة الهيدروليكية الضخمة',
+            category: 'projects',
+            descriptionEn: 'Logistical muscle using multi-ton mobile and crawler cranes to place massive modular chiller coils with precision.',
+            descriptionAr: 'معدات مناولة ونقل أحمال الروابط والـ Chiller والصمامات الكونية الكبرى لضمان تدشين سريع وآمن.',
+            imageUrls: ['https://images.pexels.com/photos/1216589/pexels-photo-1216589.jpeg?auto=compress&cs=tinysrgb&w=1200'],
+            type: 'equipment',
+            visible: true,
+            createdAt: new Date(Date.now() - 2 * 3600 * 1000).toISOString()
+          },
+          {
+            id: 'default_eq_6',
+            titleEn: 'UL/FM Certified Pump Installation',
+            titleAr: 'توريد وتركيب مضخات الحريق المعتمدة UL/FM',
+            category: 'projects',
+            descriptionEn: 'Supply and installation of certified fire pumps in accordance with safety standards, with complete firefighting execution.',
+            descriptionAr: 'توريد وتركيب مضخات الحريق المعتمدة وفق معايير السلامة العالمية، مع تنفيذ كامل لشبكات الإطفاء وأنظمة التحكم.',
+            imageUrls: ['/images/fire-pump.jpg'],
+            type: 'equipment',
+            visible: true,
+            createdAt: new Date(Date.now() - 1 * 3600 * 1000).toISOString()
+          }
+        ];
+        merged = [...merged, ...defaultEquipmentSeeds];
+      }
+
       merged.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       setMediaItems(merged);
       localStorage.setItem('gcc_dynamic_media', JSON.stringify(merged));
     } catch (err) {
       console.error("Firestore dynamic media retrieval failed. Using cache...", err);
-      const localMedia: MediaItem[] = JSON.parse(localStorage.getItem('gcc_dynamic_media') || '[]');
+      let localMedia: MediaItem[] = JSON.parse(localStorage.getItem('gcc_dynamic_media') || '[]');
+      
+      const hasEquipment = localMedia.some(m => m.type === 'equipment');
+      if (!hasEquipment) {
+        const defaultEquipmentSeeds: MediaItem[] = [
+          {
+            id: 'default_eq_1',
+            titleEn: 'High-Rise Steel & Foundation Rigs',
+            titleAr: 'أعمال صب الخرسانات ورافعات الهياكل الهندسية',
+            category: 'projects',
+            descriptionEn: 'Executing grand excavations, deep piling foundation engineering complying with structural engineering SBC safety metrics.',
+            descriptionAr: 'تجهيز وتشييد المباني الشاهقة وحسابات الحفر العميقة ودعم الأنفاق بالأبراج السكنية والطبية.',
+            imageUrls: ['https://images.pexels.com/photos/1216589/pexels-photo-1216589.jpeg?auto=compress&cs=tinysrgb&w=1200'],
+            type: 'equipment',
+            visible: true,
+            createdAt: new Date(Date.now() - 6 * 3600 * 1000).toISOString()
+          },
+          {
+            id: 'default_eq_2',
+            titleEn: 'Precision Calibration & Live Diagnostics',
+            titleAr: 'الفحص الرقمي والمعاينة الميدانية بدقة',
+            category: 'projects',
+            descriptionEn: 'Our engineers supervise installations with advanced computerized analysis for thermal readings and signal circuits.',
+            descriptionAr: 'مراقبة دائمة وإشراف هندسي متكامل لضمان مطابقة التركيبات للمخططات التكعيبية والمصادقات الرسمية.',
+            imageUrls: ['https://images.pexels.com/photos/1108572/pexels-photo-1108572.jpeg?auto=compress&cs=tinysrgb&w=1200'],
+            type: 'equipment',
+            visible: true,
+            createdAt: new Date(Date.now() - 5 * 3600 * 1000).toISOString()
+          },
+          {
+            id: 'default_eq_3',
+            titleEn: 'ATS Switches & Heavy-Duty Busbar Layout',
+            titleAr: 'قواطع ضغط ومفاتيح التحويل التلقائية المزدوجة',
+            category: 'projects',
+            descriptionEn: 'Structuring high-voltage breakers and weatherproof cabinet shelters to withstand harsh Saudi desert environments.',
+            descriptionAr: 'توفير وتجميع خلايا التوزيع الكهربائية ونقاط التماس المحكومة لتجنب انقطاع التيار والتأثر بالغبار والحرارة.',
+            imageUrls: ['https://images.pexels.com/photos/257736/pexels-photo-257736.jpeg?auto=compress&cs=tinysrgb&w=1200'],
+            type: 'equipment',
+            visible: true,
+            createdAt: new Date(Date.now() - 4 * 3600 * 1000).toISOString()
+          },
+          {
+            id: 'default_eq_4',
+            titleEn: 'NFPA Compliant Valves & FM-200 Loops',
+            titleAr: 'شبكات مرشات التدفق المائي ومضخات مكافحة اللهب',
+            category: 'projects',
+            descriptionEn: 'Heavy engineering design for dry and wet alarm check valves keeping continuous automatic pressure indicators safe.',
+            descriptionAr: 'شبكات متدفقة جافة لغرف التحكم وخراطيم تغذية رئيسية مطابقة لاشتراطات الدفاع المدني السعودي.',
+            imageUrls: ['https://images.pexels.com/photos/3825585/pexels-photo-3825585.jpeg?auto=compress&cs=tinysrgb&w=1200'],
+            type: 'equipment',
+            visible: true,
+            createdAt: new Date(Date.now() - 3 * 3600 * 1000).toISOString()
+          },
+          {
+            id: 'default_eq_5',
+            titleEn: 'Hydraulic Rigs & Precision High Lift Solutions',
+            titleAr: 'رافعات الإنشاءات والأنظمة الهيدروليكية الضخمة',
+            category: 'projects',
+            descriptionEn: 'Logistical muscle using multi-ton mobile and crawler cranes to place massive modular chiller coils with precision.',
+            descriptionAr: 'معدات مناولة ونقل أحمال الروابط والـ Chiller والصمامات الكونية الكبرى لضمان تدشين سريع وآمن.',
+            imageUrls: ['https://images.pexels.com/photos/1216589/pexels-photo-1216589.jpeg?auto=compress&cs=tinysrgb&w=1200'],
+            type: 'equipment',
+            visible: true,
+            createdAt: new Date(Date.now() - 2 * 3600 * 1000).toISOString()
+          },
+          {
+            id: 'default_eq_6',
+            titleEn: 'UL/FM Certified Pump Installation',
+            titleAr: 'توريد وتركيب مضخات الحريق المعتمدة UL/FM',
+            category: 'projects',
+            descriptionEn: 'Supply and installation of certified fire pumps in accordance with safety standards, with complete firefighting execution.',
+            descriptionAr: 'توريد وتركيب مضخات الحريق المعتمدة وفق معايير السلامة العالمية، مع تنفيذ كامل لشبكات الإطفاء وأنظمة التحكم.',
+            imageUrls: ['/images/fire-pump.jpg'],
+            type: 'equipment',
+            visible: true,
+            createdAt: new Date(Date.now() - 1 * 3600 * 1000).toISOString()
+          }
+        ];
+        localMedia = [...localMedia, ...defaultEquipmentSeeds];
+        localStorage.setItem('gcc_dynamic_media', JSON.stringify(localMedia));
+      }
       localMedia.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       setMediaItems(localMedia);
     } finally {
@@ -1805,14 +1971,15 @@ const Admin: React.FC = () => {
                               {item.imageUrls && item.imageUrls[0]?.split('/').pop()}
                             </span>
 
-                            <div className="flex gap-1.5">
-                              {/* View click (Eye icon) */}
+                            <div className="flex gap-1.5 items-center">
+                              {/* Quick Preview Button */}
                               <button 
                                 onClick={() => setSelectedPreviewMedia(item)}
-                                className="p-1.5 border border-slate-200 rounded-lg text-[#0f2d59] hover:bg-slate-50 transition-colors"
-                                title={language === 'en' ? 'View/Inspect details' : 'عرض ومعاينة التفاصيل'}
+                                className="px-2.5 py-1.5 border border-[#0f2d59] text-white bg-[#0f2d59] hover:bg-slate-800 rounded-lg text-[9.5px] font-black flex items-center gap-1 transition-all shadow-sm active:scale-95"
+                                title={language === 'en' ? 'Quick Image Preview & Gallery' : 'معاينة تفاعلية سريعة للصور والمعرض'}
                               >
                                 <Eye className="w-3.5 h-3.5" />
+                                <span>{language === 'en' ? 'Quick Preview' : 'معاينة سريعة'}</span>
                               </button>
                               
                               {/* Quick visibility toggle */}
@@ -1891,13 +2058,80 @@ const Admin: React.FC = () => {
 
               <div className="p-6 space-y-5 overflow-y-auto max-h-[70vh]">
                 {selectedPreviewMedia.imageUrls && selectedPreviewMedia.imageUrls.length > 0 && (
-                  <div className="h-48 overflow-hidden rounded-2xl border border-slate-100">
-                    <img 
-                      src={selectedPreviewMedia.imageUrls[0]} 
-                      alt="Primary showcase" 
-                      className="w-full h-full object-cover" 
-                      referrerPolicy="no-referrer"
-                    />
+                  <div className="space-y-3">
+                    <div className="relative h-64 md:h-80 overflow-hidden rounded-2xl border border-slate-100 bg-slate-950 flex items-center justify-center group/carousel shadow-inner">
+                      <img 
+                        src={selectedPreviewMedia.imageUrls[previewImageIndex] || selectedPreviewMedia.imageUrls[0]} 
+                        alt={`Showcase image ${previewImageIndex + 1}`} 
+                        className="max-w-full max-h-full object-contain transition-all duration-300" 
+                        referrerPolicy="no-referrer"
+                      />
+                      
+                      {/* Cycling controls */}
+                      {selectedPreviewMedia.imageUrls.length > 1 && (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setPreviewImageIndex((prev) => 
+                                prev === 0 ? selectedPreviewMedia.imageUrls.length - 1 : prev - 1
+                              );
+                            }}
+                            className="absolute left-3 top-1/2 -translate-y-1/2 bg-slate-900/80 hover:bg-slate-900 text-white p-2 rounded-full backdrop-blur-md opacity-0 group-hover/carousel:opacity-100 transition-opacity focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-red-500 z-10 shadow-lg"
+                            title={language === 'en' ? 'Previous Image' : 'الصورة السابقة'}
+                          >
+                            <ChevronLeft className="w-5 h-5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setPreviewImageIndex((prev) => 
+                                prev === selectedPreviewMedia.imageUrls.length - 1 ? 0 : prev + 1
+                              );
+                            }}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 bg-slate-900/80 hover:bg-slate-900 text-white p-2 rounded-full backdrop-blur-md opacity-0 group-hover/carousel:opacity-100 transition-opacity focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-red-500 z-10 shadow-lg"
+                            title={language === 'en' ? 'Next Image' : 'الصورة التالية'}
+                          >
+                            <ChevronRight className="w-5 h-5" />
+                          </button>
+                          
+                          {/* Indicators badge */}
+                          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-slate-905/85 backdrop-blur-md px-3 py-1 rounded-full text-white text-[10px] font-mono font-bold flex items-center gap-1.5 shadow-lg select-none">
+                            <span>{previewImageIndex + 1}</span>
+                            <span className="text-slate-400">/</span>
+                            <span>{selectedPreviewMedia.imageUrls.length}</span>
+                          </div>
+                        </>
+                      )}
+                    </div>
+
+                    {/* Thumbnails list if multiple images exist */}
+                    {selectedPreviewMedia.imageUrls.length > 1 && (
+                      <div className="flex gap-2 overflow-x-auto py-1 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
+                        {selectedPreviewMedia.imageUrls.map((url, idx) => (
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={() => setPreviewImageIndex(idx)}
+                            className={`relative w-14 h-14 rounded-xl overflow-hidden border-2 shrink-0 transition-all ${
+                              previewImageIndex === idx 
+                                ? 'border-red-650 scale-[1.02] ring-2 ring-red-100' 
+                                : 'border-slate-200 hover:border-slate-350 hover:scale-[1.01]'
+                            }`}
+                          >
+                            <img 
+                              src={url} 
+                              alt={`Thumbnail ${idx + 1}`} 
+                              className="w-full h-full object-cover"
+                              referrerPolicy="no-referrer"
+                            />
+                            {previewImageIndex === idx && (
+                              <div className="absolute inset-0 bg-red-650/10 pointer-events-none" />
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
 

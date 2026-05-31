@@ -42,11 +42,87 @@ const Home: React.FC = () => {
   React.useEffect(() => {
     try {
       const stored = localStorage.getItem('gcc_dynamic_media');
+      let parsed: HomeMediaItem[] = [];
       if (stored) {
-        const parsed: HomeMediaItem[] = JSON.parse(stored);
-        const filtered = parsed.filter(item => item.type === 'equipment' && item.visible !== false);
-        setDynamicEquipment(filtered);
+        parsed = JSON.parse(stored);
       }
+      
+      const hasEquipment = parsed.some(item => item.type === 'equipment');
+      if (!hasEquipment) {
+        const defaultEquipmentSeeds: HomeMediaItem[] = [
+          {
+            id: 'default_eq_1',
+            titleEn: 'High-Rise Steel & Foundation Rigs',
+            titleAr: 'أعمال صب الخرسانات ورافعات الهياكل الهندسية',
+            category: 'projects',
+            descriptionEn: 'Executing grand excavations, deep piling foundation engineering complying with structural engineering SBC safety metrics.',
+            descriptionAr: 'تجهيز وتشييد المباني الشاهقة وحسابات الحفر العميقة ودعم الأنفاق بالأبراج السكنية والطبية.',
+            imageUrls: ['https://images.pexels.com/photos/1216589/pexels-photo-1216589.jpeg?auto=compress&cs=tinysrgb&w=1200'],
+            type: 'equipment',
+            visible: true
+          },
+          {
+            id: 'default_eq_2',
+            titleEn: 'Precision Calibration & Live Diagnostics',
+            titleAr: 'الفحص الرقمي والمعاينة الميدانية بدقة',
+            category: 'projects',
+            descriptionEn: 'Our engineers supervise installations with advanced computerized analysis for thermal readings and signal circuits.',
+            descriptionAr: 'مراقبة دائمة وإشراف هندسي متكامل لضمان مطابقة التركيبات للمخططات التكعيبية والمصادقات الرسمية.',
+            imageUrls: ['https://images.pexels.com/photos/1108572/pexels-photo-1108572.jpeg?auto=compress&cs=tinysrgb&w=1200'],
+            type: 'equipment',
+            visible: true
+          },
+          {
+            id: 'default_eq_3',
+            titleEn: 'ATS Switches & Heavy-Duty Busbar Layout',
+            titleAr: 'قواطع ضغط ومفاتيح التحويل التلقائية المزدوجة',
+            category: 'projects',
+            descriptionEn: 'Structuring high-voltage breakers and weatherproof cabinet shelters to withstand harsh Saudi desert environments.',
+            descriptionAr: 'توفير وتجميع خلايا التوزيع الكهربائية ونقاط التماس المحكومة لتجنب انقطاع التيار والتأثر بالغبار والحرارة.',
+            imageUrls: ['https://images.pexels.com/photos/257736/pexels-photo-257736.jpeg?auto=compress&cs=tinysrgb&w=1200'],
+            type: 'equipment',
+            visible: true
+          },
+          {
+            id: 'default_eq_4',
+            titleEn: 'NFPA Compliant Valves & FM-200 Loops',
+            titleAr: 'شبكات مرشات التدفق المائي ومضخات مكافحة اللهب',
+            category: 'projects',
+            descriptionEn: 'Heavy engineering design for dry and wet alarm check valves keeping continuous automatic pressure indicators safe.',
+            descriptionAr: 'شبكات متدفقة جافة لغرف التحكم وخراطيم تغذية رئيسية مطابقة لاشتراطات الدفاع المدني السعودي.',
+            imageUrls: ['https://images.pexels.com/photos/3825585/pexels-photo-3825585.jpeg?auto=compress&cs=tinysrgb&w=1200'],
+            type: 'equipment',
+            visible: true
+          },
+          {
+            id: 'default_eq_5',
+            titleEn: 'Hydraulic Rigs & Precision High Lift Solutions',
+            titleAr: 'رافعات الإنشاءات والأنظمة الهيدروليكية الضخمة',
+            category: 'projects',
+            descriptionEn: 'Logistical muscle using multi-ton mobile and crawler cranes to place massive modular chiller coils with precision.',
+            descriptionAr: 'معدات مناولة ونقل أحمال الروابط والـ Chiller والصمامات الكونية الكبرى لضمان تدشين سريع وآمن.',
+            imageUrls: ['https://images.pexels.com/photos/1216589/pexels-photo-1216589.jpeg?auto=compress&cs=tinysrgb&w=1200'],
+            type: 'equipment',
+            visible: true
+          },
+          {
+            id: 'default_eq_6',
+            titleEn: 'UL/FM Certified Pump Installation',
+            titleAr: 'توريد وتركيب مضخات الحريق المعتمدة UL/FM',
+            category: 'projects',
+            descriptionEn: 'Supply and installation of certified fire pumps in accordance with safety standards, with complete firefighting execution.',
+            descriptionAr: 'توريد وتركيب مضخات الحريق المعتمدة وفق معايير السلامة العالمية، مع تنفيذ كامل لشبكات الإطفاء وأنظمة التحكم.',
+            imageUrls: ['/images/fire-pump.jpg'],
+            type: 'equipment',
+            visible: true
+          }
+        ];
+        parsed = [...parsed, ...defaultEquipmentSeeds];
+        localStorage.setItem('gcc_dynamic_media', JSON.stringify(parsed));
+      }
+      
+      const filtered = parsed.filter(item => item.type === 'equipment' && item.visible !== false);
+      setDynamicEquipment(filtered);
     } catch (err) {
       console.error("Failed to parse dynamic equipment items", err);
     }
@@ -300,165 +376,11 @@ const Home: React.FC = () => {
             </div>
           ))}
 
-          {/* Card 1: Heavy Construction Sites */}
-          <div className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-200 group flex flex-col justify-between">
-            <div className="h-48 overflow-hidden relative">
-              <img 
-                src="https://images.pexels.com/photos/1216589/pexels-photo-1216589.jpeg?auto=compress&cs=tinysrgb&w=1200" 
-                alt="GCC Heavy Construction Sites" 
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                referrerPolicy="no-referrer"
-              />
-              <span className="absolute top-3 left-3 bg-slate-950/85 text-white text-[9px] font-mono font-bold px-2 py-0.5 rounded">01</span>
+          {dynamicEquipment.length === 0 && (
+            <div className="col-span-full text-center py-12 text-slate-400 font-medium text-xs bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+              {language === 'en' ? 'No active equipment items to display.' : 'لا توجد معدات مسجلة ومفعلة حالياً.'}
             </div>
-            <div className="p-5 flex-1 flex flex-col justify-between space-y-3">
-              <div>
-                <h3 className="text-xs font-black tracking-wider text-slate-400 uppercase font-mono mb-1">{language === 'en' ? 'Construction Sites' : 'مواقع إنشائية مهيبة'}</h3>
-                <h4 className="text-sm font-black text-slate-950 leading-tight">
-                  {language === 'en' ? 'High-Rise Steel & Foundation Rigs' : 'أعمال صب الخرسانات ورافعات الهياكل الهندسية'}
-                </h4>
-              </div>
-              <p className="text-slate-500 text-[11px] leading-relaxed">
-                {language === 'en'
-                  ? 'Executing grand excavations, deep piling foundation engineering complying with structural engineering SBC safety metrics.'
-                  : 'تجهيز وتشييد المباني الشاهقة وحسابات الحفر العميقة ودعم الأنفاق بالأبراج السكنية والطبية.'}
-              </p>
-            </div>
-          </div>
-
-          {/* Card 2: On-site Engineers */}
-          <div className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-200 group flex flex-col justify-between">
-            <div className="h-48 overflow-hidden relative">
-              <img 
-                src="https://images.pexels.com/photos/1108572/pexels-photo-1108572.jpeg?auto=compress&cs=tinysrgb&w=1200" 
-                alt="On-site Engineers at Work" 
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                referrerPolicy="no-referrer"
-              />
-              <span className="absolute top-3 left-3 bg-blue-650 text-white text-[9px] font-mono font-bold px-2 py-0.5 rounded">02</span>
-            </div>
-            <div className="p-5 flex-1 flex flex-col justify-between space-y-3">
-              <div>
-                <h3 className="text-xs font-black tracking-wider text-slate-400 uppercase font-mono mb-1">{language === 'en' ? 'On-site Engineers' : 'مهندسين واستشاريين بالموقع'}</h3>
-                <h4 className="text-sm font-black text-slate-950 leading-tight">
-                  {language === 'en' ? 'Precision Calibration & Live Diagnostics' : 'الفحص الرقمي والمعاينة الميدانية بدقة'}
-                </h4>
-              </div>
-              <p className="text-slate-500 text-[11px] leading-relaxed">
-                {language === 'en'
-                  ? 'Our engineers supervise installations with advanced computerized analysis for thermal readings and signal circuits.'
-                  : 'مراقبة دائمة وإشراف هندسي متكامل لضمان مطابقة التركيبات للمخططات التكعيبية والمصادقات الرسمية.'}
-              </p>
-            </div>
-          </div>
-
-          {/* Card 3: Electrical Boards */}
-          <div className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-200 group flex flex-col justify-between">
-            <div className="h-48 overflow-hidden relative">
-              <img 
-                src="https://images.pexels.com/photos/257736/pexels-photo-257736.jpeg?auto=compress&cs=tinysrgb&w=1200" 
-                alt="Electrical boards and cabinets" 
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                referrerPolicy="no-referrer"
-              />
-              <span className="absolute top-3 left-3 bg-red-650 text-white text-[9px] font-mono font-bold px-2 py-0.5 rounded">03</span>
-            </div>
-            <div className="p-5 flex-1 flex flex-col justify-between space-y-3">
-              <div>
-                <h3 className="text-xs font-black tracking-wider text-slate-400 uppercase font-mono mb-1">{language === 'en' ? 'Control Distribution Panels' : 'لوحات كهربائية ونحاسية'}</h3>
-                <h4 className="text-sm font-black text-slate-950 leading-tight">
-                  {language === 'en' ? 'ATS Switches & Heavy-Duty Busbar Layout' : 'قواطع ضغط ومفاتيح التحويل التلقائية المزدوجة'}
-                </h4>
-              </div>
-              <p className="text-slate-500 text-[11px] leading-relaxed">
-                {language === 'en'
-                  ? 'Structuring high-voltage breakers and weatherproof cabinet shelters to withstand harsh Saudi desert environments.'
-                  : 'توفير وتجميع خلايا التوزيع الكهربائية ونقاط التماس المحكومة لتجنب انقطاع التيار والتأثر بالغبار والحرارة.'}
-              </p>
-            </div>
-          </div>
-
-          {/* Card 4: Safety Systems */}
-          <div className="bg-white rounded-3xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 border-2 border-emerald-500 group flex flex-col justify-between relative scale-[1.01] md:scale-105 z-10 shadow-emerald-100">
-            <div className="h-48 overflow-hidden relative">
-              <img 
-                src="https://images.pexels.com/photos/3825585/pexels-photo-3825585.jpeg?auto=compress&cs=tinysrgb&w=1200" 
-                alt="Safety and Fire Safety Systems" 
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 brightness-105 contrast-105"
-                referrerPolicy="no-referrer"
-              />
-              <span className="absolute top-3 left-3 bg-slate-950/85 text-white text-[9px] font-mono font-bold px-2 py-0.5 rounded">04</span>
-              <span className="absolute top-3 right-3 bg-emerald-600 text-white text-[9px] font-black tracking-wide px-2 py-0.5 rounded-full shadow-lg flex items-center gap-1 animate-pulse">
-                <span className="w-1.5 h-1.5 rounded-full bg-white block animate-ping" />
-                {language === 'en' ? 'RELIABLE & PREFERRED' : 'الأفضل والمفضّل'}
-              </span>
-            </div>
-            <div className="p-5 flex-1 flex flex-col justify-between space-y-3 bg-emerald-50/10">
-              <div>
-                <h3 className="text-xs font-black tracking-wider text-emerald-600 uppercase font-mono mb-1">{language === 'en' ? 'Safety Systems • Featured' : 'أنظمة السلامة • الخيار الأفضل والمفضّل'}</h3>
-                <h4 className="text-sm font-black text-slate-950 leading-tight">
-                  {language === 'en' ? 'NFPA Compliant Valves & FM-205 Loops' : 'شبكات مرشات التدفق المائي ومضخات مكافحة اللهب'}
-                </h4>
-              </div>
-              <p className="text-slate-500 text-[11px] leading-relaxed">
-                {language === 'en'
-                  ? 'Heavy engineering design for dry and wet alarm check valves keeping continuous automatic pressure indicators safe.'
-                  : 'شبكات متدفقة جافة لغرف التحكم وخراطيم تغذية رئيسية مطابقة لاشتراطات الدفاع المدني السعودي.'}
-              </p>
-            </div>
-          </div>
-
-          {/* Card 5: Heavy Cranes & Equipment */}
-          <div className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-200 group flex flex-col justify-between">
-            <div className="h-48 overflow-hidden relative">
-              <img 
-                src="https://images.pexels.com/photos/1216589/pexels-photo-1216589.jpeg?auto=compress&cs=tinysrgb&w=1200" 
-                alt="Heavy cranes and industrial machinery" 
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                referrerPolicy="no-referrer"
-              />
-              <span className="absolute top-3 left-3 bg-amber-500 text-white text-[9px] font-mono font-bold px-2 py-0.5 rounded">05</span>
-            </div>
-            <div className="p-5 flex-1 flex flex-col justify-between space-y-3">
-              <div>
-                <h3 className="text-xs font-black tracking-wider text-slate-400 uppercase font-mono mb-1">{language === 'en' ? 'Heavy Cranes & Equipment' : 'رافعات حفر ومعدات ثقيلة'}</h3>
-                <h4 className="text-sm font-black text-slate-950 leading-tight">
-                  {language === 'en' ? 'Hydraulic Rigs & Precision High Lift Solutions' : 'رافعات الإنشاءات والأنظمة الهيدروليكية الضخمة'}
-                </h4>
-              </div>
-              <p className="text-slate-500 text-[11px] leading-relaxed">
-                {language === 'en'
-                  ? 'Logistical muscle using multi-ton mobile and crawler cranes to place massive modular chiller coils with precision.'
-                  : 'معدات مناولة ونقل أحمال الروابط والـ Chiller والصمامات الكونية الكبرى لضمان تدشين سريع وآمن.'}
-              </p>
-            </div>
-          </div>
-
-          {/* Card 6: UL/FM Certified Pump Installation */}
-          <div className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-200 group flex flex-col justify-between">
-            <div className="h-48 overflow-hidden relative">
-              <img 
-                src="/images/fire-pump.jpg" 
-                alt="UL/FM Certified Fire Fighting Pump Installation" 
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                referrerPolicy="no-referrer"
-              />
-              <span className="absolute top-3 left-3 bg-red-650 text-white text-[9px] font-mono font-bold px-2 py-0.5 rounded">06</span>
-            </div>
-            <div className="p-5 flex-1 flex flex-col justify-between space-y-3">
-              <div>
-                <h3 className="text-xs font-black tracking-wider text-slate-400 uppercase font-mono mb-1">{language === 'en' ? 'Pumping Systems' : 'أنظمة مكافحة اللهب'}</h3>
-                <h4 className="text-sm font-black text-slate-950 leading-tight">
-                  {language === 'en' ? 'Installation of UL/FM Certified Fire Pumps' : 'توريد وتركيب مضخات الحريق المعتمدة UL/FM'}
-                </h4>
-              </div>
-              <p className="text-slate-500 text-[11px] sm:text-xs leading-relaxed">
-                {language === 'en'
-                  ? 'Supply and installation of certified fire pumps in accordance with international safety standards, with complete execution of firefighting networks and control systems.'
-                  : 'توريد وتركيب مضخات الحريق المعتمدة وفق معايير السلامة العالمية، مع تنفيذ كامل لشبكات الإطفاء وأنظمة التحكم لضمان أعلى مستويات الحماية والكفاءة التشغيلية.'}
-              </p>
-            </div>
-          </div>
+          )}
         </div>
       </div>
 
