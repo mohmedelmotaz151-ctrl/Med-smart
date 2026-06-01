@@ -43,10 +43,50 @@ const Projects: React.FC = () => {
   const [dynamicProjects, setDynamicProjects] = useState<Project[]>([]);
 
   React.useEffect(() => {
-    try {
-      const stored = localStorage.getItem('gcc_dynamic_media');
-      if (stored) {
-        const parsed = JSON.parse(stored);
+    const fetchAndLoadProjects = async () => {
+      let parsed: any[] = [];
+      try {
+        const { collection, getDocs, query, orderBy } = await import('firebase/firestore');
+        const { db } = await import('../lib/firebase');
+        
+        let remoteItems: any[] = [];
+        try {
+          const q = query(collection(db, 'gcc_dynamic_media'), orderBy('createdAt', 'desc'));
+          const querySnapshot = await getDocs(q);
+          querySnapshot.forEach((doc) => {
+            remoteItems.push({ id: doc.id, ...doc.data() });
+          });
+        } catch (dbErr) {
+          console.warn("Firestore fetch error on projects page:", dbErr);
+        }
+
+        const stored = localStorage.getItem('gcc_dynamic_media');
+        const localItems = stored ? JSON.parse(stored) : [];
+
+        // Merge keeping Firestore as priority
+        const merged = [...remoteItems];
+        localItems.forEach((localItem: any) => {
+          const exists = merged.some(m => m.id === localItem.id || (m.titleEn === localItem.titleEn && m.createdAt === localItem.createdAt));
+          if (!exists) {
+            merged.push(localItem);
+          }
+        });
+
+        parsed = merged;
+        try {
+          localStorage.setItem('gcc_dynamic_media', JSON.stringify(merged));
+        } catch (saveErr) {
+          console.warn("Failed to update cache on projects page:", saveErr);
+        }
+      } catch (e) {
+        console.warn("Failed to load projects from Firestore dynamic system, falling back to cache.", e);
+        const stored = localStorage.getItem('gcc_dynamic_media');
+        if (stored) {
+          parsed = JSON.parse(stored);
+        }
+      }
+
+      if (parsed.length > 0) {
         const filtered = parsed
           .filter((item: any) => item.type === 'project' && item.visible !== false)
           .map((item: any) => ({
@@ -75,9 +115,9 @@ const Projects: React.FC = () => {
           }));
         setDynamicProjects(filtered);
       }
-    } catch (e) {
-      console.warn("Error reading dynamic projects list", e);
-    }
+    };
+
+    fetchAndLoadProjects();
   }, []);
 
   const projectsData: Project[] = [

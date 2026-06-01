@@ -30,6 +30,7 @@ interface HomeMediaItem {
   imageUrls: string[];
   type: string;
   visible?: boolean;
+  createdAt?: string;
 }
 
 const Home: React.FC = () => {
@@ -40,13 +41,45 @@ const Home: React.FC = () => {
   const [dynamicEquipment, setDynamicEquipment] = React.useState<HomeMediaItem[]>([]);
 
   React.useEffect(() => {
-    try {
-      const stored = localStorage.getItem('gcc_dynamic_media');
+    const fetchAndLoadHomeMedia = async () => {
       let parsed: HomeMediaItem[] = [];
-      if (stored) {
-        parsed = JSON.parse(stored);
+      try {
+        const { collection, getDocs, query, orderBy } = await import('firebase/firestore');
+        const { db } = await import('../lib/firebase');
+        
+        let remoteItems: HomeMediaItem[] = [];
+        try {
+          const q = query(collection(db, 'gcc_dynamic_media'), orderBy('createdAt', 'desc'));
+          const querySnapshot = await getDocs(q);
+          querySnapshot.forEach((doc) => {
+            remoteItems.push({ id: doc.id, ...doc.data() } as HomeMediaItem);
+          });
+        } catch (dbErr) {
+          console.warn("Firestore fetch error on home page:", dbErr);
+        }
+
+        const stored = localStorage.getItem('gcc_dynamic_media');
+        const localItems = stored ? JSON.parse(stored) : [];
+
+        // Merge keeping Firestore as priority
+        const merged = [...remoteItems];
+        localItems.forEach((localItem: any) => {
+          const exists = merged.some(m => m.id === localItem.id || (m.titleEn === localItem.titleEn && m.createdAt === localItem.createdAt));
+          if (!exists) {
+            merged.push(localItem);
+          }
+        });
+
+        parsed = merged;
+      } catch (e) {
+        console.warn("Failed to load home media from Firestore dynamic system, falling back to cache.", e);
+        const stored = localStorage.getItem('gcc_dynamic_media');
+        if (stored) {
+          parsed = JSON.parse(stored);
+        }
       }
-      
+
+      // Check if equipment exists, if not seed defaults
       const hasEquipment = parsed.some(item => item.type === 'equipment');
       if (!hasEquipment) {
         const defaultEquipmentSeeds: HomeMediaItem[] = [
@@ -100,7 +133,7 @@ const Home: React.FC = () => {
             titleAr: 'رافعات الإنشاءات والأنظمة الهيدروليكية الضخمة',
             category: 'projects',
             descriptionEn: 'Logistical muscle using multi-ton mobile and crawler cranes to place massive modular chiller coils with precision.',
-            descriptionAr: 'معدات مناولة ونقل أحمال الروابط والـ Chiller والصمامات الكبرى لضمان تدشين سريع وآمن.',
+            descriptionAr: 'معدات مناولة ونقل أحمال الروابط والـ Chiller والصمامات الكونية الكبرى لضمان تدشين سريع وآمن.',
             imageUrls: ['https://images.pexels.com/photos/1216589/pexels-photo-1216589.jpeg?auto=compress&cs=tinysrgb&w=1200'],
             type: 'equipment',
             visible: true
@@ -112,20 +145,25 @@ const Home: React.FC = () => {
             category: 'projects',
             descriptionEn: 'Supply and installation of certified fire pumps in accordance with safety standards, with complete firefighting execution.',
             descriptionAr: 'توريد وتركيب مضخات الحريق المعتمدة وفق معايير السلامة العالمية، مع تنفيذ كامل لشبكات الإطفاء وأنظمة التحكم.',
-            imageUrls: ['/images/fire-pump.jpg.png'],
+            imageUrls: ['/images/fire-pump.jpg'],
             type: 'equipment',
             visible: true
           }
         ];
         parsed = [...parsed, ...defaultEquipmentSeeds];
-        localStorage.setItem('gcc_dynamic_media', JSON.stringify(parsed));
       }
-      
+
+      try {
+        localStorage.setItem('gcc_dynamic_media', JSON.stringify(parsed));
+      } catch (saveErr) {
+        console.warn("Failed to set localStorage on home page", saveErr);
+      }
+
       const filtered = parsed.filter(item => item.type === 'equipment' && item.visible !== false);
       setDynamicEquipment(filtered);
-    } catch (err) {
-      console.error("Failed to parse dynamic equipment items", err);
-    }
+    };
+
+    fetchAndLoadHomeMedia();
   }, []);
 
   const mockServices = [
@@ -242,7 +280,7 @@ const Home: React.FC = () => {
             <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/90 via-slate-950/25 to-transparent p-4 flex justify-between items-end">
               <div>
                 <span className="text-[9px] font-mono uppercase tracking-widest text-slate-300 block">{language === 'en' ? 'Active Projects' : 'مواقع العمل النشطة'}</span>
-                <span className="text-xs font-bold text-white">{language === 'en' ? 'Riyadh Financial Hub Foundations' : 'أساسات مجمع الرياض المالي '}</span>
+                <span className="text-xs font-bold text-white">{language === 'en' ? 'Riyadh Financial Hub Foundations' : 'أساسات مجمع الرياض المالي الرقمي'}</span>
               </div>
               <span className="bg-red-650 text-white text-[9px] font-bold px-2 py-0.5 rounded uppercase">SBC Verified</span>
             </div>
@@ -286,11 +324,11 @@ const Home: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-bold text-slate-700">
             <div className="flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-              <span>{language === 'en' ? 'Expert Mechanical Engineers' : 'نخبة من المهندسين والمصممين'}</span>
+              <span>{language === 'en' ? 'Expert Mechanical Engineers' : 'نخبة من المهندسين الميكانيكيين والمصممين'}</span>
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-              <span>{language === 'en' ? 'Fully Compliant to Fire Safety Codes' : 'تصميمات معتمدة للدفاع المدني وأنظمة السلامة'}</span>
+              <span>{language === 'en' ? 'Fully Compliant to Fire Safety Codes' : 'تصميمات معتمدة للدفاع المدني وأنظمة الإنقاص'}</span>
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
@@ -397,7 +435,7 @@ const Home: React.FC = () => {
           <p className="text-slate-500 text-xs sm:text-sm leading-relaxed text-justify">
             {language === 'en'
               ? 'Our official 30-page corporate profile detailing civil engineering licenses, ZATCA tax registrations, custom electrical generator specifications, and landmark executed HVAC & fire suppression projects at Bisha University, Maersk, and Amazon centers.'
-              : 'الملف والبروفايل التعريفي الرسمي الشامل لشركة GCC للتجهيزات والمقاولات الإلكتروميكانيكية. يحتوي على تراخيص الدفاع المدني ومطابقة الكود السعودي (SBC)، السجل التجاري والضريبي المعتمد (ZATCA)، وقائمة كاملة بالمشاريع المنفذة لجامعة بيشة، شركة أمازون، مرافئ ميرسك، ووزارة الصحة ومصانع مدن.'}
+              : 'الملف والبروفايل التعريفي الرسمي الشامل لشركة GCC للتجهيزات الكنزية والمقاولات الإلكتروميكانيكية. يحتوي على تراخيص الدفاع المدني ومطابقة الكود السعودي (SBC)، السجل التجاري والضريبي المعتمد (ZATCA)، وقائمة كاملة بالمشاريع المنفذة لجامعة بيشة، شركة أمازون، مرافئ ميرسك، ووزارة الصحة ومصانع مدن.'}
           </p>
           <div className="flex flex-wrap gap-4 pt-1.5 text-xs font-bold text-slate-700">
             <div className="flex items-center gap-2 bg-white px-3.5 py-2 rounded-xl border border-slate-200 shadow-2xs">
