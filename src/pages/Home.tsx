@@ -100,7 +100,7 @@ const Home: React.FC = () => {
             titleAr: 'رافعات الإنشاءات والأنظمة الهيدروليكية الضخمة',
             category: 'projects',
             descriptionEn: 'Logistical muscle using multi-ton mobile and crawler cranes to place massive modular chiller coils with precision.',
-            descriptionAr: 'معدات مناولة ونقل أحمال الروابط والـ Chiller والصمامات الكونية الكبرى لضمان تدشين سريع وآمن.',
+            descriptionAr: 'معدات مناولة ونقل أحمال الروابط والـ Chiller والصمامات الكبرى لضمان تدشين سريع وآمن.',
             imageUrls: ['https://images.pexels.com/photos/1216589/pexels-photo-1216589.jpeg?auto=compress&cs=tinysrgb&w=1200'],
             type: 'equipment',
             visible: true
@@ -112,7 +112,7 @@ const Home: React.FC = () => {
             category: 'projects',
             descriptionEn: 'Supply and installation of certified fire pumps in accordance with safety standards, with complete firefighting execution.',
             descriptionAr: 'توريد وتركيب مضخات الحريق المعتمدة وفق معايير السلامة العالمية، مع تنفيذ كامل لشبكات الإطفاء وأنظمة التحكم.',
-            imageUrls: ['/images/fire-pump.jpg'],
+            imageUrls: ['/images/fire-pump.jpg.png'],
             type: 'equipment',
             visible: true
           }
@@ -242,7 +242,7 @@ const Home: React.FC = () => {
             <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/90 via-slate-950/25 to-transparent p-4 flex justify-between items-end">
               <div>
                 <span className="text-[9px] font-mono uppercase tracking-widest text-slate-300 block">{language === 'en' ? 'Active Projects' : 'مواقع العمل النشطة'}</span>
-                <span className="text-xs font-bold text-white">{language === 'en' ? 'Riyadh Financial Hub Foundations' : 'أساسات مجمع الرياض المالي الرقمي'}</span>
+                <span className="text-xs font-bold text-white">{language === 'en' ? 'Riyadh Financial Hub Foundations' : 'أساسات مجمع الرياض المالي '}</span>
               </div>
               <span className="bg-red-650 text-white text-[9px] font-bold px-2 py-0.5 rounded uppercase">SBC Verified</span>
             </div>
@@ -286,11 +286,11 @@ const Home: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-bold text-slate-700">
             <div className="flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-              <span>{language === 'en' ? 'Expert Mechanical Engineers' : 'نخبة من المهندسين الميكانيكيين والمصممين'}</span>
+              <span>{language === 'en' ? 'Expert Mechanical Engineers' : 'نخبة من المهندسين والمصممين'}</span>
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-              <span>{language === 'en' ? 'Fully Compliant to Fire Safety Codes' : 'تصميمات معتمدة للدفاع المدني وأنظمة الإنقاص'}</span>
+              <span>{language === 'en' ? 'Fully Compliant to Fire Safety Codes' : 'تصميمات معتمدة للدفاع المدني وأنظمة السلامة'}</span>
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
@@ -397,7 +397,7 @@ const Home: React.FC = () => {
           <p className="text-slate-500 text-xs sm:text-sm leading-relaxed text-justify">
             {language === 'en'
               ? 'Our official 30-page corporate profile detailing civil engineering licenses, ZATCA tax registrations, custom electrical generator specifications, and landmark executed HVAC & fire suppression projects at Bisha University, Maersk, and Amazon centers.'
-              : 'الملف والبروفايل التعريفي الرسمي الشامل لشركة GCC للتجهيزات الكنزية والمقاولات الإلكتروميكانيكية. يحتوي على تراخيص الدفاع المدني ومطابقة الكود السعودي (SBC)، السجل التجاري والضريبي المعتمد (ZATCA)، وقائمة كاملة بالمشاريع المنفذة لجامعة بيشة، شركة أمازون، مرافئ ميرسك، ووزارة الصحة ومصانع مدن.'}
+              : 'الملف والبروفايل التعريفي الرسمي الشامل لشركة GCC للتجهيزات والمقاولات الإلكتروميكانيكية. يحتوي على تراخيص الدفاع المدني ومطابقة الكود السعودي (SBC)، السجل التجاري والضريبي المعتمد (ZATCA)، وقائمة كاملة بالمشاريع المنفذة لجامعة بيشة، شركة أمازون، مرافئ ميرسك، ووزارة الصحة ومصانع مدن.'}
           </p>
           <div className="flex flex-wrap gap-4 pt-1.5 text-xs font-bold text-slate-700">
             <div className="flex items-center gap-2 bg-white px-3.5 py-2 rounded-xl border border-slate-200 shadow-2xs">
