@@ -54,23 +54,11 @@ const Home: React.FC = () => {
           querySnapshot.forEach((doc) => {
             remoteItems.push({ id: doc.id, ...doc.data() } as HomeMediaItem);
           });
+          parsed = remoteItems;
         } catch (dbErr) {
           console.warn("Firestore fetch error on home page:", dbErr);
+          throw dbErr;
         }
-
-        const stored = localStorage.getItem('gcc_dynamic_media');
-        const localItems = stored ? JSON.parse(stored) : [];
-
-        // Merge keeping Firestore as priority
-        const merged = [...remoteItems];
-        localItems.forEach((localItem: any) => {
-          const exists = merged.some(m => m.id === localItem.id || (m.titleEn === localItem.titleEn && m.createdAt === localItem.createdAt));
-          if (!exists) {
-            merged.push(localItem);
-          }
-        });
-
-        parsed = merged;
       } catch (e) {
         console.warn("Failed to load home media from Firestore dynamic system, falling back to cache.", e);
         const stored = localStorage.getItem('gcc_dynamic_media');

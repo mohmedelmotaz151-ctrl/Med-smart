@@ -276,183 +276,95 @@ const Admin: React.FC = () => {
         items.push({ id: doc.id, ...doc.data() } as MediaItem);
       });
 
-      // Synchronize/Fallback to LocalStorage
-      const localMedia: MediaItem[] = JSON.parse(localStorage.getItem('gcc_dynamic_media') || '[]');
-      let merged = [...items];
-      localMedia.forEach(localItem => {
-        const exists = merged.some(m => m.id === localItem.id || (m.titleEn === localItem.titleEn && m.createdAt === localItem.createdAt));
-        if (!exists) {
-          merged.push(localItem);
+      const defaultEquipmentSeeds: MediaItem[] = [
+        {
+          id: 'default_eq_1',
+          titleEn: 'High-Rise Steel & Foundation Rigs',
+          titleAr: 'أعمال صب الخرسانات ورافعات الهياكل الهندسية',
+          category: 'projects',
+          descriptionEn: 'Executing grand excavations, deep piling foundation engineering complying with structural engineering SBC safety metrics.',
+          descriptionAr: 'تجهيز وتشييد المباني الشاهقة وحسابات الحفر العميقة ودعم الأنفاق بالأبراج السكنية والطبية.',
+          imageUrls: ['https://images.pexels.com/photos/1216589/pexels-photo-1216589.jpeg?auto=compress&cs=tinysrgb&w=1200'],
+          type: 'equipment',
+          visible: true,
+          createdAt: new Date(Date.now() - 6 * 3600 * 1000).toISOString()
+        },
+        {
+          id: 'default_eq_2',
+          titleEn: 'Precision Calibration & Live Diagnostics',
+          titleAr: 'الفحص الرقمي والمعاينة الميدانية بدقة',
+          category: 'projects',
+          descriptionEn: 'Our engineers supervise installations with advanced computerized analysis for thermal readings and signal circuits.',
+          descriptionAr: 'مراقبة دائمة وإشراف هندسي متكامل لضمان مطابقة التركيبات للمخططات التكعيبية والمصادقات الرسمية.',
+          imageUrls: ['https://images.pexels.com/photos/1108572/pexels-photo-1108572.jpeg?auto=compress&cs=tinysrgb&w=1200'],
+          type: 'equipment',
+          visible: true,
+          createdAt: new Date(Date.now() - 5 * 3600 * 1000).toISOString()
+        },
+        {
+          id: 'default_eq_3',
+          titleEn: 'ATS Switches & Heavy-Duty Busbar Layout',
+          titleAr: 'قواطع ضغط ومفاتيح التحويل التلقائية المزدوجة',
+          category: 'projects',
+          descriptionEn: 'Structuring high-voltage breakers and weatherproof cabinet shelters to withstand harsh Saudi desert environments.',
+          descriptionAr: 'توفير وتجميع خلايا التوزيع الكهربائية ونقاط التماس المحكومة لتجنب انقطاع التيار والتأثر بالغبار والحرارة.',
+          imageUrls: ['https://images.pexels.com/photos/257736/pexels-photo-257736.jpeg?auto=compress&cs=tinysrgb&w=1200'],
+          type: 'equipment',
+          visible: true,
+          createdAt: new Date(Date.now() - 4 * 3600 * 1000).toISOString()
+        },
+        {
+          id: 'default_eq_4',
+          titleEn: 'NFPA Compliant Valves & FM-200 Loops',
+          titleAr: 'شبكات مرشات التدفق المائي ومضخات مكافحة اللهب',
+          category: 'projects',
+          descriptionEn: 'Heavy engineering design for dry and wet alarm check valves keeping continuous automatic pressure indicators safe.',
+          descriptionAr: 'شبكات متدفقة جافة لغرف التحكم وخراطيم تغذية رئيسية مطابقة لاشتراطات الدفاع المدني السعودي.',
+          imageUrls: ['https://images.pexels.com/photos/3825585/pexels-photo-3825585.jpeg?auto=compress&cs=tinysrgb&w=1200'],
+          type: 'equipment',
+          visible: true,
+          createdAt: new Date(Date.now() - 3 * 3600 * 1000).toISOString()
+        },
+        {
+          id: 'default_eq_5',
+          titleEn: 'Hydraulic Rigs & Precision High Lift Solutions',
+          titleAr: 'رافعات الإنشاءات والأنظمة الهيدروليكية الضخمة',
+          category: 'projects',
+          descriptionEn: 'Logistical muscle using multi-ton mobile and crawler cranes to place massive modular chiller coils with precision.',
+          descriptionAr: 'معدات مناولة ونقل أحمال الروابط والـ Chiller والصمامات الكونية الكبرى لضمان تدشين سريع وآمن.',
+          imageUrls: ['https://images.pexels.com/photos/1216589/pexels-photo-1216589.jpeg?auto=compress&cs=tinysrgb&w=1200'],
+          type: 'equipment',
+          visible: true,
+          createdAt: new Date(Date.now() - 2 * 3600 * 1000).toISOString()
+        },
+        {
+          id: 'default_eq_6',
+          titleEn: 'UL/FM Certified Pump Installation',
+          titleAr: 'توريد وتركيب مضخات الحريق المعتمدة UL/FM',
+          category: 'projects',
+          descriptionEn: 'Supply and installation of certified fire pumps in accordance with safety standards, with complete firefighting execution.',
+          descriptionAr: 'توريد وتركيب مضخات الحريق المعتمدة وفق معايير السلامة العالمية، مع تنفيذ كامل لشبكات الإطفاء وأنظمة التحكم.',
+          imageUrls: ['/images/fire-pump.jpg'],
+          type: 'equipment',
+          visible: true,
+          createdAt: new Date(Date.now() - 1 * 3600 * 1000).toISOString()
         }
-      });
+      ];
 
-      const hasEquipment = merged.some(m => m.type === 'equipment');
-      if (!hasEquipment) {
-        const defaultEquipmentSeeds: MediaItem[] = [
-          {
-            id: 'default_eq_1',
-            titleEn: 'High-Rise Steel & Foundation Rigs',
-            titleAr: 'أعمال صب الخرسانات ورافعات الهياكل الهندسية',
-            category: 'projects',
-            descriptionEn: 'Executing grand excavations, deep piling foundation engineering complying with structural engineering SBC safety metrics.',
-            descriptionAr: 'تجهيز وتشييد المباني الشاهقة وحسابات الحفر العميقة ودعم الأنفاق بالأبراج السكنية والطبية.',
-            imageUrls: ['https://images.pexels.com/photos/1216589/pexels-photo-1216589.jpeg?auto=compress&cs=tinysrgb&w=1200'],
-            type: 'equipment',
-            visible: true,
-            createdAt: new Date(Date.now() - 6 * 3600 * 1000).toISOString()
-          },
-          {
-            id: 'default_eq_2',
-            titleEn: 'Precision Calibration & Live Diagnostics',
-            titleAr: 'الفحص الرقمي والمعاينة الميدانية بدقة',
-            category: 'projects',
-            descriptionEn: 'Our engineers supervise installations with advanced computerized analysis for thermal readings and signal circuits.',
-            descriptionAr: 'مراقبة دائمة وإشراف هندسي متكامل لضمان مطابقة التركيبات للمخططات التكعيبية والمصادقات الرسمية.',
-            imageUrls: ['https://images.pexels.com/photos/1108572/pexels-photo-1108572.jpeg?auto=compress&cs=tinysrgb&w=1200'],
-            type: 'equipment',
-            visible: true,
-            createdAt: new Date(Date.now() - 5 * 3600 * 1000).toISOString()
-          },
-          {
-            id: 'default_eq_3',
-            titleEn: 'ATS Switches & Heavy-Duty Busbar Layout',
-            titleAr: 'قواطع ضغط ومفاتيح التحويل التلقائية المزدوجة',
-            category: 'projects',
-            descriptionEn: 'Structuring high-voltage breakers and weatherproof cabinet shelters to withstand harsh Saudi desert environments.',
-            descriptionAr: 'توفير وتجميع خلايا التوزيع الكهربائية ونقاط التماس المحكومة لتجنب انقطاع التيار والتأثر بالغبار والحرارة.',
-            imageUrls: ['https://images.pexels.com/photos/257736/pexels-photo-257736.jpeg?auto=compress&cs=tinysrgb&w=1200'],
-            type: 'equipment',
-            visible: true,
-            createdAt: new Date(Date.now() - 4 * 3600 * 1000).toISOString()
-          },
-          {
-            id: 'default_eq_4',
-            titleEn: 'NFPA Compliant Valves & FM-200 Loops',
-            titleAr: 'شبكات مرشات التدفق المائي ومضخات مكافحة اللهب',
-            category: 'projects',
-            descriptionEn: 'Heavy engineering design for dry and wet alarm check valves keeping continuous automatic pressure indicators safe.',
-            descriptionAr: 'شبكات متدفقة جافة لغرف التحكم وخراطيم تغذية رئيسية مطابقة لاشتراطات الدفاع المدني السعودي.',
-            imageUrls: ['https://images.pexels.com/photos/3825585/pexels-photo-3825585.jpeg?auto=compress&cs=tinysrgb&w=1200'],
-            type: 'equipment',
-            visible: true,
-            createdAt: new Date(Date.now() - 3 * 3600 * 1000).toISOString()
-          },
-          {
-            id: 'default_eq_5',
-            titleEn: 'Hydraulic Rigs & Precision High Lift Solutions',
-            titleAr: 'رافعات الإنشاءات والأنظمة الهيدروليكية الضخمة',
-            category: 'projects',
-            descriptionEn: 'Logistical muscle using multi-ton mobile and crawler cranes to place massive modular chiller coils with precision.',
-            descriptionAr: 'معدات مناولة ونقل أحمال الروابط والـ Chiller والصمامات الكونية الكبرى لضمان تدشين سريع وآمن.',
-            imageUrls: ['https://images.pexels.com/photos/1216589/pexels-photo-1216589.jpeg?auto=compress&cs=tinysrgb&w=1200'],
-            type: 'equipment',
-            visible: true,
-            createdAt: new Date(Date.now() - 2 * 3600 * 1000).toISOString()
-          },
-          {
-            id: 'default_eq_6',
-            titleEn: 'UL/FM Certified Pump Installation',
-            titleAr: 'توريد وتركيب مضخات الحريق المعتمدة UL/FM',
-            category: 'projects',
-            descriptionEn: 'Supply and installation of certified fire pumps in accordance with safety standards, with complete firefighting execution.',
-            descriptionAr: 'توريد وتركيب مضخات الحريق المعتمدة وفق معايير السلامة العالمية، مع تنفيذ كامل لشبكات الإطفاء وأنظمة التحكم.',
-            imageUrls: ['/images/fire-pump.jpg'],
-            type: 'equipment',
-            visible: true,
-            createdAt: new Date(Date.now() - 1 * 3600 * 1000).toISOString()
-          }
-        ];
-        merged = [...merged, ...defaultEquipmentSeeds];
+      if (items.length === 0) {
+        items = [...defaultEquipmentSeeds];
+      } else {
+        const hasEquipment = items.some(m => m.type === 'equipment');
+        if (!hasEquipment) {
+          items = [...items, ...defaultEquipmentSeeds];
+        }
       }
 
-      merged.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-      setMediaItems(merged);
-      localStorage.setItem('gcc_dynamic_media', JSON.stringify(merged));
+      items.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      setMediaItems(items);
     } catch (err) {
-      console.error("Firestore dynamic media retrieval failed. Using cache...", err);
-      let localMedia: MediaItem[] = JSON.parse(localStorage.getItem('gcc_dynamic_media') || '[]');
-      
-      const hasEquipment = localMedia.some(m => m.type === 'equipment');
-      if (!hasEquipment) {
-        const defaultEquipmentSeeds: MediaItem[] = [
-          {
-            id: 'default_eq_1',
-            titleEn: 'High-Rise Steel & Foundation Rigs',
-            titleAr: 'أعمال صب الخرسانات ورافعات الهياكل الهندسية',
-            category: 'projects',
-            descriptionEn: 'Executing grand excavations, deep piling foundation engineering complying with structural engineering SBC safety metrics.',
-            descriptionAr: 'تجهيز وتشييد المباني الشاهقة وحسابات الحفر العميقة ودعم الأنفاق بالأبراج السكنية والطبية.',
-            imageUrls: ['https://images.pexels.com/photos/1216589/pexels-photo-1216589.jpeg?auto=compress&cs=tinysrgb&w=1200'],
-            type: 'equipment',
-            visible: true,
-            createdAt: new Date(Date.now() - 6 * 3600 * 1000).toISOString()
-          },
-          {
-            id: 'default_eq_2',
-            titleEn: 'Precision Calibration & Live Diagnostics',
-            titleAr: 'الفحص الرقمي والمعاينة الميدانية بدقة',
-            category: 'projects',
-            descriptionEn: 'Our engineers supervise installations with advanced computerized analysis for thermal readings and signal circuits.',
-            descriptionAr: 'مراقبة دائمة وإشراف هندسي متكامل لضمان مطابقة التركيبات للمخططات التكعيبية والمصادقات الرسمية.',
-            imageUrls: ['https://images.pexels.com/photos/1108572/pexels-photo-1108572.jpeg?auto=compress&cs=tinysrgb&w=1200'],
-            type: 'equipment',
-            visible: true,
-            createdAt: new Date(Date.now() - 5 * 3600 * 1000).toISOString()
-          },
-          {
-            id: 'default_eq_3',
-            titleEn: 'ATS Switches & Heavy-Duty Busbar Layout',
-            titleAr: 'قواطع ضغط ومفاتيح التحويل التلقائية المزدوجة',
-            category: 'projects',
-            descriptionEn: 'Structuring high-voltage breakers and weatherproof cabinet shelters to withstand harsh Saudi desert environments.',
-            descriptionAr: 'توفير وتجميع خلايا التوزيع الكهربائية ونقاط التماس المحكومة لتجنب انقطاع التيار والتأثر بالغبار والحرارة.',
-            imageUrls: ['https://images.pexels.com/photos/257736/pexels-photo-257736.jpeg?auto=compress&cs=tinysrgb&w=1200'],
-            type: 'equipment',
-            visible: true,
-            createdAt: new Date(Date.now() - 4 * 3600 * 1000).toISOString()
-          },
-          {
-            id: 'default_eq_4',
-            titleEn: 'NFPA Compliant Valves & FM-200 Loops',
-            titleAr: 'شبكات مرشات التدفق المائي ومضخات مكافحة اللهب',
-            category: 'projects',
-            descriptionEn: 'Heavy engineering design for dry and wet alarm check valves keeping continuous automatic pressure indicators safe.',
-            descriptionAr: 'شبكات متدفقة جافة لغرف التحكم وخراطيم تغذية رئيسية مطابقة لاشتراطات الدفاع المدني السعودي.',
-            imageUrls: ['https://images.pexels.com/photos/3825585/pexels-photo-3825585.jpeg?auto=compress&cs=tinysrgb&w=1200'],
-            type: 'equipment',
-            visible: true,
-            createdAt: new Date(Date.now() - 3 * 3600 * 1000).toISOString()
-          },
-          {
-            id: 'default_eq_5',
-            titleEn: 'Hydraulic Rigs & Precision High Lift Solutions',
-            titleAr: 'رافعات الإنشاءات والأنظمة الهيدروليكية الضخمة',
-            category: 'projects',
-            descriptionEn: 'Logistical muscle using multi-ton mobile and crawler cranes to place massive modular chiller coils with precision.',
-            descriptionAr: 'معدات مناولة ونقل أحمال الروابط والـ Chiller والصمامات الكونية الكبرى لضمان تدشين سريع وآمن.',
-            imageUrls: ['https://images.pexels.com/photos/1216589/pexels-photo-1216589.jpeg?auto=compress&cs=tinysrgb&w=1200'],
-            type: 'equipment',
-            visible: true,
-            createdAt: new Date(Date.now() - 2 * 3600 * 1000).toISOString()
-          },
-          {
-            id: 'default_eq_6',
-            titleEn: 'UL/FM Certified Pump Installation',
-            titleAr: 'توريد وتركيب مضخات الحريق المعتمدة UL/FM',
-            category: 'projects',
-            descriptionEn: 'Supply and installation of certified fire pumps in accordance with safety standards, with complete firefighting execution.',
-            descriptionAr: 'توريد وتركيب مضخات الحريق المعتمدة وفق معايير السلامة العالمية، مع تنفيذ كامل لشبكات الإطفاء وأنظمة التحكم.',
-            imageUrls: ['/images/fire-pump.jpg'],
-            type: 'equipment',
-            visible: true,
-            createdAt: new Date(Date.now() - 1 * 3600 * 1000).toISOString()
-          }
-        ];
-        localMedia = [...localMedia, ...defaultEquipmentSeeds];
-        localStorage.setItem('gcc_dynamic_media', JSON.stringify(localMedia));
-      }
-      localMedia.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-      setMediaItems(localMedia);
+      console.error("Firestore dynamic media retrieval failed:", err);
+      alert(language === 'en' ? 'Failed to fetch projects from server.' : 'فشل جلب المشاريع من خادم الفايربيز الرئيسي.');
     } finally {
       setMediaLoading(false);
     }
@@ -601,39 +513,22 @@ const Admin: React.FC = () => {
         createdAt: editingMedia ? editingMedia.createdAt : new Date().toISOString()
       };
 
-      let registeredId = editingMedia?.id || `local_media_${Date.now()}`;
-
       // 2. Persist in Firestore
       try {
-        if (editingMedia?.id && !editingMedia.id.startsWith('local_')) {
+        if (editingMedia?.id && !editingMedia.id.startsWith('local_') && !editingMedia.id.startsWith('default_eq_')) {
           const docRef = doc(db, 'gcc_dynamic_media', editingMedia.id);
           await updateDoc(docRef, { ...mediaPayload });
         } else {
-          const docRef = await addDoc(collection(db, 'gcc_dynamic_media'), mediaPayload);
-          registeredId = docRef.id;
+          await addDoc(collection(db, 'gcc_dynamic_media'), mediaPayload);
         }
-      } catch (dbErr) {
-        console.warn("Firestore save skipped/failed, proceeding offline with LocalStorage:", dbErr);
+
+        await fetchMediaItems();
+        clearMediaForm();
+        alert(language === 'en' ? 'Dynamic media successfully registered!' : 'تم حفظ وتفعيل المشروع بنجاح على الخادم الرئيسي لموقع GCC!');
+      } catch (dbErr: any) {
+        console.error("Firestore Secure write failed:", dbErr);
+        setUploadError(language === 'en' ? `Database Error: ${dbErr.message}` : `فشل الاتصال الفعلي بالفايربيز: ${dbErr.message}`);
       }
-
-      // 3. Save to LocalStorage cache
-      const updatedItem: MediaItem = { id: registeredId, ...mediaPayload };
-      const localMedia: MediaItem[] = JSON.parse(localStorage.getItem('gcc_dynamic_media') || '[]');
-      
-      let updatedLocal: MediaItem[];
-      if (editingMedia) {
-        updatedLocal = localMedia.map(item => item.id === editingMedia.id ? updatedItem : item);
-      } else {
-        updatedLocal = [updatedItem, ...localMedia];
-      }
-
-      localStorage.setItem('gcc_dynamic_media', JSON.stringify(updatedLocal));
-      
-      // Update state
-      setMediaItems(updatedLocal);
-      clearMediaForm();
-
-      alert(language === 'en' ? 'Dynamic media successfully registered!' : 'تم حفظ وتجهيز الصورة والبيانات بنجاح ومطابقتها الميدانية!');
     } catch (err: any) {
       console.error("Media registration failed", err);
       setUploadError(err.message || (language === 'en' ? 'Error saving content.' : 'حصل خطأ في حفظ البيانات.'));
@@ -664,47 +559,37 @@ const Admin: React.FC = () => {
     if (!window.confirm(language === 'en' ? 'Are you sure you want to remove this project/image resource?' : 'هل أنت متأكد من رغبتك في حذف هذا الملف الهندسي / الصورة بالكامل؟')) return;
 
     try {
-      if (!mediaId.startsWith('local_')) {
+      if (!mediaId.startsWith('default_eq_') && !mediaId.startsWith('local_')) {
         await deleteDoc(doc(db, 'gcc_dynamic_media', mediaId));
       }
-    } catch (err) {
-      console.warn("Firestore delete failed, carrying on local mirror bypass...", err);
-    }
-
-    const localMedia: MediaItem[] = JSON.parse(localStorage.getItem('gcc_dynamic_media') || '[]');
-    const filtered = localMedia.filter(item => item.id !== mediaId);
-    localStorage.setItem('gcc_dynamic_media', JSON.stringify(filtered));
-    setMediaItems(filtered);
-
-    if (editingMedia?.id === mediaId) {
-      clearMediaForm();
+      await fetchMediaItems();
+      if (editingMedia?.id === mediaId) {
+        clearMediaForm();
+      }
+    } catch (err: any) {
+      console.error("Firestore delete failed:", err);
+      alert(language === 'en' ? `Failed to delete from database: ${err.message}` : `فشل الحذف من قاعدة البيانات: ${err.message}`);
     }
   };
 
   const handleToggleVisibility = async (item: MediaItem) => {
     if (!item.id) return;
     const updatedVisible = item.visible === false ? true : false;
-    const updatedItem = { ...item, visible: updatedVisible };
     
-    // update locally
-    const localMedia: MediaItem[] = JSON.parse(localStorage.getItem('gcc_dynamic_media') || '[]');
-    const updatedLocal = localMedia.map(m => m.id === item.id ? updatedItem : m);
-    localStorage.setItem('gcc_dynamic_media', JSON.stringify(updatedLocal));
-    setMediaItems(updatedLocal);
-    
-    // update in Firestore (if not local-only)
-    if (!item.id.startsWith('local_')) {
-      try {
+    try {
+      if (!item.id.startsWith('default_eq_') && !item.id.startsWith('local_')) {
         await updateDoc(doc(db, 'gcc_dynamic_media', item.id), { visible: updatedVisible });
-      } catch (err) {
-        console.warn("Could not toggle visibility in Firestore, kept offline change", err);
       }
+      await fetchMediaItems();
+      triggerToast(
+        language === 'en' 
+          ? `Status updated to ${updatedVisible ? 'Visible' : 'Hidden'}` 
+          : `تم تعديل حالة العرض إلى ${updatedVisible ? 'معروض للزوار' : 'مخفي مؤقتاً بالواجهة'}`
+      );
+    } catch (err: any) {
+      console.error("Could not toggle visibility in Firestore:", err);
+      alert(language === 'en' ? `Failed to update status: ${err.message}` : `فشل تحديث حالة العرض: ${err.message}`);
     }
-    triggerToast(
-      language === 'en' 
-        ? `Status updated to ${updatedVisible ? 'Visible' : 'Hidden'}` 
-        : `تم تعديل حالة العرض إلى ${updatedVisible ? 'معروض للزوار' : 'مخفي مؤقتاً بالواجهة'}`
-    );
   };
 
   const fetchInquiries = async () => {
