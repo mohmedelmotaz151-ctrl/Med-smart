@@ -121,7 +121,7 @@ const Home: React.FC = () => {
             titleAr: 'رافعات الإنشاءات والأنظمة الهيدروليكية الضخمة',
             category: 'projects',
             descriptionEn: 'Logistical muscle using multi-ton mobile and crawler cranes to place massive modular chiller coils with precision.',
-            descriptionAr: 'معدات مناولة ونقل أحمال الروابط والـ Chiller والصمامات الكونية الكبرى لضمان تدشين سريع وآمن.',
+            descriptionAr: 'معدات مناولة ونقل أحمال الروابط والـ Chiller والصمامات  الكبرى لضمان تدشين سريع وآمن.',
             imageUrls: ['https://images.pexels.com/photos/1216589/pexels-photo-1216589.jpeg?auto=compress&cs=tinysrgb&w=1200'],
             type: 'equipment',
             visible: true
@@ -133,7 +133,7 @@ const Home: React.FC = () => {
             category: 'projects',
             descriptionEn: 'Supply and installation of certified fire pumps in accordance with safety standards, with complete firefighting execution.',
             descriptionAr: 'توريد وتركيب مضخات الحريق المعتمدة وفق معايير السلامة العالمية، مع تنفيذ كامل لشبكات الإطفاء وأنظمة التحكم.',
-            imageUrls: ['/images/fire-pump.jpg'],
+            imageUrls: ['/images/sprinkler.jpg'],
             type: 'equipment',
             visible: true
           }
