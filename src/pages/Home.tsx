@@ -74,10 +74,10 @@ const Home: React.FC = () => {
           {
             id: 'default_eq_1',
             titleEn: 'High-Rise Steel & Foundation Rigs',
-            titleAr: 'أعمال صب الخرسانات ورافعات الهياكل الهندسية',
+            titleAr: 'صيانة المولدات الكهربائية',
             category: 'projects',
             descriptionEn: 'Executing grand excavations, deep piling foundation engineering complying with structural engineering SBC safety metrics.',
-            descriptionAr: 'تجهيز وتشييد المباني الشاهقة وحسابات الحفر العميقة ودعم الأنفاق بالأبراج السكنية والطبية.',
+            descriptionAr: 'صيانة مولدات الديزل وتجهيزها بالكامل للعمل علي اتم الجاهزية.',
             imageUrls: ['https://www.shutterstock.com/shutterstock/photos/2739234851/display_1500/stock-photo-industrial-plants-factory-technician-worker-grinder-spark-metal-cutting-workshop-scene-in-motion-2739234851.jpg'],
             type: 'equipment',
             visible: true
@@ -89,7 +89,7 @@ const Home: React.FC = () => {
             category: 'projects',
             descriptionEn: 'Our engineers supervise installations with advanced computerized analysis for thermal readings and signal circuits.',
             descriptionAr: 'مراقبة دائمة وإشراف هندسي متكامل لضمان مطابقة التركيبات للمخططات التكعيبية والمصادقات الرسمية.',
-            imageUrls: ['https://images.pexels.com/photos/1108572/pexels-photo-1108572.jpeg?auto=compress&cs=tinysrgb&w=1200'],
+            imageUrls: ['https://www.shutterstock.com/image-photo/sleman-yogyakarta-indonesia-august-07-2019-1508804384?trackingId=86aaa845-52db-4cfb-a176-7fad88b0b2db&listId=searchResults'],
             type: 'equipment',
             visible: true
           },
