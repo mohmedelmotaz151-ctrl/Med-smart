@@ -112,10 +112,7 @@ service cloud.firestore {
 
     // --- GCC Dynamic Media ---
     match /gcc_dynamic_media/{mediaId} {
-      allow read: if true;
-      allow create: if isAdmin() && isValidMedia(incoming()) && isValidId(mediaId);
-      allow update: if isAdmin() && isValidMedia(incoming()) && isValidId(mediaId);
-      allow delete: if isAdmin() && isValidId(mediaId);
+      allow read, write: if true;
     }
 
     function isValidMedia(data) {
@@ -131,12 +128,7 @@ service cloud.firestore {
 
     // --- Inquiries / Quote Requests ---
     match /inquiries/{inquiryId} {
-      allow get: if isAdmin() || (isSignedIn() && existing().userEmail == request.auth.token.email);
-      allow list: if isAdmin() || 
-                     (isSignedIn() && resource.data.userEmail == request.auth.token.email) ||
-                     (resource.data.ticketId != null);
-      allow create: if isValidInquiry(incoming());
-      allow update, delete: if isAdmin();
+      allow read, write: if true;
     }
 
     function isValidInquiry(data) {
