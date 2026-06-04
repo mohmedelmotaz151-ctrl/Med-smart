@@ -74,11 +74,11 @@ const Home: React.FC = () => {
           {
             id: 'default_eq_1',
             titleEn: 'High-Rise Steel & Foundation Rigs',
-            titleAr: 'صيانة المولدات الكهربائية',
+            titleAr: 'أعمال صب الخرسانات ورافعات الهياكل الهندسية',
             category: 'projects',
             descriptionEn: 'Executing grand excavations, deep piling foundation engineering complying with structural engineering SBC safety metrics.',
-            descriptionAr: 'صيانة مولدات الديزل وتجهيزها بالكامل للعمل علي اتم الجاهزية.',
-            imageUrls: ['https://www.shutterstock.com/shutterstock/photos/2739234851/display_1500/stock-photo-industrial-plants-factory-technician-worker-grinder-spark-metal-cutting-workshop-scene-in-motion-2739234851.jpg'],
+            descriptionAr: 'تجهيز وتشييد المباني الشاهقة وحسابات الحفر العميقة ودعم الأنفاق بالأبراج السكنية والطبية.',
+            imageUrls: ['https://images.pexels.com/photos/1216589/pexels-photo-1216589.jpeg?auto=compress&cs=tinysrgb&w=1200'],
             type: 'equipment',
             visible: true
           },
@@ -89,7 +89,7 @@ const Home: React.FC = () => {
             category: 'projects',
             descriptionEn: 'Our engineers supervise installations with advanced computerized analysis for thermal readings and signal circuits.',
             descriptionAr: 'مراقبة دائمة وإشراف هندسي متكامل لضمان مطابقة التركيبات للمخططات التكعيبية والمصادقات الرسمية.',
-            imageUrls: ['https://www.shutterstock.com/image-photo/sleman-yogyakarta-indonesia-august-07-2019-1508804384?trackingId=86aaa845-52db-4cfb-a176-7fad88b0b2db&listId=searchResults'],
+            imageUrls: ['https://images.pexels.com/photos/1108572/pexels-photo-1108572.jpeg?auto=compress&cs=tinysrgb&w=1200'],
             type: 'equipment',
             visible: true
           },
@@ -121,7 +121,7 @@ const Home: React.FC = () => {
             titleAr: 'رافعات الإنشاءات والأنظمة الهيدروليكية الضخمة',
             category: 'projects',
             descriptionEn: 'Logistical muscle using multi-ton mobile and crawler cranes to place massive modular chiller coils with precision.',
-            descriptionAr: 'معدات مناولة ونقل أحمال الروابط والـ Chiller والصمامات  الكبرى لضمان تدشين سريع وآمن.',
+            descriptionAr: 'معدات مناولة ونقل أحمال الروابط والـ Chiller والصمامات الكونية الكبرى لضمان تدشين سريع وآمن.',
             imageUrls: ['https://images.pexels.com/photos/1216589/pexels-photo-1216589.jpeg?auto=compress&cs=tinysrgb&w=1200'],
             type: 'equipment',
             visible: true
@@ -133,7 +133,7 @@ const Home: React.FC = () => {
             category: 'projects',
             descriptionEn: 'Supply and installation of certified fire pumps in accordance with safety standards, with complete firefighting execution.',
             descriptionAr: 'توريد وتركيب مضخات الحريق المعتمدة وفق معايير السلامة العالمية، مع تنفيذ كامل لشبكات الإطفاء وأنظمة التحكم.',
-            imageUrls: ['/images/sprinkler.jpg'],
+            imageUrls: ['/images/fire-pump.jpg'],
             type: 'equipment',
             visible: true
           }

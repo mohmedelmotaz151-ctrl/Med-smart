@@ -35,23 +35,19 @@ async function startServer() {
   app.use(express.static(path.join(process.cwd(), "public")));
 
   // Dynamic uploads endpoint
-  app.post("/api/upload", (req, res) => {
+  app.post("/api/upload", async (req, res) => {
     try {
       const { filename, content, category } = req.body;
       if (!filename || !content) {
         return res.status(400).json({ error: "Missing filename or content payload." });
       }
 
-      // decode base64 buffer
-      const matches = content.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
-      let buffer: Buffer;
-      if (matches && matches.length === 3) {
-        buffer = Buffer.from(matches[2], 'base64');
-      } else {
-        buffer = Buffer.from(content, 'base64');
-      }
+      // Check if Cloudinary is configured
+      const cloudName = process.env.CLOUDINARY_CLOUD_NAME || "transport-95c76";
+      const apiKey = process.env.CLOUDINARY_API_KEY || "694234951845448";
+      const apiSecret = process.env.CLOUDINARY_API_SECRET || "Md8UOXGYwQJu_Lvh81SbiCmDUL0";
 
-      // Normalize directory naming
+      // Normalize directory/folder naming
       let folderKey = "projects";
       if (category === "services") {
         folderKey = "services";
@@ -59,6 +55,40 @@ async function startServer() {
         folderKey = "fire-systems";
       } else if (category === "general") {
         folderKey = "general";
+      }
+
+      if (cloudName && apiKey && apiSecret) {
+        try {
+          const { v2: cloudinary } = await import("cloudinary");
+          cloudinary.config({
+            cloud_name: cloudName,
+            api_key: apiKey,
+            api_secret: apiSecret,
+          });
+
+          // Upload safely to Cloudinary
+          const uploadResult = await cloudinary.uploader.upload(content, {
+            folder: `gcc_media/${folderKey}`,
+            resource_type: "auto",
+          });
+
+          return res.json({
+            success: true,
+            url: uploadResult.secure_url,
+            public_id: uploadResult.public_id
+          });
+        } catch (cloudinaryErr: any) {
+          console.error("Cloudinary upload failed, falling back to local file system:", cloudinaryErr);
+        }
+      }
+
+      // decode base64 buffer as fallback
+      const matches = content.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+      let buffer: Buffer;
+      if (matches && matches.length === 3) {
+        buffer = Buffer.from(matches[2], 'base64');
+      } else {
+        buffer = Buffer.from(content, 'base64');
       }
 
       const destFolder = path.join(uploadRoot, folderKey);
