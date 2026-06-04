@@ -43,7 +43,7 @@ async function startServer() {
       }
 
       // Check if Cloudinary is configured
-      const cloudName = process.env.CLOUDINARY_CLOUD_NAME || "transport-95c76";
+      const cloudName = process.env.CLOUDINARY_CLOUD_NAME || "dtd6qwe2a";
       const apiKey = process.env.CLOUDINARY_API_KEY || "694234951845448";
       const apiSecret = process.env.CLOUDINARY_API_SECRET || "Md8UOXGYwQJu_Lvh81SbiCmDUL0";
 
