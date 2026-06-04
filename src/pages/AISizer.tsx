@@ -525,6 +525,44 @@ const AISizer: React.FC = () => {
       detailedSpecs = `أنظمة مكافحة الحرائق والإطفاء: التكوين ${selectedSuppressionTypes.join(', ')}. المساحة الكلية: ${suppArea} متر مربع. الطوابق: ${suppFloors}. نوع المضخات: ${pumpType}. المواسير: ${pipeType}. عدد الطفايات: ${extinguishersCount} حبة.`;
     }
 
+    // 1. Upload files to Cloudinary using /api/upload
+    const uploadedUrls: string[] = [];
+    setLoadingStatus(language === 'ar' ? 'جاري رفع المخططات والوثائق بأمان...' : 'Uploading schemas & layouts securely...');
+    
+    for (const file of files) {
+      if (file.dataUrl) {
+        try {
+          const response = await fetch('/api/upload', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              filename: `${Date.now()}_${file.name}`,
+              content: file.dataUrl,
+              category: 'general'
+            })
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            if (data.url) {
+              console.log("Uploaded file to Cloudinary:", data.url);
+              uploadedUrls.push(`${file.name}||${data.url}`);
+            } else {
+              uploadedUrls.push(`${file.name}||${file.dataUrl}`);
+            }
+          } else {
+            console.warn("Failed uploading sizer file, falling back to dataUrl:", response.statusText);
+            uploadedUrls.push(`${file.name}||${file.dataUrl}`);
+          }
+        } catch (uploadErr) {
+          console.error("Cloudinary upload error in sizer, falling back to inline base64:", uploadErr);
+          uploadedUrls.push(`${file.name}||${file.dataUrl}`);
+        }
+      } else {
+        uploadedUrls.push(file.name);
+      }
+    }
+
     // Build the consolidated Inquiry Object formatted exactly for the GCC Admin Panel Database
     const finalInquiryPayload = {
       name: clientName,
@@ -539,8 +577,8 @@ const AISizer: React.FC = () => {
       ticketId: ticketStr,
       status: 'new',
       createdAt: new Date().toISOString(),
-      uploadedFiles: files.length > 0 
-        ? files.map(f => f.dataUrl ? `${f.name}||${f.dataUrl}` : f.name) 
+      uploadedFiles: uploadedUrls.length > 0 
+        ? uploadedUrls 
         : ['Interactive-Config-Generated.pdf', 'Estimated-Layout.cad'],
       priceDetails: {
         componentsCost: estimatedCostData.min,
@@ -552,7 +590,7 @@ const AISizer: React.FC = () => {
       }
     };
 
-    // 1. Save to Remote Firebase Firestore
+    // 2. Save to Remote Firebase Firestore
     try {
       await addDoc(collection(db, 'inquiries'), finalInquiryPayload);
       console.log("Success storing GCC specification remotely to Firestore!");
@@ -560,7 +598,7 @@ const AISizer: React.FC = () => {
       console.error("Firebase write error, storing securely in local caches...", err);
     }
 
-    // 2. Save directly inside local storage to ensure availability
+    // 3. Save directly inside local storage to ensure availability
     const localInquiries = JSON.parse(localStorage.getItem('gcc_inquiries') || '[]');
     localInquiries.unshift(finalInquiryPayload);
     localStorage.setItem('gcc_inquiries', JSON.stringify(localInquiries));
