@@ -100,8 +100,8 @@ const Profile: React.FC = () => {
 
   const getObjectiveLabel = (obj: string) => {
     switch (obj) {
-      case 'quote': return language === 'en' ? 'Heavy Quoting Estimate' : 'طلب عرض سعر ومقايسة كبرى';
-      case 'maintenance': return language === 'en' ? 'Preventive Maintenance SLA' : 'صيانة كهروميكانيكية دورية';
+      case 'quote': return language === 'en' ? 'Heavy Quoting Estimate' : 'طلب عرض سعر ومقايسة ';
+      case 'maintenance': return language === 'en' ? 'Preventive Maintenance SLA' : 'عقد صيانة';
       case 'inspection': return language === 'en' ? 'Civil Defense Fire Audit' : 'معاينة واعتمادات الدفاع المدني';
       default: return language === 'en' ? 'General Inquiry' : 'استفسار عام للمجموعة';
     }
@@ -128,14 +128,14 @@ const Profile: React.FC = () => {
               {profile?.displayName || user?.displayName || 'GCC Company Client'}
             </h1>
             <span className="bg-red-600 text-white text-[10px] font-extrabold uppercase tracking-widest px-3 py-1 rounded-full border border-red-500/20">
-              {profile?.role === 'doctor' ? (language === 'en' ? 'Engineering Lead' : 'قائد القسم الهندسي') : (language === 'en' ? 'Corporate Client' : 'عميل شركة GCC')}
+              {profile?.role === 'doctor' ? (language === 'en' ? 'Engineering Lead' : ' القسم الهندسي') : (language === 'en' ? 'Corporate Client' : 'عميل شركة GCC')}
             </span>
           </div>
           <p className="text-slate-400 text-xs font-mono">{user?.email}</p>
           <div className="flex items-center justify-center md:justify-start gap-4 pt-1">
             <div className="flex items-center gap-1.5 text-slate-400 text-xs font-bold">
               <MapPin size={14} className="text-red-500" />
-              <span>{profile?.city || 'Riyadh, KSA'}</span>
+              <span>{profile?.city || 'kamis mushat, KSA'}</span>
             </div>
             <div className="flex items-center gap-1.5 text-slate-400 text-xs font-bold">
               <Phone size={14} className="text-blue-400" />
