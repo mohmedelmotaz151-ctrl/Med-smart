@@ -248,7 +248,7 @@ const Contact: React.FC = () => {
         <p className="text-slate-600 text-sm leading-relaxed font-sans">
           {language === 'en'
             ? 'GCC COMPANY helps you size, estimate, and evaluate electro-mechanical contracts easily. Furnish your layout specs, estimated building size, and download your preliminary estimate within 4 hours.'
-            : 'تساعدكم شركة GCC COMPANY على تصميم وتسعير المقاولات الكهروميكانيكية والأنظمة الأمنية والدفاع المدني بدقة. أدخل تفاصيل ومخطط المنشأة واحصل على عرض سعر ومقايس أولية فنية في غضون 4 ساعات.'}
+            : 'تساعدكم شركة GCC COMPANY على تصميم وتسعير المقاولات الكهروميكانيكية والأنظمة الأمنية والدفاع المدني بدقة. أدخل تفاصيل ومخطط المنشأة واحصل على عرض سعر ومقايس أولية فنية في غضون 3 ساعات.'}
         </p>
       </div>
 
@@ -278,7 +278,7 @@ const Contact: React.FC = () => {
                       name="name"
                       value={formData.name}
                       onChange={handleInput}
-                      placeholder={language === 'en' ? 'e.g. Sultan Al-Ahmad' : 'مثال: سلطان الأحمد'}
+                      placeholder={language === 'en' ? 'e.g. Ahmed Mohmed' : 'مثال:احمد محمد'}
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs focus:outline-none focus:border-red-500 focus:bg-white transition-all text-slate-800 font-sans"
                     />
                   </div>
@@ -293,7 +293,7 @@ const Contact: React.FC = () => {
                       name="company"
                       value={formData.company}
                       onChange={handleInput}
-                      placeholder={language === 'en' ? 'e.g. Al-Fahd Contracting' : 'مثال: شركة الفهد للمقاولات'}
+                      placeholder={language === 'en' ? 'e.g. Al-Fahd Contracting' : 'مثال: شركة الحماية للمقاولات'}
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs focus:outline-none focus:border-red-500 focus:bg-white transition-all text-slate-800 font-sans"
                     />
                   </div>
@@ -446,7 +446,7 @@ const Contact: React.FC = () => {
                             name="location"
                             value={formData.location}
                             onChange={handleInput}
-                            placeholder={language === 'en' ? 'e.g. Riyadh, Al Olaya' : 'مثال: الرياض، حي العليا'}
+                            placeholder={language === 'en' ? 'e.g. Abha, Al mwazfeen' : 'مثال: ابها، حي الموظفين'}
                             className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs focus:outline-none focus:border-red-500 focus:bg-white transition-all text-slate-800 font-sans"
                           />
                           <MapPin className="absolute top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none right-4" />
@@ -711,8 +711,8 @@ const Contact: React.FC = () => {
               <div className="flex gap-3 items-start text-xs leading-relaxed font-sans">
                 <MapPin className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
                 <div>
-                  <span className="block font-black text-slate-200">{language === 'en' ? 'Saudi Arabia Command Central' : 'مقر التواجد الرئيسي (مملكة ريادية)'}</span>
-                  <span className="block text-[11px] text-slate-400">7190 King Fahd Road, Al-Aqeeq District, Riyadh 13511</span>
+                  <span className="block font-black text-slate-200">{language === 'en' ? 'Saudi Arabia Command Central' : 'مقر التواجد الرئيسي (المملكة العربية السعودية)'}</span>
+                  <span className="block text-[11px] text-slate-400">7190 King Fahd Road, abah,kamis mushat 13511</span>
                 </div>
               </div>
 
@@ -736,7 +736,7 @@ const Contact: React.FC = () => {
                 <Clock className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                 <div>
                   <span className="block font-black text-slate-200">{language === 'en' ? 'Working Hours' : 'ساعات معاينات العمل'}</span>
-                  <span className="block text-[11px] text-slate-400">{language === 'en' ? 'Sunday - Thursday: 8:00 AM - 5:00 PM' : 'الأحد - الخميس: 8:00 صباحاً - 5:00 مساءً'}</span>
+                  <span className="block text-[11px] text-slate-400">{language === 'en' ? 'Saterday - Thursday: 7:00 AM - 7:00 PM' : 'السبت - الخميس: 7:00 صباحاً - 7:00 مساءً'}</span>
                   <span className="block text-[10px] text-red-500 font-extrabold uppercase mt-1">*{language === 'en' ? 'Emergencies response Active 24/7' : 'استجابة الكوارث والدعم الفني مستمرة 24 ساعة'}</span>
                 </div>
               </div>
@@ -748,7 +748,7 @@ const Contact: React.FC = () => {
             <div className="flex items-center gap-3">
               <ShieldCheck className="w-8 h-8 text-blue-600" />
               <div>
-                <h4 className="text-xs font-black text-slate-900">{language === 'en' ? '4-Hour Bidding SLA Guarantee' : 'ضمان إنجاز المقايسة خلال 4 ساعات'}</h4>
+                <h4 className="text-xs font-black text-slate-900">{language === 'en' ? '3-Hour Bidding SLA Guarantee' : 'ضمان إنجاز المقايسة خلال 3 ساعات'}</h4>
                 <p className="text-[10px] text-slate-400 leading-normal font-sans">{language === 'en' ? 'Our civil safety estimators analyze specifications at record speeds.' : 'فريق المهندسين الفنيين يحلل المتطلبات بأقصى كفاءة.'}</p>
               </div>
             </div>
