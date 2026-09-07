@@ -31,19 +31,17 @@ const ProtectedRoute = ({ children, role }: { children: React.ReactNode; role?: 
   return <>{children}</>;
 };
 
-import Sidebar from './components/Sidebar';
 
 function AppContent() {
   const { dir, language } = useLanguage();
   const [isOpen, setIsOpen] = React.useState(false);
 
   return (
-    <div className="h-screen flex bg-slate-100 font-sans text-slate-900 overflow-hidden" dir={dir}>
-      <Sidebar />
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
-        <Navbar />
-        <main className="flex-1 overflow-y-auto p-6 md:p-8">
-          <div className="max-w-7xl mx-auto w-full font-sans">
+    <div className="min-h-screen bg-[#f7f8fa] font-sans text-slate-900" dir={dir}>
+      <Navbar />
+      <div className="relative min-h-[calc(100vh-78px)]">
+        <main className="px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-10">
+          <div className="mx-auto w-full max-w-[1460px] font-sans">
             <Suspense fallback={<LoadingScreen />}>
               <Routes>
                 <Route path="/" element={<Home />} />
@@ -85,6 +83,7 @@ function AppContent() {
             </Suspense>
           </div>
         </main>
+        <Footer />
 
         {/* Global Floating Custom WhatsApp & Call Hub with Premium Micro-animations */}
         <div className="fixed bottom-6 end-6 z-50 flex flex-col items-end gap-3 font-sans">
