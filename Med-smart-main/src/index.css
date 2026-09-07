@@ -2,40 +2,56 @@
 @plugin "@tailwindcss/typography";
 
 @theme {
-  --font-sans: "Inter", "IBM Plex Sans Arabic", "Segoe UI", Tahoma, Arial, sans-serif;
-  --color-primary: #111827;
-  --color-secondary: #334155;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --color-primary: #0284c7;
+  --color-secondary: #0f172a;
   --color-surface: #ffffff;
-  --color-background: #f7f8fa;
-  --color-red-650: #d9253f;
-  --color-red-105: #ffe3e7;
-  --color-red-55: #fff7f8;
+  --color-background: #f1f5f9;
+  --color-red-650: #dc2650;
+  --color-red-105: #fee0e0;
+  --color-red-55: #fff5f5;
 }
-
-html { scroll-behavior: smooth; background: #f7f8fa; }
-body { margin: 0; min-width: 320px; background: #f7f8fa; color: #0f172a; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
-::selection { background: #111827; color: white; }
 
 @layer utilities {
-  .site-shell { width: min(100% - 2rem, 1440px); margin-inline: auto; }
-  .premium-panel { background: rgba(255,255,255,.94); border: 1px solid #e2e8f0; border-radius: 22px; box-shadow: 0 20px 60px rgba(15,23,42,.08); }
-  .card-geometric { background: #fff; border: 1px solid #e2e8f0; border-radius: 20px; padding: 22px; box-shadow: 0 8px 30px rgba(15,23,42,.04); transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
-  .card-geometric:hover { transform: translateY(-2px); box-shadow: 0 18px 44px rgba(15,23,42,.08); border-color: #cbd5e1; }
-  .primary-button { display:inline-flex; align-items:center; gap:.5rem; border-radius:.85rem; background:#0f172a; color:white; padding:.68rem 1rem; font-size:.78rem; font-weight:800; box-shadow:0 8px 20px rgba(15,23,42,.12); transition:.2s ease; }
-  .primary-button:hover { background:#1e293b; transform:translateY(-1px); }
-  .secondary-button { display:inline-flex; align-items:center; gap:.45rem; border-radius:.85rem; border:1px solid #e2e8f0; background:white; color:#334155; padding:.66rem .9rem; font-size:.76rem; font-weight:800; transition:.2s ease; }
-  .secondary-button:hover { border-color:#cbd5e1; background:#f8fafc; color:#0f172a; }
-  .icon-button { display:grid; width:2.55rem; height:2.55rem; place-items:center; border-radius:.8rem; border:1px solid #e2e8f0; background:white; color:#64748b; transition:.2s ease; }
-  .icon-button:hover { color:#0f172a; background:#f8fafc; }
-  .field-label { display:block; font-size:.72rem; font-weight:800; color:#475569; }
-  .modern-input { width:100%; border-radius:.85rem; border:1px solid #dbe2ea; background:#f8fafc; padding:.8rem .9rem; font-size:.9rem; font-weight:600; outline:none; transition:.2s ease; }
-  .modern-input:focus { border-color:#94a3b8; background:white; box-shadow:0 0 0 4px rgba(148,163,184,.14); }
-  .field-icon { position:absolute; inset-inline-start:.85rem; top:50%; transform:translateY(-50%); color:#94a3b8; }
-  .ai-glow { position:relative; overflow:hidden; background:linear-gradient(135deg,#0f172a 0%,#1e293b 65%,#7f1d1d 140%); }
-  .ai-glow::after { content:''; position:absolute; inset:-30%; background:radial-gradient(circle at 65% 35%,rgba(255,255,255,.12),transparent 35%); pointer-events:none; }
-  .no-scrollbar::-webkit-scrollbar { display:none; }
-  .no-scrollbar { scrollbar-width:none; }
-  .rtl-flip { transform:scaleX(-1); }
+  .ai-glow {
+    background: linear-gradient(135deg, #0284C7 0%, #0369A1 100%);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .ai-glow::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .card-geometric {
+    background-color: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 20px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .sidebar-width {
+    width: 80px;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .rtl-flip {
+    transform: scaleX(-1);
+  }
 }
 
-@media (max-width: 640px) { .site-shell { width:min(100% - 1rem, 1440px); } .card-geometric { border-radius:16px; padding:16px; } }

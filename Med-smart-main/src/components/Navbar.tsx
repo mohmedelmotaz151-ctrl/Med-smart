@@ -1,58 +1,135 @@
-import React from 'react';
-import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { signOut } from 'firebase/auth';
-import { Menu, X, Globe2, ShieldCheck, Sparkles, LogOut } from 'lucide-react';
-import { auth } from '../lib/firebase';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
+import { auth } from '../lib/firebase';
+import { signOut } from 'firebase/auth';
+import { 
+  Calendar, 
+  ClipboardList, 
+  MessageSquare, 
+  User as UserIcon, 
+  LogOut, 
+  Globe,
+  PlusCircle,
+  Search
+} from 'lucide-react';
+import { motion } from 'motion/react';
 import GccLogo from './GccLogo';
 
 const Navbar: React.FC = () => {
-  const { language, setLanguage } = useLanguage();
-  const { user, profile, isAdmin } = useAuth();
+  const { user, profile } = useAuth();
+  const { language, setLanguage, t } = useLanguage();
   const navigate = useNavigate();
-  const [open, setOpen] = React.useState(false);
-  const items = [
-    ['/', language === 'en' ? 'Home' : 'الرئيسية'],
-    ['/about', language === 'en' ? 'About' : 'من نحن'],
-    ['/services', language === 'en' ? 'Services' : 'الخدمات'],
-    ['/projects', language === 'en' ? 'Projects' : 'المشاريع'],
-    ['/track', language === 'en' ? 'Track request' : 'تتبع الطلب'],
-    ['/contact', language === 'en' ? 'Contact' : 'تواصل معنا'],
-  ];
 
-  const logout = async () => { await signOut(auth); navigate('/'); };
+  const handleLogout = async () => {
+    localStorage.removeItem('gcc_demo_user');
+    localStorage.removeItem('gcc_demo_profile');
+    try {
+      await signOut(auth);
+    } catch (e) {
+      console.warn("Firebase signout failed", e);
+    }
+    // Force direct reload if needed or just navigate to flush state
+    navigate('/login');
+    window.location.reload();
+  };
+
+  const toggleLanguage = () => {
+    setLanguage(language === 'en' ? 'ar' : 'en');
+  };
 
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl">
-      <div className="site-shell flex h-20 items-center justify-between gap-5">
-        <Link to="/" className="flex items-center gap-3.5 min-w-0">
-          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-slate-950 p-2 shadow-sm"><GccLogo /></span>
-          <span className="min-w-0"><strong className="block truncate text-base font-black tracking-tight text-slate-950">GCC COMPANY</strong><small className="block truncate text-[10px] font-bold uppercase tracking-[.16em] text-slate-400">Engineering · MEP · Safety</small></span>
-        </Link>
-
-        <nav className="hidden xl:flex items-center gap-1 rounded-2xl border border-slate-200 bg-slate-50/80 p-1.5">
-          {items.map(([path,label]) => <NavLink key={path} to={path} className={({isActive})=>`rounded-xl px-3.5 py-2 text-xs font-extrabold transition ${isActive?'bg-white text-slate-950 shadow-sm ring-1 ring-slate-200':'text-slate-500 hover:text-slate-950'}`}>{label}</NavLink>)}
-        </nav>
-
-        <div className="hidden lg:flex items-center gap-2">
-          <button onClick={()=>setLanguage(language==='en'?'ar':'en')} className="secondary-button"><Globe2 size={16}/>{language==='en'?'العربية':'English'}</button>
-          <Link to="/sizer" className="primary-button"><Sparkles size={16}/>{language==='en'?'AI consultation':'استشارة ذكية'}</Link>
-          {isAdmin && <Link to="/gcc-dashboard" className="secondary-button"><ShieldCheck size={16}/>{language==='en'?'Admin':'الإدارة'}</Link>}
-          {user && <button onClick={logout} className="icon-button" title={profile?.displayName || user.email || ''}><LogOut size={17}/></button>}
+    <nav className="h-[72px] bg-white border-b border-slate-200 flex items-center justify-between px-6 shrink-0 z-40">
+      <div 
+        onClick={() => navigate('/')}
+        className="flex items-center gap-3 cursor-pointer select-none active:scale-95 transition-all duration-200"
+        title={language === 'en' ? 'GCC Company' : 'شركة جي سي سي للمقاولات'}
+      >
+        <div className="flex flex-col">
+          <span className="text-md sm:text-lg font-black tracking-wider text-slate-900 leading-none">{t('app.name')}</span>
+          <span className="text-[10px] text-slate-500 font-bold uppercase tracking-tight hidden sm:block leading-none mt-1">{t('app.tagline')}</span>
         </div>
-
-        <button onClick={()=>setOpen(v=>!v)} className="icon-button lg:hidden" aria-label="Menu">{open?<X/>:<Menu/>}</button>
       </div>
-      {open && <div className="site-shell border-t border-slate-100 py-4 lg:hidden">
-        <div className="grid gap-1.5">
-          {items.map(([path,label]) => <NavLink onClick={()=>setOpen(false)} key={path} to={path} className={({isActive})=>`rounded-xl px-4 py-3 text-sm font-bold ${isActive?'bg-slate-950 text-white':'bg-slate-50 text-slate-700'}`}>{label}</NavLink>)}
-          <Link onClick={()=>setOpen(false)} to="/sizer" className="primary-button mt-2 justify-center"><Sparkles size={16}/>{language==='en'?'AI consultation':'استشارة هندسية ذكية'}</Link>
-          {isAdmin && <Link onClick={()=>setOpen(false)} to="/gcc-dashboard" className="secondary-button justify-center"><ShieldCheck size={16}/>{language==='en'?'Administration':'لوحة الإدارة'}</Link>}
-          <button onClick={()=>setLanguage(language==='en'?'ar':'en')} className="secondary-button justify-center"><Globe2 size={16}/>{language==='en'?'العربية':'English'}</button>
+
+      <div className="flex items-center gap-6">
+        <div className="flex items-center gap-2 font-bold text-xs uppercase tracking-widest cursor-pointer">
+          <button 
+            onClick={() => setLanguage('en')}
+            className={`${language === 'en' ? 'text-blue-600 underline underline-offset-4 font-extrabold' : 'text-slate-400'}`}
+          >
+            English
+          </button>
+          <span className="text-slate-300">|</span>
+          <button 
+            onClick={() => setLanguage('ar')}
+            className={`font-sans ${language === 'ar' ? 'text-blue-600 underline underline-offset-4 font-extrabold' : 'text-slate-400'}`}
+          >
+            العربية
+          </button>
         </div>
-      </div>}
-    </header>
+
+        <button 
+          onClick={() => navigate('/sizer')}
+          className="bg-red-600 hover:bg-red-700 text-white rounded-xl px-5 py-2.5 font-bold text-xs flex items-center gap-2 shadow-lg shadow-red-200 transition-all active:scale-95"
+        >
+          <PlusCircle size={16} />
+          <span>{language === 'en' ? 'AI Consultation' : 'استشارة هندسية ذكية'}</span>
+        </button>
+
+        <div className="h-8 w-px bg-slate-200 mx-1 hidden sm:block"></div>
+
+        {user ? (
+          <div className="flex items-center gap-3">
+            {profile?.role === 'admin' ? (
+              <Link to="/gcc-dashboard" className="flex items-center gap-3 group">
+                <div className="text-right hidden sm:block leading-tight">
+                  <p className="text-sm font-bold text-slate-800 group-hover:text-red-600 transition-colors">
+                    {profile?.displayName || user.displayName || 'Admin'}
+                  </p>
+                  <p className="text-[10px] text-red-500 font-black uppercase tracking-tighter">
+                    {language === 'en' ? 'System Administrator' : 'مدير النظام المعتمد'}
+                  </p>
+                </div>
+                {user.photoURL ? (
+                  <img src={user.photoURL} alt="Profile" className="w-10 h-10 rounded-full border-2 border-red-500 shadow-sm" />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-red-500 font-bold shadow-sm uppercase">
+                    {user.email?.charAt(0) || 'A'}
+                  </div>
+                )}
+              </Link>
+            ) : (
+              <Link to="/profile" className="flex items-center gap-3 group">
+                <div className="text-right hidden sm:block leading-tight">
+                  <p className="text-sm font-bold text-slate-800 group-hover:text-blue-650 transition-colors">
+                    {profile?.displayName || user.displayName || 'Client'}
+                  </p>
+                  <p className="text-[10px] text-blue-500 font-semibold uppercase tracking-tighter">
+                    {language === 'en' ? 'Client' : 'عميل'}
+                  </p>
+                </div>
+                {user.photoURL ? (
+                  <img src={user.photoURL} alt="Profile" className="w-10 h-10 rounded-full border-2 border-blue-500 shadow-sm" />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-blue-500 font-bold shadow-sm uppercase">
+                    {user.email?.charAt(0) || 'C'}
+                  </div>
+                )}
+              </Link>
+            )}
+            <button 
+              onClick={handleLogout}
+              className="p-2 text-slate-400 hover:text-red-500 rounded-lg transition-colors cursor-pointer"
+              title={language === 'en' ? 'Logout Session' : 'تسجيل الخروج'}
+            >
+              <LogOut size={20} />
+            </button>
+          </div>
+        ) : null}
+      </div>
+    </nav>
   );
 };
+
 export default Navbar;

@@ -128,7 +128,7 @@ const Profile: React.FC = () => {
               {profile?.displayName || user?.displayName || 'GCC Company Client'}
             </h1>
             <span className="bg-red-600 text-white text-[10px] font-extrabold uppercase tracking-widest px-3 py-1 rounded-full border border-red-500/20">
-              {profile?.role === 'admin' ? (language === 'en' ? 'GCC Administrator' : 'إدارة GCC') : (language === 'en' ? 'Corporate Client' : 'عميل شركة GCC')}
+              {profile?.role === 'doctor' ? (language === 'en' ? 'Engineering Lead' : ' القسم الهندسي') : (language === 'en' ? 'Corporate Client' : 'عميل شركة GCC')}
             </span>
           </div>
           <p className="text-slate-400 text-xs font-mono">{user?.email}</p>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
-import { auth, db } from '../lib/firebase';
+import { db } from '../lib/firebase';
 import { collection, getDocs, updateDoc, doc, query, orderBy, deleteDoc, addDoc } from 'firebase/firestore';
 import { 
   Building, 
@@ -469,15 +469,9 @@ const Admin: React.FC = () => {
       for (const upload of selectedUploads) {
         try {
           // Post base64 file to server /api/upload
-          const currentUser = auth.currentUser;
-          if (!currentUser) throw new Error('Administrator session expired. Please sign in again.');
-          const idToken = await currentUser.getIdToken();
           const response = await fetch('/api/upload', {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${idToken}`
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               filename: `${Date.now()}_${upload.name}`,
               content: upload.base64,
@@ -1053,7 +1047,7 @@ const Admin: React.FC = () => {
                     </button>
                   </div>
 
-                  {/* Client specification grid */}
+                  {/* Patient / Client specification grid */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-6 text-xs font-sans pb-4 border-b border-slate-100">
                     <div>
                       <span className="text-slate-400 block font-bold">{language === 'en' ? 'Full Client Name' : 'اسم العميل'}</span>

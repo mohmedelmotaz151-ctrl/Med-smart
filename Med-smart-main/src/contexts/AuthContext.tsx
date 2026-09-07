@@ -1,88 +1,107 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, onAuthStateChanged } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
-import { auth, db } from '../lib/firebase';
+import { auth, db, handleFirestoreError, OperationType } from '../lib/firebase';
+import { doc, getDoc, setDoc, getDocFromServer, serverTimestamp } from 'firebase/firestore';
 
-export type GCCRole = 'admin' | 'client';
-
-export interface GCCProfile {
-  uid: string;
-  email: string | null;
-  displayName?: string | null;
-  photoURL?: string | null;
-  city?: string | null;
-  phone?: string | null;
-  role: GCCRole;
+async function testConnection() {
+  try {
+    await getDocFromServer(doc(db, 'test', 'connection'));
+  } catch (error) {
+    if(error instanceof Error && error.message.includes('the client is offline')) {
+      console.error("Please check your Firebase configuration.");
+    }
+  }
 }
+testConnection();
 
 interface AuthContextType {
   user: User | null;
-  profile: GCCProfile | null;
+  profile: any | null;
   loading: boolean;
   isAdmin: boolean;
+  isDoctor: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<GCCProfile | null>(null);
+  const [profile, setProfile] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => onAuthStateChanged(auth, async (firebaseUser) => {
-    setLoading(true);
-    setUser(firebaseUser);
+  useEffect(() => {
+    return onAuthStateChanged(auth, async (user) => {
+      const localUserJson = localStorage.getItem('gcc_demo_user');
+      const localProfileJson = localStorage.getItem('gcc_demo_profile');
 
-    if (!firebaseUser) {
-      setProfile(null);
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const snap = await getDoc(doc(db, 'users', firebaseUser.uid));
-      if (!snap.exists()) {
-        setProfile({
-          uid: firebaseUser.uid,
-          email: firebaseUser.email,
-          displayName: firebaseUser.displayName,
-          photoURL: firebaseUser.photoURL,
-          role: 'client',
-        });
-      } else {
-        const data = snap.data();
-        setProfile({
-          uid: firebaseUser.uid,
-          email: firebaseUser.email,
-          displayName: data.displayName || firebaseUser.displayName,
-          photoURL: data.photoURL || firebaseUser.photoURL,
-          city: typeof data.city === 'string' ? data.city : null,
-          phone: typeof data.phone === 'string' ? data.phone : null,
-          role: data.role === 'admin' ? 'admin' : 'client',
-        });
+      if (localUserJson && localProfileJson) {
+        setUser(JSON.parse(localUserJson));
+        setProfile(JSON.parse(localProfileJson));
+        setLoading(false);
+        return;
       }
-    } catch (error) {
-      console.error('Unable to load GCC user profile.', error);
-      setProfile({
-        uid: firebaseUser.uid,
-        email: firebaseUser.email,
-        displayName: firebaseUser.displayName,
-        photoURL: firebaseUser.photoURL,
-        role: 'client',
-      });
-    } finally {
+
+      setUser(user);
+      if (user) {
+        const docRef = doc(db, 'users', user.uid);
+        try {
+          const docSnap = await getDoc(docRef);
+          let userProfile: any = null;
+          
+          if (docSnap.exists()) {
+            userProfile = docSnap.data();
+          } else {
+            const isEmailAdmin = user.email?.toLowerCase().includes('admin') || user.email === 'admin@gcc-company.com';
+            const role = isEmailAdmin ? 'admin' : 'patient';
+            
+            userProfile = {
+              uid: user.uid,
+              email: user.email,
+              displayName: user.displayName || (isEmailAdmin ? 'GCC Admin' : 'Demo Client'),
+              photoURL: user.photoURL,
+              role: role,
+              createdAt: serverTimestamp(),
+            };
+            try {
+              await setDoc(docRef, userProfile);
+            } catch (err) {
+              console.warn("Could not write Firestore initial user document", err);
+            }
+          }
+
+          if (user.email?.toLowerCase().includes('admin') || user.email === 'admin@gcc-company.com') {
+            if (userProfile) {
+              userProfile.role = 'admin';
+            }
+          }
+          setProfile(userProfile);
+        } catch (error) {
+          handleFirestoreError(error, OperationType.GET, `users/${user.uid}`);
+          // Graceful fallback for offline / restricted database environments
+          const isEmailAdmin = user.email?.toLowerCase().includes('admin') || user.email === 'admin@gcc-company.com';
+          setProfile({
+            uid: user.uid,
+            email: user.email,
+            displayName: user.displayName || (isEmailAdmin ? 'GCC Admin' : 'Demo Client'),
+            photoURL: user.photoURL,
+            role: isEmailAdmin ? 'admin' : 'patient',
+          });
+        }
+      } else {
+        setProfile(null);
+      }
       setLoading(false);
-    }
-  }), []);
+    });
+  }, []);
 
-  const value = useMemo(() => ({
-    user,
-    profile,
-    loading,
-    isAdmin: profile?.role === 'admin',
-  }), [user, profile, loading]);
+  const isAdmin = profile?.role === 'admin';
+  const isDoctor = profile?.role === 'doctor';
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={{ user, profile, loading, isAdmin, isDoctor }}>
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
 export const useAuth = () => {

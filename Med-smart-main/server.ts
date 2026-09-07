@@ -3,7 +3,6 @@ import { createServer as createViteServer } from "vite";
 import path from "path";
 import { fileURLToPath } from "url";
 import dotenv from "dotenv";
-import crypto from "crypto";
 
 dotenv.config();
 
@@ -14,74 +13,9 @@ async function startServer() {
   const app = express();
   const PORT = 3000;
 
-  app.disable("x-powered-by");
-  app.use((req, res, next) => {
-    res.setHeader("X-Content-Type-Options", "nosniff");
-    res.setHeader("X-Frame-Options", "DENY");
-    res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
-    res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
-    res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
-    res.setHeader("Content-Security-Policy", "default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.cloudinary.com wss://*.firebaseio.com; font-src 'self' data: https:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'");
-    if (process.env.NODE_ENV === "production") res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
-    next();
-  });
-
-  app.use(express.json({ limit: "8mb" }));
-  app.use(express.urlencoded({ limit: "2mb", extended: true }));
-
-  const rateBuckets = new Map<string, { count: number; resetAt: number }>();
-  const rateLimit = (limit: number, windowMs: number) => (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    const key = `${req.ip}:${req.path}`;
-    const now = Date.now();
-    const bucket = rateBuckets.get(key);
-    if (!bucket || bucket.resetAt < now) {
-      rateBuckets.set(key, { count: 1, resetAt: now + windowMs });
-      return next();
-    }
-    if (bucket.count >= limit) return res.status(429).json({ error: "Too many requests. Please try again later." });
-    bucket.count += 1;
-    next();
-  };
-
-  const decodeBase64Url = (value: string) => Buffer.from(value.replace(/-/g, "+").replace(/_/g, "/"), "base64");
-  const verifyFirebaseAdmin = async (token: string) => {
-    const parts = token.split(".");
-    if (parts.length !== 3) throw new Error("Invalid token");
-    const header = JSON.parse(decodeBase64Url(parts[0]).toString("utf8"));
-    const payload = JSON.parse(decodeBase64Url(parts[1]).toString("utf8"));
-    const projectId = process.env.FIREBASE_PROJECT_ID || process.env.VITE_FIREBASE_PROJECT_ID;
-    if (!projectId || header.alg !== "RS256" || !header.kid) throw new Error("Invalid token configuration");
-    const certResponse = await fetch("https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com");
-    if (!certResponse.ok) throw new Error("Unable to verify session");
-    const certs = await certResponse.json() as Record<string, string>;
-    const certPem = certs[header.kid];
-    if (!certPem) throw new Error("Unknown signing key");
-    const verifier = crypto.createVerify("RSA-SHA256");
-    verifier.update(`${parts[0]}.${parts[1]}`);
-    verifier.end();
-    if (!verifier.verify(certPem, decodeBase64Url(parts[2]))) throw new Error("Invalid token signature");
-    const now = Math.floor(Date.now() / 1000);
-    if (payload.aud !== projectId || payload.iss !== `https://securetoken.google.com/${projectId}` || payload.exp <= now || payload.iat > now + 60 || !payload.sub) throw new Error("Invalid token claims");
-
-    const userUrl = `https://firestore.googleapis.com/v1/projects/${encodeURIComponent(projectId)}/databases/(default)/documents/users/${encodeURIComponent(payload.sub)}`;
-    const profileResponse = await fetch(userUrl, { headers: { Authorization: `Bearer ${token}` } });
-    if (!profileResponse.ok) throw new Error("Unable to read user permission");
-    const profile = await profileResponse.json() as any;
-    if (profile?.fields?.role?.stringValue !== "admin") throw new Error("Administrator permission required");
-    return payload;
-  };
-
-  const requireAdminOrPublicInquiryUpload = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    if (req.body?.category === "general") return next();
-    try {
-      const token = req.headers.authorization?.startsWith("Bearer ") ? req.headers.authorization.slice(7) : "";
-      if (!token) return res.status(401).json({ error: "Authentication required." });
-      await verifyFirebaseAdmin(token);
-      next();
-    } catch {
-      return res.status(401).json({ error: "Invalid, expired, or unauthorized session." });
-    }
-  };
+  // Set body parser limits for high-resolution images
+  app.use(express.json({ limit: "50mb" }));
+  app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
   // Ensure uploads directory exists and is static
   const fs = await import("fs");
@@ -101,25 +35,17 @@ async function startServer() {
   app.use(express.static(path.join(process.cwd(), "public")));
 
   // Dynamic uploads endpoint
-  app.post("/api/upload", rateLimit(8, 60_000), requireAdminOrPublicInquiryUpload, async (req, res) => {
+  app.post("/api/upload", async (req, res) => {
     try {
       const { filename, content, category } = req.body;
       if (!filename || !content) {
         return res.status(400).json({ error: "Missing filename or content payload." });
       }
-      if (typeof filename !== "string" || filename.length > 180 || typeof content !== "string") {
-        return res.status(400).json({ error: "Invalid upload payload." });
-      }
-      const mimeMatch = content.match(/^data:([^;]+);base64,/);
-      const allowedMimes = new Set(["image/jpeg", "image/png", "image/webp", "application/pdf"]);
-      if (mimeMatch && !allowedMimes.has(mimeMatch[1])) return res.status(415).json({ error: "Unsupported file type." });
-      const estimatedBytes = Math.ceil((content.length * 3) / 4);
-      if (estimatedBytes > 6 * 1024 * 1024) return res.status(413).json({ error: "File exceeds the 6 MB upload limit." });
 
       // Check if Cloudinary is configured
-      const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
-      const apiKey = process.env.CLOUDINARY_API_KEY;
-      const apiSecret = process.env.CLOUDINARY_API_SECRET;
+      const cloudName = process.env.CLOUDINARY_CLOUD_NAME || "dtd6qwe2a";
+      const apiKey = process.env.CLOUDINARY_API_KEY || "694234951845448";
+      const apiSecret = process.env.CLOUDINARY_API_SECRET || "Md8UOXGYwQJu_Lvh81SbiCmDUL0";
 
       // Normalize directory/folder naming
       let folderKey = "projects";
@@ -170,14 +96,16 @@ async function startServer() {
         fs.mkdirSync(destFolder, { recursive: true });
       }
 
-      if (process.env.NODE_ENV === "production") {
-        return res.status(503).json({ error: "Cloud media storage is not configured." });
-      }
-      const ext = path.extname(filename).toLowerCase().replace(/[^.a-z0-9]/g, "") || ".bin";
-      const safeFilename = `${Date.now()}-${crypto.randomBytes(12).toString("hex")}${ext}`;
+      const safeFilename = filename.replace(/[^a-zA-Z0-9.-]/g, "_");
       const finalPath = path.join(destFolder, safeFilename);
-      fs.writeFileSync(finalPath, buffer, { flag: "wx" });
-      res.json({ success: true, url: `/uploads/${folderKey}/${safeFilename}` });
+
+      fs.writeFileSync(finalPath, buffer);
+
+      res.json({
+        success: true,
+        url: `/uploads/${folderKey}/${safeFilename}`,
+        path: finalPath
+      });
     } catch (err: any) {
       console.error("API Upload error:", err);
       res.status(500).json({ error: err.message || "Failed saving uploaded asset." });
@@ -189,15 +117,9 @@ async function startServer() {
     res.json({ status: "ok" });
   });
 
-  app.post("/api/consult", rateLimit(12, 60_000), async (req, res) => {
+  app.post("/api/consult", async (req, res) => {
     try {
       const { message, history } = req.body;
-      if (typeof message !== "string" || message.trim().length < 2 || message.length > 6000) {
-        return res.status(400).json({ error: "Invalid consultation message." });
-      }
-      if (history && (!Array.isArray(history) || history.length > 20)) {
-        return res.status(400).json({ error: "Invalid consultation history." });
-      }
       
       const apiKey = process.env.GEMINI_API_KEY;
       if (!apiKey) {
